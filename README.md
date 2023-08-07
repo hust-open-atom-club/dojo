@@ -41,6 +41,10 @@ Finally, run the infrastructure which will be hosted on domain `my.domain.colleg
 docker run --privileged -d -v /opt/dojo:/opt/pwn.college -p 22:22 -p 80:80 -p 443:443 pwncollege/dojo
 ```
 
+> **Warning**
+> This command would map ports (22, 80, 443) in the container to the corresponding ports on the Docker host.
+> If these ports are bound, especially Port 22, you can disable these processes or modify the mapping ports.
+
 This will run the initial setup, including building the challenge docker image.
 If you want to build the full 70+ GB challenge image, you can add `-e DOJO_CHALLENGE=challenge` to the docker args.
 Note, however, that docker environment variables only affect the initial setup, after which `./data/config.env` should be modified instead.
