@@ -13,18 +13,20 @@ This docker container will have the associated challenge binary injected into th
 Users may enter this container via `ssh`, by supplying a public ssh key in their profile settings, or via vscode in the browser ([code-server](https://github.com/cdr/code-server)).
 The associated challenge binary may be either global, which means all users will get the same binary, or instanced, which means that different users will receive different variants of the same challenge.
 
-## Setup
-
-Clone the repository:
-
-```sh
-git clone https://github.com/pwncollege/dojo /opt/dojo
-```
+## Dependencies
 
 The only dependency to run the infrastructure is docker, which can be installed with:
 
 ```sh
 curl -fsSL https://get.docker.com | /bin/sh
+```
+
+## Setup
+
+First, clone the repository:
+
+```sh
+git clone https://github.com/pwncollege/dojo /opt/dojo
 ```
 
 Now, build the container:
@@ -38,18 +40,6 @@ Finally, run the infrastructure which will be hosted on domain `my.domain.colleg
 ```sh
 docker run --privileged -d -v /opt/dojo:/opt/pwn.college -p 22:22 -p 80:80 -p 443:443 pwncollege/dojo
 ```
-
-> **Warning**
-> **(MacOS)**
-> 
-> It's important to note that while the dojo is capable of operating on MacOS (either x86 or ARM), MacOS has inherent limitations when it comes to nested Linux mounts within a MacOS bind mount. 
-> This limitation specifically affects `data/docker`, which necessitates the use of OverlayFS mounts, preventing nested docker orchestration from functioning properly.
-> In order to circumvent this issue, you must ensure that`data/docker` is not backed by a MacOS bind mount. 
-> This can be accomplished by replacing the bind mount with a docker volume for `data/docker`, which will use a native Linux mount. 
-> You can apply this solution using the following Docker command (notice the additional `-v`):
-> ```
-> docker run --privileged -d -v /opt/dojo:/opt/pwn.college -v dojo-data-docker:/opt/pwn.college/data/docker -p 22:22 -p 80:80 -p 443:443 pwncollege/dojo
-> ```
 
 This will run the initial setup, including building the challenge docker image.
 If you want to build the full 70+ GB challenge image, you can add `-e DOJO_CHALLENGE=challenge` to the docker args.
