@@ -26,7 +26,7 @@ curl -fsSL https://get.docker.com | /bin/sh
 First, clone the repository:
 
 ```sh
-git clone https://github.com/pwncollege/dojo /opt/dojo
+git clone https://github.com/HUSTSeclab/dojo/ /opt/dojo
 ```
 
 Now, build the container:
