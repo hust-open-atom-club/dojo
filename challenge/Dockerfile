@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 
-FROM ubuntu:20.04 as builder
+ARG UBUNTU_VERSION=20.04
+
+FROM ubuntu:${UBUNTU_VERSION} as builder
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
 
@@ -60,6 +62,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         upx-ucl
         wget
 EOF
+
+RUN rm -f /usr/lib/python3.*/EXTERNALLY-MANAGED
 
 ################################################################################
 
@@ -240,6 +244,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
     apt-get -y autoremove
+        dbus-x11
         mousepad
         novnc
         tigervnc-standalone-server
@@ -262,8 +267,9 @@ FROM builder as builder-desktop-reversing-tools
 COPY desktop/angr-management.desktop /usr/share/applications/
 COPY desktop/Ghidra.desktop /usr/share/applications/
 
+ARG UBUNTU_VERSION=20.04
 RUN <<EOF
-    wget -q -O - https://github.com/angr/angr-management/releases/download/nightly/angr-management-ubuntu-20.04.tar.gz | tar xvz -C /opt
+    wget -q -O - https://github.com/angr/angr-management/releases/download/nightly/angr-management-ubuntu-${UBUNTU_VERSION}.tar.gz | tar xvz -C /opt
 
     wget -q -O /tmp/ghidra.zip https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_10.3_build/ghidra_10.3_PUBLIC_20230510.zip
     unzip /tmp/ghidra.zip -d /tmp
@@ -325,7 +331,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ltrace
         nano
         net-tools
-        netcat
+        netcat-openbsd
         nmap
         openssh-server
         parallel
@@ -392,7 +398,8 @@ RUN gcc /opt/pwn.college/setuid_interpreter.c -DSUID_PYTHON -o /opt/pwn.college/
 
 ################################################################################
 
-FROM ubuntu:20.04 as challenge-minimal
+ARG UBUNTU_VERSION=20.04
+FROM ubuntu:${UBUNTU_VERSION} as challenge-minimal
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
 
@@ -405,6 +412,7 @@ COPY --link --from=builder-tools-apt / /
 COPY --link --from=builder-pwn.college /opt/pwn.college /opt/pwn.college
 
 RUN <<EOF
+    if id ubuntu; then userdel -f -r ubuntu; fi
     useradd -s /bin/bash -m hacker
     passwd -d hacker
 
@@ -433,7 +441,8 @@ WORKDIR /home/hacker
 
 ################################################################################
 
-FROM ubuntu:20.04 as challenge
+ARG UBUNTU_VERSION=20.04
+FROM ubuntu:${UBUNTU_VERSION} as challenge
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
 
@@ -465,6 +474,7 @@ RUN cat >> /etc/ssh/ssh_config <<EOF
 EOF
 
 RUN <<EOF
+    if id ubuntu; then userdel -f -r ubuntu; fi
     useradd -s /bin/bash -m hacker
     passwd -d hacker
 
