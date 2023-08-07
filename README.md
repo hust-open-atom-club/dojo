@@ -38,7 +38,7 @@ docker build -t pwncollege/dojo .
 Finally, run the infrastructure which will be hosted on domain `my.domain.college` with:
 
 ```sh
-docker run --privileged -d -v /opt/dojo:/opt/pwn.college:shared -p 22:22 -p 80:80 -p 443:443 pwncollege/dojo
+docker run --privileged -d -v /opt/dojo:/opt/pwn.college:shared -p 22:22 -p 80:80 -p 443:443 --name dojo pwncollege/dojo
 ```
 
 > [!NOTE]
@@ -57,7 +57,7 @@ It will take some time to initialize everything and build the challenge docker i
 You can check on your container (and the progress of the initial build) with:
 
 ```sh
-docker exec YOUR_CONTAINER_NAME dojo logs
+docker exec dojo dojo logs
 ```
 
 Once things are setup, you should be able to access the dojo and login with username `admin` and password `admin`.
