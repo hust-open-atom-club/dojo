@@ -41,7 +41,7 @@ Finally, run the infrastructure which will be hosted on domain `my.domain.colleg
 docker run --privileged -d -v /opt/dojo:/opt/pwn.college -p 22:22 -p 80:80 -p 443:443 pwncollege/dojo
 ```
 
-> **Warning**
+> [!NOTE]
 > This command would map ports (22, 80, 443) in the container to the corresponding ports on the Docker host.
 > If these ports are bound, especially Port 22, you can disable these processes or modify the mapping ports.
 
