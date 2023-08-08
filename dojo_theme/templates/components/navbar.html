@@ -15,9 +15,9 @@
     </button>
     <div class="collapse navbar-collapse" id="base-navbars">
       <ul class="navbar-nav mr-auto">
-        {{ navitem("Dojos", url_for("pwncollege_dojos.listing"), "fa-bolt") }}
-        {{ navitem("Workspace", url_for("pwncollege_workspace.view_workspace"), "fa-terminal") }}
-        {{ navitem("Desktop", url_for("pwncollege_desktop.view_desktop"), "fa-desktop") }}
+        {{ navitem("道场", url_for("pwncollege_dojos.listing"), "fa-bolt") }}
+        {{ navitem("工作空间", url_for("pwncollege_workspace.view_workspace"), "fa-terminal") }}
+        {{ navitem("桌面", url_for("pwncollege_desktop.view_desktop"), "fa-desktop") }}
       </ul>
 
       <hr class="d-sm-flex d-md-flex d-lg-none">
@@ -25,19 +25,19 @@
       <ul class="navbar-nav ml-md-auto d-block d-sm-flex d-md-flex">
         {% if authed() %}
         {% if is_admin() %}
-        {{ navitem("Admin Panel", url_for("admin.view"), "fa-wrench") }}
+        {{ navitem("管理面板", url_for("admin.view"), "fa-wrench") }}
         {% endif %}
 
-        {{ navitem("Profile", url_for("pwncollege_users.view_self"), "fa-user-circle") }}
-        {{ navitem("Settings", url_for("views.settings"), "fa-cogs") }}
-        {{ navitem("Logout", url_for("auth.logout"), "fa-sign-out-alt", shrink=True) }}
+        {{ navitem("简介", url_for("pwncollege_users.view_self"), "fa-user-circle") }}
+        {{ navitem("设置", url_for("views.settings"), "fa-cogs") }}
+        {{ navitem("注销", url_for("auth.logout"), "fa-sign-out-alt", shrink=True) }}
 
         {% else %}
         {% if registration_visible() %}
-        {{ navitem("Register", url_for("auth.register"), "fa-user-plus") }}
+        {{ navitem("注册", url_for("auth.register"), "fa-user-plus") }}
         {% endif %}
 
-        {{ navitem("Login", url_for("auth.login", next=request.full_path), "fa-sign-in-alt") }}
+        {{ navitem("登录", url_for("auth.login", next=request.full_path), "fa-sign-in-alt") }}
         {% endif %}
 
         <li class="nav-item">
