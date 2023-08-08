@@ -41,8 +41,8 @@ for config_option in missing_warnings:
 def bootstrap():
     from .utils import INDEX_HTML
 
-    set_config("ctf_name", "pwn.college")
-    set_config("ctf_description", "pwn.college")
+    set_config("ctf_name", "pwn.hust.college")
+    set_config("ctf_description", "pwn.hust.college")
     set_config("user_mode", "users")
 
     set_config("challenge_visibility", "public")
