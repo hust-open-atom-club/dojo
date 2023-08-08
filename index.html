@@ -7,42 +7,42 @@
 
 <br><br><br>
 
-# Getting Started
+# 简介
 
-At the core of pwn.college is flags. How do you get those flags? Solve challenges. You can start a challenge by clicking on the `Challenges` tab at the top, selecting a module, clicking on a particular level, and hitting `Start`. In order to access that challenge, you have two options.
+`pwn.hust.college` 是 `pwn.collge` 的复刻版本。`pwn.collge` 是供学生及其他感兴趣的人，通过实践方式学习和实践核心网络安全概念的教育平台。用武术的说法，它旨在将网络安全的“白带”提升为“蓝带”，能够应对（简单的）CTF和战争游戏。我最喜欢 `pwn.college` 的理念 -- “熟能生巧”。`pwn.collge` 由亚利桑那州立大学的 [Zardus (Yan Shoshitaishvili)](https://yancomm.net) 与 [kanak (Connor Nelson)](https://connornelson.com) 创建，并向全世界感兴趣的人免费开放参与！
 
-The first option is using the `Workspace` tab. This will present you with a fully functional development environment in your browser via Visual Studio Code. You can, for instance, quickly open a new terminal by pressing `F1`, searching for `New Terminal`, and pressing enter.
+# 入门
 
-The second option is using `ssh`. In order to ssh into your challenge instances, you must add a public ssh key to `Settings` > `SSH Key`. You can quickly generate an ssh key by running `ssh-keygen -f key -N ''` in a terminal on your (unix-friendly) host machine. This will generate files `key` and `key.pub`, which are your private and public keys respectively. Once you have linked your ssh key to your account, you can run `ssh -i key hacker@dojo.pwn.college` to connect into your challenge instance.
+继承于 `pwn.collge`，`pwn.hust.college` 的核心是 flags（标志）。如何获取这些标志呢？解决挑战。您可以点击顶部的“道场”（Dojo）， 选择其中模块（Module）内的挑战（Challenge）关卡，点击特定级别（Level），然后点击开始（Start）开始挑战。为了访问该挑战，您有三个选项：
 
-Once you are in a challenge instance, your goal is to get the contents of the `/flag` file. Unfortunately for you, you are executing as the `hacker` user, but `/flag` is only readable by the `root` user. Fortunately, however, there are challenge programs located inside of the `/challenge` directory, which when run, will run with the privileges of the `root` user. Solve the challenge to get the `/flag`, and then submit it in order to complete the challenge!
+- 顶部的 Workspace（工作空间）：这将为您提供一个在浏览器中通过Visual Studio Code完全功能的开发环境。例如，您可以通过按 `F1` 键，搜索 `New Terminal`，然后按回车键来快速打开一个新的终端。
 
-A few things to note. Your home directory `/home/hacker` is persistent. This means that when you start a new challenge, all of the files you have saved in there will still be there. The `Practice` button can be incredibly useful for debugging your solution. When you start a challenge in this way, you will have the ability to run programs as the `root` user with the `sudo` command; however, the instance will only have a practice flag. For some of the later (kernel-focused) challenges, you will need to solve the challenge in a virtual machine. You can interact with the virtual machine using the `vm` command.
+- 顶部的 Desktop（桌面）：通过 VNC 为您提供一个图形用户界面，可以使用相应的终端运行相应的命令，方便一些不熟悉文本界面的新手用户。
 
-<br><br><br>
+- SSH 连接：为了远程连接到挑战实例，您必须将公开密钥添加到 `Settings > SSH Key`。您可以通过在主机机器终端中运行 `ssh-keygen -f key -N ''` 快速生成一个 `SSH` 密钥。这将生成 `key` 和 `key.pub` 文件，分别是您的私钥和公钥。一旦您将 `SSH` 密钥链接到您的账户，您可以运行 `ssh -i key -p 22222 hacker@pwn.hust.college` 来连接到您的挑战实例。注意，`SSH` 连接端口为22222。
 
-<div class="embed-responsive embed-responsive-16by9">
-  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/DJO1A2neZ6Y" title="pwn.college - Getting Started" allowfullscreen></iframe>
-</div>
+一旦您进入挑战实例，您的目标是获取 `/flag` 文件的内容。不幸的是，您以 hacker 用户执行，但 `/flag` 文件只能由 root 用户读取。然而，幸运的是，在 `/challenge` 目录中有一些挑战关卡，当运行时，将以root用户的权限运行。解决挑战以获取“/flag”，然后提交以完成挑战！
 
-<br><br><br>
-
-# About
-
-pwn.college is an education platform for students (and other interested parties) to learn about, and practice, core cybersecurity concepts in a hands-on fashion. In martial arts terms, it is designed to take a “white belt” in cybersecurity to becoming a “blue belt”, able to approach (simple) CTFs and wargames. The philosophy of pwn.college is “practice makes perfect”.
-
-pwn.college was created by [Zardus (Yan Shoshitaishvili)](https://yancomm.net) and [kanak (Connor Nelson)](https://connornelson.com) at Arizona State University. It powers ASU’s Computer Systems Security course, CSE466, and is now open, for free, to participation for interested people around the world!
+**注意**：您的主目录 `/home/hacker` 是持久的。这意味着当您开始一个新的挑战时，您在其中保存的所有文件仍将存在。`Practice` 按钮对于调试您的解决方案非常有用。当您以这种方式开始挑战时，您将能够使用 `sudo` 命令以root用户身份运行程序。然而，该实例将只有一个练习标志。
 
 <br><br><br>
 
-# Resources
+# Dojo（道场）
+
+Dojo 的中文翻译为道场，即为修炼某种技术或能力的场所。墨菲斯曾在道场为尼奥上了宝贵的一课，激发了他的潜藏能力，这曾是《黑客帝国》中最令人难忘的场景之一。其中的道场是一个模拟矩阵世界物理规则的对练程序，尼奥在其中学会质疑其对虚构世界各种规则的先入之见。
+
+在当前平台上下文中，Dojo是指一个特定的挑战实例，类似于在网络安全领域进行技能练习和竞赛的虚拟训练场所。
+
+<br><br><br>
+
+# 资源
 
 <div class="container">
   <div class="row text-center">
     <div class="col-lg-auto m-3">
       <figure>
         <a class="text-decoration-none" href="https://github.com/HUSTSeclab/">
-          <i class="fab fa-github fa-7x"></i>
+          <i class="fab fa-github fa-5x"></i>
           <figcaption>Open Source on<br>GitHub</figcaption>
         </a>
       </figure>
@@ -50,7 +50,7 @@ pwn.college was created by [Zardus (Yan Shoshitaishvili)](https://yancomm.net) a
     <div class="col-lg-auto m-3">
       <figure>
         <a class="text-decoration-none" href="mailto:dzm91@hust.edu.cn">
-          <i class="fas fa-envelope fa-7x"></i>
+          <i class="fas fa-envelope fa-5x"></i>
           <figcaption>Contact us via<br>Email</figcaption>
         </a>
       </figure>
