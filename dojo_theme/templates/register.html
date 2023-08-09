@@ -18,7 +18,7 @@
       <h3>漏洞悬赏</h3>
       <p>即使是精英黑客，他们编写的软件中也会存在安全漏洞！如果你找到平台中的漏洞，请 <a href="mailto:dzm91@hust.edu.cn">发送邮件</a> 给我们，非常感谢！如果你是华科网安学院的学生，我们会奖励给你额外的分数！</p>
 
-      <h2>Sign Up!</h2>
+      <h2>注册!</h2>
 			{% with form = Forms.auth.RegistrationForm() %}
 			{% from "macros/forms.html" import render_extra_fields %}
 			<form method="post" accept-charset="utf-8" autocomplete="off" role="form">
@@ -26,21 +26,21 @@
 					<b>{{ form.name.label }}</b>
 					{{ form.name(class="form-control", value=name) }}
 					<small class="form-text text-muted">
-						Your username on the site
+						平台用户名
 					</small>
 				</div>
 				<div class="form-group">
 					<b>{{ form.email.label }}</b>
 					{{ form.email(class="form-control", value=email) }}
 					<small class="form-text text-muted">
-						Never shown to the public
+						切忌公开泄露
 					</small>
 				</div>
 				<div class="form-group">
 					<b>{{ form.password.label }}</b>
 					{{ form.password(class="form-control", value=password) }}
 					<small class="form-text text-muted">
-						Password used to log into your account
+						用户登录密码
 					</small>
 				</div>
 				{{ form.nonce() }}
