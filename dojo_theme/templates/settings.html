@@ -3,19 +3,19 @@
 {% block content %}
 <div class="jumbotron">
   <div class="container">
-    <h1>User Settings</h1>
+    <h1>用户设置</h1>
   </div>
 </div>
 <div class="container">
   <div class="row">
     <div class="col-md-2 offset-md-1">
       <div class="nav flex-column nav-pills" role="tablist">
-        <a class="nav-link active" id="settings-profile-tab" data-toggle="pill" href="#profile" role="tab">Profile</a>
-        <a class="nav-link" id="settings-ssh-key-tab" data-toggle="pill" href="#ssh-key" role="tab">SSH Key</a>
+        <a class="nav-link active" id="settings-profile-tab" data-toggle="pill" href="#profile" role="tab">简介</a>
+        <a class="nav-link" id="settings-ssh-key-tab" data-toggle="pill" href="#ssh-key" role="tab">SSH 公钥</a>
         {% if discord_enabled %}
         <a class="nav-link" id="settings-discord-tab" data-toggle="pill" href="#discord" role="tab">Discord</a>
         {% endif %}
-	      <a class="nav-link" id="settings-tokens-tab" data-toggle="pill" href="#tokens" role="tab">Access Tokens</a>
+	      <a class="nav-link" id="settings-tokens-tab" data-toggle="pill" href="#tokens" role="tab">访问令牌</a>
       </div>
     </div>
     <div class="col-md-8">
@@ -78,8 +78,8 @@
         <div class="tab-pane fade" id="ssh-key" role="tabpanel">
           <form method="post" id="ssh-key-form" autocomplete="off">
             <div class="form-group">
-              <b><label for="enter-name">SSH Key</label></b>
-              <small class="form-text text-muted">Required for accessing challenges over SSH</small>
+              <b><label for="enter-name">SSH 公钥</label></b>
+              <small class="form-text text-muted"> 用于通过 `SSH` 远程访问挑战关卡</small>
               <br>
               <input class="form-control" id="ssh-key" name="ssh_key" type="text" value="{{ ssh_key or "" }}">
             </div>

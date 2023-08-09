@@ -40,7 +40,7 @@
   <br>
 
   {% if dojo.award and dojo.award.get("emoji") %}
-  <h2 class="row">Award: <b>{{ dojo.award["emoji"] }}</b></h2>
+  <h2 class="row">奖项： <b>{{ dojo.award["emoji"] }}</b></h2>
   <br>
   {% endif %}
 
@@ -61,7 +61,7 @@
 
   <br>
 
-  <h2 class="row">Dojo Modules</h2>
+  <h2 class="row">道场模块</h2>
   <br>
   <ul class="card-list">
     {% for module in dojo.modules %}
@@ -81,12 +81,12 @@
 
   <br>
 
-  <h2 class="row">Dojo Rankings:</h2>
+  <h2 class="row">道场排名：</h2>
   <br>
   <p>
-    <a href="javascript:loadScoreboard(7, 1)">Week</a> |
-    <a href="javascript:loadScoreboard(30, 1)">Month</a> |
-    <a href="javascript:loadScoreboard(0, 1)">All Time</a>
+    <a href="javascript:loadScoreboard(7, 1)">周</a> |
+    <a href="javascript:loadScoreboard(30, 1)">月</a> |
+    <a href="javascript:loadScoreboard(0, 1)">全部时间</a>
   </p>
   {% from "macros/scoreboard.html" import scoreboard %}
   {{ scoreboard() }}

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="jumbotron">
 	<div class="container">
-		<h1>Register</h1>
+		<h1>注册</h1>
 	</div>
 </div>
 <div class="container">
@@ -11,16 +11,12 @@
 		<div class="col-md-6 offset-md-3">
 			{% include "components/errors.html" %}
 
-			<h2>Ground Rules</h2>
-			<p>When using this platform, please keep several ground rules in mind!</p>
-			<h3>Writeups</h3>
-			<p>The challenges created for pwn.college are educational material, and are used to grade students at Arizona State University.
-      Because of this, we would appreciate that writeups, walkthrough videos, and livestreams of challenge solutions are not posted to the internet.
-      Obviously, we can't stop you from posting things to the internet, but we worked hard to make all of this public, and we would appreciate your help in keeping pwn.college a viable educational platform.</p>
-      <h3>Bug Bounties</h3>
-      <p>Even master hackers have vulnerabilities in their software!
-      If you find a vulnerability in this platform, please <a href="mailto:pwn-college@asu.edu">email</a> us rather than pwn us.
-      We'll appreciate it, and you'll get extra credit (if you're an ASU student) or an awesome scoreboard award!</p>
+			<h2>基本规则</h2>
+			<p>在使用这个平台时，请记住一些基本规则！</p>
+			<h3>通关攻略（Writeups）</h3>
+			<p>`pwn.hust.college` 创建的挑战关卡是教育素材，用于给华科网安学院的学生评分。因此，我们希望不要在互联网上发布这些挑战关卡的通关攻略、讲解视频和直播。显然，我们无法阻止您在互联网上发布内容，但我们努力使所有这些内容都变成公开的，我们希望您的帮助能够使 `pwn.hust.college` 保持为一个可行的教育平台。</p>
+      <h3>漏洞悬赏</h3>
+      <p>即使是精英黑客，他们编写的软件中也会存在安全漏洞！如果你找到平台中的漏洞，请 <a href="mailto:dzm91@hust.edu.cn">发送</a> 给我们，非常感谢！如果你是华科网安学院的学生，我们会奖励给你额外的分数！</p>
 
       <h2>Sign Up!</h2>
 			{% with form = Forms.auth.RegistrationForm() %}

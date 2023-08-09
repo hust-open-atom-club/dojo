@@ -3,22 +3,22 @@
 {% block content %}
 <div class="jumbotron">
     <div class="container">
-        <h1>Create Dojo</h1>
+        <h1>创建道场</h1>
     </div>
 </div>
 <div class="container">
     <form method="post" id="dojo-create-form" autocomplete="off">
         <div class="form-group">
-            <b><label>GitHub Repository</label></b>
+            <b><label>GitHub 仓库</label></b>
             <small class="form-text text-muted">https://github.com/<b>pwncollege/example-dojo</b></small>
             <br>
             <input class="form-control" name="repository" type="text" placeholder="pwncollege/example-dojo" value="">
 
             <br>
 
-            <b><label>Deploy Key</label></b>
+            <b><label>部署秘钥</label></b>
             <small class="form-text text-muted">
-            Required for Private Repositories: <a href="https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys" target="_blank">Deploy Keys Documentation</a>
+            私库必需： <a href="https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys" target="_blank">部署秘钥文档</a>
             </small>
             <br>
             <div class="input-group mb-3">
