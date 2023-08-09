@@ -122,7 +122,7 @@
   {% endif %}
 
   {% if module.challenges %}
-  <h2>Challenges</h2>
+  <h2>挑战关卡</h2>
 
   <div class="accordion" id="challenges">
     {% for challenge in module.challenges %}
@@ -183,8 +183,8 @@
 
   <br>
 
-  <h2>Module Ranking</h2>
-  <p>This scoreboard reflects solves for challenges in this module after the module launched in this dojo.</p>
+  <h2>模块排名</h2>
+  <p>此计分板反映了本道场模块启动后挑战成功的记录。</p>
   {% from "macros/scoreboard.html" import scoreboard %}
   {{ scoreboard() }}
 
