@@ -96,9 +96,9 @@
         {% else %}
           {% if resource.type == "lecture" %}
           {% if resource.video %}
-	  {% set src = "//player.bilibili.com/player.html" + "?" + "aid=" + resource.video + "&" + "bvid=" + resource.playlist + "&page=1&autoplay=0" %}
+	  {% set src = "//player.bilibili.com/player.html" + "?" + "aid=" + resource.video + "&" + "bvid=" + resource.playlist + "&page=1&autoplay=0&high_quality=1" %}
           <div class="embed-responsive embed-responsive-16by9">
-            <iframe class="embed-responsive-item" data-src="{{ src }}" title="YouTube video player" allowfullscreen></iframe>
+            <iframe class="embed-responsive-item" data-src="{{ src }}" title="Bilibili video player" allowfullscreen></iframe>
           </div>
           {% endif %}
           {% if resource.slides %}
