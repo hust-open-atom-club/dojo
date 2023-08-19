@@ -3,7 +3,7 @@
 {% block content %}
 <div class="jumbotron">
     <div class="container">
-        <h1>Dojo Admin</h1>
+        <h1>道场管理界面</h1>
         <br>
         <h2>{{ dojo.name }}</h2>
     </div>
@@ -16,7 +16,7 @@
             data-copy="{{ url_for('pwncollege_dojos.join_dojo', dojo=dojo.reference_id, password=dojo.password, _external=True) }}"
             onclick="copyToClipboard(event)">
             <i class="fas fa-share fa-3x"></i>
-            <figcaption><b style="font-family: 'Courier New', Courier, monospace" id="tooltip">&nbsp;Share&nbsp;</b></figcaption>
+            <figcaption><b style="font-family: 'Courier New', Courier, monospace" id="tooltip">&nbsp;共享&nbsp;</b></figcaption>
           </a>
         </figure>
       </div>
@@ -24,7 +24,7 @@
           <figure>
             <a class="text-decoration-none" href="{{ url_for('pwncollege_dojos.update_dojo', dojo=dojo.reference_id, update_code=dojo.update_code) }}" target="_blank">
               <i class="fas fa-upload fa-3x"></i>
-              <figcaption><b style="font-family: 'Courier New', Courier, monospace">Update</b></figcaption>
+              <figcaption><b style="font-family: 'Courier New', Courier, monospace">更新</b></figcaption>
             </a>
           </figure>
         </div>
@@ -32,27 +32,27 @@
           <figure>
             <a class="text-decoration-none" href="{{ url_for('pwncollege_dojos.view_dojo_solves', dojo=dojo.reference_id) }}" target="_blank">
               <i class="fas fa-file-csv fa-3x"></i>
-              <figcaption><b style="font-family: 'Courier New', Courier, monospace">Solves</b></figcaption>
+              <figcaption><b style="font-family: 'Courier New', Courier, monospace">解决方案</b></figcaption>
             </a>
           </figure>
         </div>
         <br>
     </div>
-    <b style="font-family: 'Courier New', Courier, monospace">Reference ID: </b><code>{{ dojo.reference_id }}</code>
+    <b style="font-family: 'Courier New', Courier, monospace">参考 ID: </b><code>{{ dojo.reference_id }}</code>
     <br>
-    <b style="font-family: 'Courier New', Courier, monospace">Dojo ID: </b><code>{{ dojo.hex_dojo_id }}</code>
+    <b style="font-family: 'Courier New', Courier, monospace">道场 ID: </b><code>{{ dojo.hex_dojo_id }}</code>
     <br>
     <!-- <b style="font-family: 'Courier New', Courier, monospace">Update Code: </b><code>{{ dojo.update_code }}</code>
     <br> -->
-    <b style="font-family: 'Courier New', Courier, monospace">Git Hash: </b><code>{{ dojo.hash[:8] }}</code>
+    <b style="font-family: 'Courier New', Courier, monospace">Git 哈希值: </b><code>{{ dojo.hash[:8] }}</code>
     <br>
-    <b style="font-family: 'Courier New', Courier, monospace">Admins</b>
+    <b style="font-family: 'Courier New', Courier, monospace">管理员</b>
     <ul>
         {% for admin in dojo.admins %}
             <li>{{ admin.user.name }}</li>
         {% endfor %}
     </ul>
-    <b style="font-family: 'Courier New', Courier, monospace">Members</b>
+    <b style="font-family: 'Courier New', Courier, monospace">成员</b>
     <ul>
         {% for member in dojo.members %}
             <li>{{ member.user.name }}</li>
