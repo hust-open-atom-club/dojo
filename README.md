@@ -38,11 +38,11 @@ docker build -t pwncollege/dojo .
 Finally, run the infrastructure which will be hosted on domain `my.domain.college` with:
 
 ```sh
-docker run --privileged -d -v /opt/dojo:/opt/pwn.college:shared -p 22:22 -p 80:80 -p 443:443 --name dojo pwncollege/dojo
+docker run --privileged -d -v /opt/dojo:/opt/pwn.college:shared -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
 ```
 
 > [!NOTE]
-> This command would map ports (22, 80, 443) in the container to the corresponding ports on the Docker host.
+> This command would map ports(22, 80, 443) in the container to the corresponding ports(22222, 8080, 10443) on the Docker host.
 > If these ports are bound, especially Port 22, you can disable these processes or modify the mapping ports.
 
 This will run the initial setup, including building the challenge docker image.
