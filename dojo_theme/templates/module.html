@@ -96,13 +96,13 @@
         {% else %}
           {% if resource.type == "lecture" %}
           {% if resource.video %}
-	  {% set src = "//player.bilibili.com/player.html" + "?" + "aid=" + resource.video + "&" + "bvid=" + resource.playlist + "&page=1&autoplay=0&high_quality=1" %}
+	  {% set src = "//player.bilibili.com/player.html" + "?" + "aid=" + resource.video + "&" + "bvid=" + resource.playlist + "&page=1&autoplay=0&high_quality=1&danmaku=0" %}
           <div class="embed-responsive embed-responsive-16by9">
             <iframe class="embed-responsive-item" data-src="{{ src }}" title="Bilibili video player" allowfullscreen></iframe>
           </div>
           {% endif %}
           {% if resource.slides %}
-          {% set src = "https://show.zohopublic.com.cn/publish/" + resource.slides  %}
+          {% set src = "https://show.zohopublic.com.cn/publish/" + resource.slides + "/params?toolbar=true&menu=false&loop=true&viewtype=5&preload=true" %}
           <div class="embed-responsive embed-responsive-16by9">
             <iframe class="embed-responsive-item" data-src="{{ src }}"></iframe>
           </div>
