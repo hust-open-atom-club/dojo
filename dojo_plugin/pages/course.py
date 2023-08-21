@@ -198,9 +198,9 @@ def grade(dojo, users_query):
 
 
 @course.route("/dojo/<dojo>/course")
-@course.route("/dojo/<dojo>/course/<resource>")
 @dojo_route
-def view_course(dojo, resource=None):
+@authed_only
+def view_course(dojo):
     if not dojo.course:
         abort(404)
 
@@ -213,29 +213,14 @@ def view_course(dojo, resource=None):
         user = get_current_user()
         name = "Your"
 
-    grades = {}
+    grades = next(grade(dojo, user))
     identity = {}
 
-    setup = {
-        step: "incomplete"
-        for step in ["create_account", "link_student"]
-    }
+    student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
+    identity["identity_name"] = dojo.course.get("student_id", "Identity")
+    identity["identity_value"] = student.token if student else None
 
-    if user:
-        grades = next(grade(dojo, user))
-
-        student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
-        identity["identity_name"] = dojo.course.get("student_id", "Identity")
-        identity["identity_value"] = student.token if student else None
-
-        setup["create_account"] = "complete"
-
-        if student and student.token in dojo.course.get("students", []):
-            setup["link_student"] = "complete"
-        elif student:
-            setup["link_student"] = "unknown"
-
-    return render_template("course.html", name=name, **grades, **identity, **setup, user=user, dojo=dojo)
+    return render_template("course.html", name=name, **grades, **identity, dojo=dojo)
 
 
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
