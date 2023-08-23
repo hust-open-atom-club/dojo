@@ -43,7 +43,7 @@ CTFd.fetch(endpoint, {
 }
 
 $(() => {
-form_fetch_and_show("identity", `/dojo/${init.dojo}/course/identity`, "PATCH", "Your identity has been updated");
+    form_fetch_and_show("identity", `/dojo/${init.dojo}/course/identity`, "PATCH", "Your identity has been updated");
 
     let navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
@@ -73,7 +73,6 @@ form_fetch_and_show("identity", `/dojo/${init.dojo}/course/identity`, "PATCH", "
                 tab.classList.remove('active');
             });
             targetTab.classList.add('active');
-            targetTab.classList.add('show');
 
             let activeNavs = document.querySelectorAll('.nav-link.active');
             activeNavs.forEach(nav => {
