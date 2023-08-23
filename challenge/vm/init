@@ -35,7 +35,7 @@ find /challenge -name '*.ko' -exec /usr/sbin/insmod {} \;
 service ssh start
 
 if [ -e /usr/sbin/docker-init ]; then
-    exec /usr/sbin/docker-init /bin/sleep -- 6h
+    exec /usr/sbin/docker-init /bin/sleep -- 2h
 else
-    exec /bin/sleep 6h
+    exec /bin/sleep 2h
 fi

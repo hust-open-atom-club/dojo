@@ -76,7 +76,7 @@ def start_challenge(user, dojo_challenge, practice):
 
         return docker_client.containers.run(
             dojo_challenge.image,
-            entrypoint=["/bin/sleep", "6h"],
+            entrypoint=["/bin/sleep", "2h"],
             name=f"user_{user.id}",
             hostname=hostname,
             user="hacker",
