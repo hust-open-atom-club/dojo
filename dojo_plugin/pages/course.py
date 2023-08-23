@@ -200,7 +200,6 @@ def grade(dojo, users_query):
 @course.route("/dojo/<dojo>/course")
 @course.route("/dojo/<dojo>/course/<resource>")
 @dojo_route
-@authed_only
 def view_course(dojo, resource=None):
     if not dojo.course:
         abort(404)
@@ -214,14 +213,17 @@ def view_course(dojo, resource=None):
         user = get_current_user()
         name = "Your"
 
-    grades = next(grade(dojo, user))
+    grades = {}
     identity = {}
 
-    student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
-    identity["identity_name"] = dojo.course.get("student_id", "Identity")
-    identity["identity_value"] = student.token if student else None
+    if user:
+        grades = next(grade(dojo, user))
 
-    return render_template("course.html", name=name, **grades, **identity, dojo=dojo)
+        student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
+        identity["identity_name"] = dojo.course.get("student_id", "Identity")
+        identity["identity_value"] = student.token if student else None
+
+    return render_template("course.html", name=name, **grades, **identity, user=user, dojo=dojo)
 
 
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
