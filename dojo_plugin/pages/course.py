@@ -100,6 +100,8 @@ def grade(dojo, users_query):
 
                 challenge_count = challenge_counts[module_id]
                 checkpoint_solves, due_solves, all_solves = module_solves.get(module_id, (0, 0, 0))
+                percent_required = assessment.get("percent_required", 0.334)
+                challenge_count_required = int(challenge_count * percent_required)
 
                 date = datetime.datetime.fromisoformat(assessment["date"])
                 extension = assessment.get("extensions", {}).get(user_id, 0)
@@ -109,8 +111,8 @@ def grade(dojo, users_query):
                     name=f"{module_name} Checkpoint",
                     date=str(user_date) + (" *" if extension else ""),
                     weight=assessment["weight"],
-                    progress=f"{checkpoint_solves} / {(challenge_count // 3)}",
-                    credit=bool(checkpoint_solves // (challenge_count // 3)),
+                    progress=f"{checkpoint_solves} / {challenge_count_required}",
+                    credit=bool(checkpoint_solves // (challenge_count_required)),
                 ))
 
             if type == "due":
@@ -122,6 +124,8 @@ def grade(dojo, users_query):
                 challenge_count = challenge_counts[module_id]
                 checkpoint_solves, due_solves, all_solves = module_solves.get(module_id, (0, 0, 0))
                 late_solves = all_solves - due_solves
+                percent_required = assessment.get("percent_required", 1.0)
+                challenge_count_required = int(challenge_count * percent_required)
 
                 date = datetime.datetime.fromisoformat(assessment["date"])
                 extension = assessment.get("extensions", {}).get(user_id, 0)
@@ -132,8 +136,8 @@ def grade(dojo, users_query):
                         name=f"{module_name}",
                         date=str(user_date) + (" *" if extension else ""),
                         weight=assessment["weight"],
-                        progress=f"{due_solves} / {challenge_count}",
-                        credit=due_solves / challenge_count,
+                        progress=f"{due_solves} / {challenge_count_required}",
+                        credit=due_solves / challenge_count_required,
                     ))
 
                 else:
@@ -143,8 +147,8 @@ def grade(dojo, users_query):
                         name=f"{module_name}",
                         date=assessment["date"],
                         weight=assessment["weight"],
-                        progress=f"{due_solves} (+{late_solves}) / {challenge_count}",
-                        credit=(due_solves + late_value * late_solves) / challenge_count,
+                        progress=f"{due_solves} (+{late_solves}) / {challenge_count_required}",
+                        credit=(due_solves + late_value * late_solves) / challenge_count_required,
                     ))
 
             if type == "manual":
@@ -193,18 +197,18 @@ def grade(dojo, users_query):
             previous_user_id = user_id
         if module_id is not None:
             module_solves[module_id] = (
-                int(checkpoint_solves),
-                int(due_solves),
-                int(all_solves),
+                int(checkpoint_solves) if checkpoint_solves is not None else 0,
+                int(due_solves) if due_solves is not None else 0,
+                int(all_solves) if all_solves is not None else 0,
             )
     if user_id:
         yield result(user_id)
 
 
 @course.route("/dojo/<dojo>/course")
+@course.route("/dojo/<dojo>/course/<resource>")
 @dojo_route
-@authed_only
-def view_course(dojo):
+def view_course(dojo, resource=None):
     if not dojo.course:
         abort(404)
 
@@ -217,14 +221,17 @@ def view_course(dojo):
         user = get_current_user()
         name = "Your"
 
-    grades = next(grade(dojo, user))
-
-    student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
+    grades = {}
     identity = {}
-    identity["identity_name"] = dojo.course.get("student_id", "Identity")
-    identity["identity_value"] = student.token if student else None
 
-    return render_template("course.html", name=name, **grades, **identity, dojo=dojo)
+    if user:
+        grades = next(grade(dojo, user))
+
+        student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
+        identity["identity_name"] = dojo.course.get("student_id", "Identity")
+        identity["identity_value"] = student.token if student else None
+
+    return render_template("course.html", name=name, **grades, **identity, user=user, dojo=dojo)
 
 
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
