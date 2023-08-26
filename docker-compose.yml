@@ -138,6 +138,11 @@ services:
       - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  windows:
+    extends:
+      file: ./windows/${WINDOWS_VM}.yml
+      service: windows
+
 volumes:
   conf:
   html:
