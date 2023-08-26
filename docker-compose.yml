@@ -150,6 +150,7 @@ volumes:
   dhparam:
   certs:
   acme:
+  windows:
 
 networks:
   user_network:
