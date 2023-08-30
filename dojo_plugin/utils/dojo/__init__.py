@@ -105,6 +105,7 @@ def load_dojo_dir(dojo_dir, *, dojo=None):
 
     data = yaml.safe_load(dojo_yml_path.read_text())
 
+<<<<<<< HEAD
     # load dojo description from markdown if it exists
     dojo_description_path = dojo_dir / "DESCRIPTION.md"
     if dojo_description_path.exists():
