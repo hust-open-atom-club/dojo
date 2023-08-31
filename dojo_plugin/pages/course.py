@@ -217,8 +217,8 @@ def view_course(dojo, resource=None):
     identity = {}
 
     setup = {
-        step: "unknown"
-        for step in ["create_account", "create_discord", "join_discord", "link_discord", "link_student"]
+        step: "incomplete"
+        for step in ["create_account", "link_student", "create_discord", "link_discord", "join_discord"]
     }
 
     if user:
@@ -234,19 +234,16 @@ def view_course(dojo, resource=None):
             setup["link_student"] = "complete"
         elif student:
             setup["link_student"] = "unknown"
-        else:
-            setup["link_student"] = "incomplete"
 
-        discord_user = DiscordUsers.query.filter_by(user=user).first()
-        if discord_user:
+        if DiscordUsers.query.filter_by(user=user).first():
             setup["create_discord"] = "complete"
             setup["link_discord"] = "complete"
-        else:
-            setup["link_discord"] = "incomplete"
 
-    else:
-        for step in setup:
-            setup[step] = "incomplete"
+        cache.delete_memoized(get_discord_user, user.id)
+        if get_discord_user(user.id):
+            setup["join_discord"] = "complete"
+        else:
+            setup["join_discord"] = "incomplete"
 
     return render_template("course.html", name=name, **grades, **identity, **setup, user=user, dojo=dojo)
 
