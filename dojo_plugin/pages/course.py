@@ -9,6 +9,7 @@ from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only, admins_only
 from CTFd.cache import cache
 
+from .discord import get_discord_user
 from ..models import DiscordUsers, DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
 from ..utils import module_visible, module_challenges_visible, DOJOS_DIR, is_dojo_admin
 from ..utils.dojo import dojo_route
@@ -131,25 +132,17 @@ def grade(dojo, users_query):
                 extension = assessment.get("extensions", {}).get(user_id, 0)
                 user_date = date + datetime.timedelta(days=extension)
 
-                if due_solves == all_solves:
-                    grades.append(dict(
-                        name=f"{module_name}",
-                        date=str(user_date) + (" *" if extension else ""),
-                        weight=assessment["weight"],
-                        progress=f"{due_solves} / {challenge_count_required}",
-                        credit=due_solves / challenge_count_required,
-                    ))
+                late_penalty = assessment.get("late_penalty", 0.0)
+                late_value = 1 - late_penalty
 
-                else:
-                    late_penalty = assessment.get("late_penalty", 0.0)
-                    late_value = 1 - late_penalty
-                    grades.append(dict(
-                        name=f"{module_name}",
-                        date=assessment["date"],
-                        weight=assessment["weight"],
-                        progress=f"{due_solves} (+{late_solves}) / {challenge_count_required}",
-                        credit=(due_solves + late_value * late_solves) / challenge_count_required,
-                    ))
+                grades.append(dict(
+                    name=f"{module_name}",
+                    date=str(user_date) + (" *" if extension else ""),
+                    weight=assessment["weight"],
+                    progress=(f"{due_solves} (+{late_solves}) / {challenge_count_required}"
+                              if late_solves else f"{due_solves} / {challenge_count_required}"),
+                    credit=min((due_solves + late_value * late_solves) / challenge_count_required, 1.0),
+                ))
 
             if type == "manual":
                 grades.append(dict(
@@ -224,6 +217,11 @@ def view_course(dojo, resource=None):
     grades = {}
     identity = {}
 
+    setup = {
+        step: "incomplete"
+        for step in ["create_account", "link_student", "create_discord", "link_discord", "join_discord"]
+    }
+
     if user:
         grades = next(grade(dojo, user))
 
@@ -231,7 +229,24 @@ def view_course(dojo, resource=None):
         identity["identity_name"] = dojo.course.get("student_id", "Identity")
         identity["identity_value"] = student.token if student else None
 
-    return render_template("course.html", name=name, **grades, **identity, user=user, dojo=dojo)
+        setup["create_account"] = "complete"
+
+        if student and student.token in dojo.course.get("students", []):
+            setup["link_student"] = "complete"
+        elif student:
+            setup["link_student"] = "unknown"
+
+        if DiscordUsers.query.filter_by(user=user).first():
+            setup["create_discord"] = "complete"
+            setup["link_discord"] = "complete"
+
+        cache.delete_memoized(get_discord_user, user.id)
+        if get_discord_user(user.id):
+            setup["join_discord"] = "complete"
+        else:
+            setup["join_discord"] = "incomplete"
+
+    return render_template("course.html", name=name, **grades, **identity, **setup, user=user, dojo=dojo)
 
 
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
