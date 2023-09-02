@@ -187,7 +187,7 @@ def start():
                 "/opt/virtiofsd/virtiofsd",
                 "--writeback",
                 "--socket-path", str(sock_path),
-                "--sandbox", "none",
+                "--sandbox", "chroot",
                 "--shared-dir", str(mountpoint)
             ],
             # fmt: on
