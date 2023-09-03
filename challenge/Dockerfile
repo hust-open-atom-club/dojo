@@ -66,7 +66,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         flex
         g++-multilib
         gcc-multilib
-        git
         libc6-dev-i386
         libc6:i386
         libedit-dev
@@ -86,9 +85,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         man-db
         manpages-dev
         nasm
-        python-is-python3
         python3-dev
-        python3-pip
         rubygems
         squashfs-tools
         upx-ucl
@@ -374,8 +371,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         genisoimage
         gnupg-utils
         hexedit
-        iproute2
-        iputils-ping
         ipython3
         keyutils
         kmod
