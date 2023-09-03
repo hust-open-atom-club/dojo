@@ -86,6 +86,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         man-db
         manpages-dev
         nasm
+        python-is-python3
         python3-dev
         python3-pip
         rubygems
@@ -329,7 +330,6 @@ FROM essentials as builder-desktop-reversing-tools
 COPY desktop/angr-management.desktop /usr/share/applications/
 COPY desktop/Ghidra.desktop /usr/share/applications/
 
-ARG UBUNTU_VERSION=20.04
 RUN <<EOF
     wget -q -O - https://github.com/angr/angr-management/releases/download/nightly/angr-management-ubuntu-${UBUNTU_VERSION}.tar.gz | tar xvz -C /opt
 
