@@ -292,7 +292,7 @@ FROM builder-desktop-base as builder-desktop-xfce
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install -yqq <<EOF && \
+    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         novnc
         tigervnc-standalone-server
@@ -307,7 +307,7 @@ FROM builder-desktop-base as builder-desktop-xfce
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install -yqq <<EOF && \
+    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
     apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
