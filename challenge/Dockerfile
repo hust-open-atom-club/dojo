@@ -379,6 +379,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ipython3
         keyutils
         kmod
+        libc6-arm64-cross
+        libc6-dev-arm64-cross
         less
         libc6-arm64-cross
         libc6-dev-arm64-cross
