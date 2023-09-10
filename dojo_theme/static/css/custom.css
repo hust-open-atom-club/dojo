@@ -250,10 +250,3 @@ h4 {
 .scoreboard-page-selected > a {
     font-weight: bold;
 }
-
-.discord-avatar {
-    display: block;
-    margin: auto;
-    width: 128px;
-    border-radius: 50%;
-}
