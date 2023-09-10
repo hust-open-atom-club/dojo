@@ -6,8 +6,6 @@ from CTFd.utils.decorators import authed_only
 from CTFd.utils.user import get_current_user
 
 from ..models import Dojos, SSHKeys, DojoMembers
-from ..config import DISCORD_CLIENT_ID
-from .discord import get_discord_user, discord_avatar_asset
 
 
 @authed_only
@@ -25,8 +23,6 @@ def settings_override():
 
     ssh_key = SSHKeys.query.filter_by(user_id=user.id).first()
     ssh_key = ssh_key.value if ssh_key else None
-
-    discord_user = get_discord_user(user.id)
 
     prevent_name_change = get_config("prevent_name_change")
 
@@ -49,9 +45,6 @@ def settings_override():
         country=country,
         tokens=tokens,
         ssh_key=ssh_key,
-        discord_enabled=bool(DISCORD_CLIENT_ID),
-        discord_user=discord_user,
-        discord_avatar_asset=discord_avatar_asset,
         prevent_name_change=prevent_name_change,
         infos=infos,
     )
