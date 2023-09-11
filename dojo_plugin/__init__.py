@@ -22,7 +22,6 @@ from .pages.workspace import workspace, redirect_workspace_referers
 from .pages.desktop import desktop
 from .pages.users import users
 from .pages.settings import settings_override
-from .pages.discord import discord, maybe_award_belt
 from .pages.course import course
 from .pages.writeups import writeups
 from .api import api
@@ -121,7 +120,6 @@ def load(app):
     app.register_blueprint(dojo)
     app.register_blueprint(workspace)
     app.register_blueprint(desktop)
-    app.register_blueprint(discord)
     app.register_blueprint(users)
     app.register_blueprint(course)
     app.register_blueprint(writeups)
