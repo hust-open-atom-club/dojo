@@ -57,11 +57,6 @@ class DojoFlag(BaseFlag):
         if challenge_id != current_challenge_id:
             raise FlagException("This flag is not for this challenge!")
 
-        try:
-            maybe_award_belt(current_account_id, ignore_challenge_id=current_challenge_id)
-        except Exception as e:
-            print(f"ERROR: Maybe awarding belt failed: {e}", file=sys.stderr, flush=True)
-
         return True
 
 
