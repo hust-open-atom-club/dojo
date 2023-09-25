@@ -165,6 +165,8 @@ RUN <<EOF
     git clone --recurse-submodules https://github.com/pwndbg/pwndbg /opt/pwndbg
     cd /opt/pwndbg
     ./setup.sh
+    ln -sf /home/hacker/.gdbinit /root/.gdbinit
+
     git clone https://github.com/hugsy/gef /opt/gef
     git clone https://github.com/jerdna-regeiz/splitmind /opt/splitmind
 EOF
@@ -264,6 +266,17 @@ RUN <<EOF
     make -j$(nproc) install
     popd
     ln -s "${VERSION}/_install" /opt/busybox/fs
+EOF
+
+FROM builder as builder-glow
+RUN <<EOF
+    VERSION="1.5.1"
+    DEB_NAME="glow_${VERSION}_amd64.deb"
+    pushd /tmp
+    wget -q "https://github.com/charmbracelet/glow/releases/download/v${VERSION}/${DEB_NAME}"
+    apt install "./${DEB_NAME}"
+    rm "${DEB_NAME}"
+    popd
 EOF
 
 ################################################################################
@@ -366,6 +379,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         fish
         findutils
         firefox
+        gcc-aarch64-linux-gnu
         gdb
         gdb-multiarch
         genisoimage
@@ -376,8 +390,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ipython3
         keyutils
         kmod
+        libc6-arm64-cross
+        libc6-dev-arm64-cross
+        less
         ltrace
         nano
+        neovim
         net-tools
         netcat-openbsd
         nmap
@@ -388,6 +406,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         pcre2-utils
         psutils
         python3-ipdb
+        qemu-user
         qemu-system-x86
         rsync
         screen
@@ -399,6 +418,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         gedit
         fortune
         zsh
+        zip
 EOF
 
 ################################################################################
@@ -462,16 +482,7 @@ RUN <<EOF
 
     mkdir /challenge
     install -m 400 <(echo 'pwn.college{uninitialized}') /flag
-
-    find / -xdev -type f -perm -4000 -exec chmod u-s {} \;
-
-    chmod u+s /opt/pwn.college/python \
-              /opt/pwn.college/bash \
-              /opt/pwn.college/sh \
-              /opt/pwn.college/vm/vm
 EOF
-
-RUN date > /opt/pwn.college/build
 
 ################################################################################
 
@@ -499,6 +510,7 @@ COPY --link --from=builder-rappel / /
 COPY --link --from=builder-rp / /
 COPY --link --from=builder-geckodriver / /
 COPY --link --from=builder-busybox / /
+COPY --link --from=builder-glow / /
 COPY --link --from=builder-desktop-xfce / /
 COPY --link --from=builder-desktop-reversing-tools / /
 COPY --link --from=builder-tools-apt / /
@@ -529,8 +541,20 @@ FROM ${DOJO_CHALLENGE} as challenge-final
 
 RUN <<EOF
     if id ubuntu; then userdel -f -r ubuntu; fi
+    
     useradd -s /bin/bash -m hacker
     passwd -d hacker
+
+    useradd -g nogroup -d /run/sshd -s /usr/sbin/nologin sshd
+
+    find / -xdev -type f -perm -4000 -exec chmod u-s {} \;
+    
+    chmod u+s /opt/pwn.college/python \
+              /opt/pwn.college/bash \
+              /opt/pwn.college/sh \
+              /opt/pwn.college/vm/vm    
+
+    date > /opt/pwn.college/build
 EOF
 
 USER hacker
