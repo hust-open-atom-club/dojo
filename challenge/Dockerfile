@@ -515,7 +515,6 @@ COPY --link --from=builder-busybox / /
 COPY --link --from=builder-glow / /
 COPY --link --from=builder-desktop-xfce / /
 COPY --link --from=builder-desktop-reversing-tools / /
-COPY --link --from=builder-tools-apt / /
 COPY --link --from=builder-gdb / /
 COPY --link --from=builder-tools-pip / /
 COPY --link --from=builder-tools-apt / /
