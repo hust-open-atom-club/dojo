@@ -65,4 +65,3 @@ class ScoreUser(Resource):
         rank = next((item.rank for item in result.all() if item.user_id == user.id), user_count)
         # since chall count is the same as user_score, they can be reused
         return f"{rank}:{user_score}:{max_score}:{user_score}:{max_score}:{user_count}"
-    
