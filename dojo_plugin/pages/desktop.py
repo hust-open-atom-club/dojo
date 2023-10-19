@@ -49,7 +49,11 @@ def view_desktop(user_id=None):
     active = bool(password) if get_current_dojo_challenge(user) is not None else None
     view_only = int(user_id != current_user.id)
 
+<<<<<<< HEAD
     iframe_src = f"/desktop/{user_id}/vnc.html?autoconnect=1&reconnect=1&path=/desktop/{user_id}/websockify&resize=remote&reconnect_delay=10&view_only={view_only}&password={password}"
+=======
+    iframe_src = f"/{route}/{user_id}/vnc.html?autoconnect=1&reconnect=1&path={route}/{user_id}/websockify&resize=remote&reconnect_delay=10&view_only={view_only}&password={password}"
+>>>>>>> 550e300 (Upgrade CTFd to v3.6.0)
     return render_template("iframe.html", iframe_src=iframe_src, active=active)
 
 
@@ -66,7 +70,6 @@ def forward_desktop(user_id, path=""):
         abort(403)
 
     return redirect_user_socket(user, ".vnc/novnc.socket", f"/{path}")
-
 
 @desktop.route("/admin/desktops", methods=["GET"])
 @admins_only
