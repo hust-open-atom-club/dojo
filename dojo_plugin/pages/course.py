@@ -9,8 +9,7 @@ from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only, admins_only
 from CTFd.cache import cache
 
-from .discord import get_discord_user
-from ..models import DiscordUsers, DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
+from ..models import DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
 from ..utils import module_visible, module_challenges_visible, DOJOS_DIR, is_dojo_admin
 from ..utils.dojo import dojo_route
 from .writeups import WriteupComments, writeup_weeks, all_writeups
