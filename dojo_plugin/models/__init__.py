@@ -611,14 +611,3 @@ class SSHKeys(db.Model):
 
     __repr__ = columns_repr(["user", "value"])
 
-
-class DiscordUsers(db.Model):
-    __tablename__ = "discord_users"
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    discord_id = db.Column(db.Text, unique=True)
-
-    user = db.relationship("Users")
-
-    __repr__ = columns_repr(["user", "discord_id"])

@@ -49,10 +49,6 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_ADDRESS=${MAIL_ADDRESS}
-      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
-      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
       - INTERNET_FOR_ALL=${INTERNET_FOR_ALL}
       - VIRTUAL_HOST=${DOJO_HOST},localhost
       - VIRTUAL_PORT=8000
@@ -109,16 +105,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "22:22"
-
-  discord-bot:
-    container_name: discord_bot
-    build: discord_bot
-    restart: on-failure
-    environment:
-      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
-      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
 
   nginx:
     container_name: nginx

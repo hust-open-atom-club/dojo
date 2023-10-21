@@ -27,10 +27,6 @@ define MAIL_PORT
 define MAIL_USERNAME
 define MAIL_PASSWORD
 define MAIL_ADDRESS
-define DISCORD_CLIENT_ID
-define DISCORD_CLIENT_SECRET
-define DISCORD_BOT_TOKEN
-define DISCORD_GUILD_ID
 mv $DOJO_DIR/data/.config.env $DOJO_DIR/data/config.env
 . $DOJO_DIR/data/config.env
 
