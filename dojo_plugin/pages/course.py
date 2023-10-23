@@ -9,8 +9,7 @@ from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only, admins_only
 from CTFd.cache import cache
 
-from .discord import get_discord_user
-from ..models import DiscordUsers, DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
+from ..models import DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
 from ..utils import module_visible, module_challenges_visible, DOJOS_DIR, is_dojo_admin
 from ..utils.dojo import dojo_route
 from .writeups import WriteupComments, writeup_weeks, all_writeups
@@ -219,7 +218,7 @@ def view_course(dojo, resource=None):
 
     setup = {
         step: "incomplete"
-        for step in ["create_account", "link_student", "create_discord", "link_discord", "join_discord"]
+        for step in ["create_account", "link_student"]
     }
 
     if user:
@@ -235,16 +234,6 @@ def view_course(dojo, resource=None):
             setup["link_student"] = "complete"
         elif student:
             setup["link_student"] = "unknown"
-
-        if DiscordUsers.query.filter_by(user=user).first():
-            setup["create_discord"] = "complete"
-            setup["link_discord"] = "complete"
-
-        cache.delete_memoized(get_discord_user, user.id)
-        if get_discord_user(user.id):
-            setup["join_discord"] = "complete"
-        else:
-            setup["join_discord"] = "incomplete"
 
     return render_template("course.html", name=name, **grades, **identity, **setup, user=user, dojo=dojo)
 

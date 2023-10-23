@@ -22,7 +22,6 @@ from .pages.workspace import workspace, redirect_workspace_referers
 from .pages.desktop import desktop
 from .pages.users import users
 from .pages.settings import settings_override
-from .pages.discord import discord, maybe_award_belt
 from .pages.course import course
 from .pages.writeups import writeups
 from .api import api
@@ -57,11 +56,6 @@ class DojoFlag(BaseFlag):
 
         if challenge_id != current_challenge_id:
             raise FlagException("This flag is not for this challenge!")
-
-        try:
-            maybe_award_belt(current_account_id, ignore_challenge_id=current_challenge_id)
-        except Exception as e:
-            print(f"ERROR: Maybe awarding belt failed: {e}", file=sys.stderr, flush=True)
 
         return True
 
@@ -121,7 +115,6 @@ def load(app):
     app.register_blueprint(dojo)
     app.register_blueprint(workspace)
     app.register_blueprint(desktop)
-    app.register_blueprint(discord)
     app.register_blueprint(users)
     app.register_blueprint(course)
     app.register_blueprint(writeups)
