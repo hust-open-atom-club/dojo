@@ -15,12 +15,12 @@ import os
 import re
 
 import docker
-from flask import current_app, Response, abort
+import bleach
+from flask import current_app, Response, Markup, abort, g
 from itsdangerous.url_safe import URLSafeSerializer
 from CTFd.models import db, Solves, Challenges, Users
 from CTFd.utils.user import get_current_user
 from CTFd.utils.modes import get_model
-from CTFd.utils.helpers import markup
 from CTFd.utils.config.pages import build_markdown
 from CTFd.utils.security.sanitize import sanitize_html
 from sqlalchemy import String, Integer
@@ -140,6 +140,15 @@ def serialize_user_flag(account_id, challenge_id, *, secret=None):
     user_flag = serializer.dumps(data)[::-1]
     return user_flag
 
+def user_ipv4(user):
+    # Subnet: 10.0.0.0/8
+    # Reserved: 10.0.0.0/24, 10.255.255.0/24
+    # Gateway: 10.0.0.1
+    # User IPs: 10.0.1.0 - 10.255.254.255
+    user_ip = (10 << 24) + (1 << 8) + user.id
+    assert user_ip < (10 << 24) + (255 << 16) + (255 << 8)
+    return f"{user_ip >> 24 & 0xff}.{user_ip >> 16 & 0xff}.{user_ip >> 8 & 0xff}.{user_ip & 0xff}"
+
 def redirect_internal(redirect_uri, auth=None):
     response = Response()
     if auth:
@@ -150,12 +159,32 @@ def redirect_internal(redirect_uri, auth=None):
     response.headers["redirect_uri"] = redirect_uri
     return response
 
-def redirect_user_socket(user, socket_path, url_path):
+def redirect_user_socket(user, port, url_path):
     assert user is not None
-    return redirect_internal(f"http://unix:/var/homes/nosuid/{random_home_path(user)}/{socket_path}:{url_path}")
+    return redirect_internal(f"http://user_{user.id}:{port}/{url_path}")
 
 def render_markdown(s):
-    return markup(build_markdown(s or ""))
+    raw_html = build_markdown(s or "")
+    if "dojo" in g and g.dojo.official:
+        return Markup(raw_html)
+
+    markdown_tags = [
+        "h1", "h2", "h3", "h4", "h5", "h6",
+        "b", "i", "strong", "em", "tt",
+        "p", "br",
+        "span", "div", "blockquote", "code", "pre", "hr",
+        "ul", "ol", "li", "dd", "dt",
+        "img",
+        "a",
+        "sub", "sup",
+    ]
+    markdown_attrs = {
+        "*": ["id"],
+        "img": ["src", "alt", "title"],
+        "a": ["href", "alt", "title"],
+    }
+    clean_html = bleach.clean(raw_html, tags=markdown_tags, attributes=markdown_attrs)
+    return Markup(clean_html)
 
 def unserialize_user_flag(user_flag, *, secret=None):
     if secret is None:

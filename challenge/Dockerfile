@@ -279,6 +279,15 @@ RUN <<EOF
     popd
 EOF
 
+FROM builder as builder-virtiofsd
+RUN <<EOF
+    mkdir /opt/virtiofsd && cd "$_"
+    wget -q -O ./build.zip "https://gitlab.com/virtio-fs/virtiofsd/-/jobs/artifacts/main/download?job=publish"
+    unzip -p ./build.zip "$(zipinfo -1 ./build.zip | head -n1)" > ./virtiofsd
+    rm -f ./build.zip
+    chmod +x ./virtiofsd
+EOF
+
 ################################################################################
 
 FROM essentials as builder-desktop-base
@@ -303,7 +312,7 @@ FROM builder-desktop-base as builder-desktop-xfce
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
     apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -408,6 +417,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         python3-ipdb
         qemu-user
         qemu-system-x86
+        qemu-utils
         rsync
         screen
         silversearcher-ag
@@ -451,6 +461,7 @@ COPY docker-entrypoint.d /opt/pwn.college/docker-entrypoint.d
 COPY docker-entrypoint.sh /opt/pwn.college/docker-entrypoint.sh
 COPY setuid_interpreter.c /opt/pwn.college/setuid_interpreter.c
 COPY vm /opt/pwn.college/vm
+COPY windows /opt/pwn.college/windows
 COPY .tmux.conf /opt/pwn.college/.tmux.conf
 COPY .gdbinit /opt/pwn.college/.gdbinit
 COPY .radare2rc /opt/pwn.college/.radare2rc
@@ -474,6 +485,7 @@ COPY --link --from=builder-pwn.college /opt/pwn.college /opt/pwn.college
 
 RUN <<EOF
     ln -sf /opt/pwn.college/vm/vm /usr/local/bin/vm
+    ln -sf /opt/pwn.college/windows/windows /usr/local/bin/windows
 
     ln -sf /home/hacker/.tmux.conf /root/.tmux.conf
     ln -sf /home/hacker/.gdbinit /root/.gdbinit
@@ -512,10 +524,11 @@ COPY --link --from=builder-geckodriver / /
 COPY --link --from=builder-busybox / /
 COPY --link --from=builder-glow / /
 COPY --link --from=builder-desktop-xfce / /
+COPY --link --from=builder-virtiofsd /opt/virtiofsd /opt/virtiofsd
 COPY --link --from=builder-desktop-reversing-tools / /
-COPY --link --from=builder-tools-apt / /
 COPY --link --from=builder-gdb / /
 COPY --link --from=builder-tools-pip / /
+COPY --link --from=builder-tools-apt / /
 
 RUN cat >> /etc/ssh/ssh_config <<EOF
     StrictHostKeyChecking no
@@ -545,14 +558,13 @@ RUN <<EOF
     useradd -s /bin/bash -m hacker
     passwd -d hacker
 
-    useradd -g nogroup -d /run/sshd -s /usr/sbin/nologin sshd
-
     find / -xdev -type f -perm -4000 -exec chmod u-s {} \;
     
     chmod u+s /opt/pwn.college/python \
               /opt/pwn.college/bash \
               /opt/pwn.college/sh \
-              /opt/pwn.college/vm/vm    
+              /opt/pwn.college/vm/vm \
+              /opt/pwn.college/windows/windows
 
     date > /opt/pwn.college/build
 EOF

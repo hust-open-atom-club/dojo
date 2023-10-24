@@ -12,7 +12,7 @@ services:
     platform: linux/amd64
     entrypoint: /bin/true
     networks:
-      - user_firewall
+      - user_network
 
   ctfd:
     container_name: ctfd
@@ -54,6 +54,7 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
       - INTERNET_FOR_ALL=${INTERNET_FOR_ALL}
+      - WINDOWS_VM=${WINDOWS_VM}
       - VIRTUAL_HOST=${DOJO_HOST},localhost
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=${DOJO_HOST}
@@ -140,6 +141,12 @@ services:
       - ./nginx-proxy/etc/passwd:/etc/passwd:ro
       - ./data/homes:/var/homes:shared
       - /var/run/docker.sock:/tmp/${DOCKER_PSLR}/docker.sock:ro
+    networks:
+      default:
+      user_network:
+        aliases:
+          - nginx
+        ipv4_address: 10.0.0.3
 
   nginx-certs:
     container_name: nginx_certs
@@ -152,16 +159,26 @@ services:
       - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  windows:
+    extends:
+      file: ./windows/${WINDOWS_VM}.yml
+      service: windows
+
 volumes:
   conf:
   html:
   dhparam:
   certs:
   acme:
+  windows:
 
 networks:
-  user_firewall:
-    name: user_firewall
+  user_network:
+    name: user_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/8
     driver_opts:
-      com.docker.network.bridge.name: "user_firewall"
+      com.docker.network.bridge.name: "user_network"
       com.docker.network.bridge.enable_icc: "false"
