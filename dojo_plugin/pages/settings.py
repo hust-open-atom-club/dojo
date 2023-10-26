@@ -13,12 +13,6 @@ def settings_override():
     infos = get_infos()
 
     user = get_current_user()
-    name = user.name
-    email = user.email
-    website = user.website
-    affiliation = user.affiliation
-    country = user.country
-
     tokens = UserTokens.query.filter_by(user_id=user.id).all()
 
     ssh_key = SSHKeys.query.filter_by(user_id=user.id).first()
@@ -38,11 +32,7 @@ def settings_override():
 
     return render_template(
         "settings.html",
-        name=name,
-        email=email,
-        website=website,
-        affiliation=affiliation,
-        country=country,
+        user=user,
         tokens=tokens,
         ssh_key=ssh_key,
         prevent_name_change=prevent_name_change,
