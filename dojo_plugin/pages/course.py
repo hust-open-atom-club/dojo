@@ -251,18 +251,26 @@ def view_course(dojo, resource=None):
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
 @dojo_route
 @authed_only
+<<<<<<< HEAD
 @ratelimit(method="PATCH", limit=10, interval=60) # 进行请求限制
 def update_identity(dojo):
     if not dojo.course:
         abort(404)
         
+=======
+@ratelimit(method="PATCH", limit=10, interval=60)
+def update_identity(dojo):
+    if not dojo.course:
+        abort(404)
+
+>>>>>>> a072c03 (Automatically add course discord role)
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
 
     if dojo_user and dojo_user.type == "admin":
         return {"success": False, "error": "Cannot identify admin"}
 
-    identity = request.json.get("identity", None)
+    identity = request.json.get("identity", "").strip()
     if not dojo_user:
         dojo_user = DojoStudents(dojo=dojo, user=user, token=identity)
         db.session.add(dojo_user)
@@ -270,6 +278,19 @@ def update_identity(dojo):
         dojo_user.type = "student"
         dojo_user.token = identity
     db.session.commit()
+
+    students = set(dojo.course.get("students", []))
+    if students and identity not in students:
+        return {"success": True, "warning": f"This identity ({identity}) is not on the official student roster"}
+
+    discord_role = dojo.course.get("discord_role")
+    if discord_role:
+        discord_user = get_discord_user(user.id)
+        if discord_user is False:
+            return {"success": True, "warning": "Your Discord account is not linked"}
+        if discord_user is None:
+            return {"success": True, "warning": "Your Discord account has not joined the official Discord server"}
+        add_role(discord_user["user"]["id"], discord_role)
 
     return {"success": True}
 
