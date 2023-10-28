@@ -6,7 +6,7 @@ from sqlalchemy import and_, cast
 from CTFd.models import db, Challenges, Solves, Users
 from CTFd.utils import get_config
 from CTFd.utils.user import get_current_user, is_admin
-from CTFd.utils.decorators import authed_only, admins_only
+from CTFd.utils.decorators import authed_only, admins_only, ratelimit
 from CTFd.cache import cache
 
 from ..models import DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
@@ -241,7 +241,11 @@ def view_course(dojo, resource=None):
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
 @dojo_route
 @authed_only
+@ratelimit(method="PATCH", limit=10, interval=60) # 进行请求限制
 def update_identity(dojo):
+    if not dojo.course:
+        abort(404)
+        
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
 
