@@ -504,6 +504,7 @@ COPY --link --from=builder-desktop-reversing-tools / /
 COPY --link --from=builder-tools-apt / /
 COPY --link --from=builder-gdb / /
 COPY --link --from=builder-tools-pip / /
+COPY --link --from=builder-tools-apt / /
 
 RUN cat >> /etc/ssh/ssh_config <<EOF
     StrictHostKeyChecking no
