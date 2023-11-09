@@ -165,6 +165,8 @@ RUN <<EOF
     git clone --recurse-submodules https://github.com/pwndbg/pwndbg /opt/pwndbg
     cd /opt/pwndbg
     ./setup.sh
+    ln -sf /home/hacker/.gdbinit /root/.gdbinit
+
     git clone https://github.com/hugsy/gef /opt/gef
     git clone https://github.com/jerdna-regeiz/splitmind /opt/splitmind
 EOF
@@ -366,6 +368,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         fish
         findutils
         firefox
+        gcc-aarch64-linux-gnu
         gdb
         gdb-multiarch
         genisoimage
@@ -376,8 +379,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ipython3
         keyutils
         kmod
+        libc6-arm64-cross
+        libc6-dev-arm64-cross
         ltrace
         nano
+        neovim
         net-tools
         netcat-openbsd
         nmap
@@ -388,6 +394,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         pcre2-utils
         psutils
         python3-ipdb
+        qemu-user
         qemu-system-x86
         rsync
         screen
