@@ -15,6 +15,7 @@ from CTFd.plugins import register_admin_plugin_menu_bar
 from CTFd.plugins.challenges import CHALLENGE_CLASSES, BaseChallenge
 from CTFd.plugins.flags import FLAG_CLASSES, BaseFlag, FlagException
 
+from .models import Dojos, DojoChallenges
 from .config import DOJO_HOST, bootstrap
 from .utils import unserialize_user_flag, render_markdown
 from .pages.dojos import dojos, dojos_override
@@ -32,6 +33,10 @@ class DojoChallenge(BaseChallenge):
     id = "dojo"
     name = "dojo"
     challenge_model = Challenges
+
+    @classmethod
+    def solve(cls, user, team, challenge, request):
+        super().solve(user, team, challenge, request)
 
 
 class DojoFlag(BaseFlag):
