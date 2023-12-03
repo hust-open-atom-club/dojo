@@ -20,10 +20,10 @@ from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql import or_, and_
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.ext.associationproxy import association_proxy
-from CTFd.models import db, get_class_by_tablename, Challenges, Solves, Flags, Users
+from CTFd.models import db, get_class_by_tablename, Challenges, Solves, Flags, Users, Admins
 from CTFd.utils.user import get_current_user, is_admin
 
-from ..utils import DOJOS_DIR
+from ..config import DOJOS_DIR
 
 
 def delete_before_insert(column, null=[]):
@@ -194,6 +194,9 @@ class Dojos(db.Model):
     def solves(self, **kwargs):
         return DojoChallenges.solves(dojo=self, **kwargs)
 
+    def completed(self, user):
+        return self.solves(user=user, ignore_visibility=True, ignore_admins=False).count() == len(self.challenges)
+
     def is_admin(self, user=None):
         if user is None:
             user = get_current_user()
@@ -332,6 +335,9 @@ class DojoModules(db.Model):
     def path(self):
         return self.dojo.path / self.id
 
+    def visible_challenges(self, user=None):
+        return [challenge for challenge in self.challenges if challenge.visible() or self.dojo.is_admin(user=user)]
+
     def solves(self, **kwargs):
         return DojoChallenges.solves(module=self, **kwargs)
 
@@ -358,7 +364,7 @@ class DojoChallenges(db.Model):
     description = db.Column(db.Text)
 
     data = db.Column(db.JSON)
-    data_fields = ["path_override"]
+    data_fields = ["image", "path_override"]
 
     dojo = db.relationship("Dojos",
                            foreign_keys=[dojo_id],
@@ -388,6 +394,7 @@ class DojoChallenges(db.Model):
                 kwargs[field] = kwargs[field] if kwargs.get(field) is not None else getattr(default, field, None)
 
             # TODO: maybe we should track the entire import
+            kwargs["data"]["image"] = default.data.get("image")
             kwargs["data"]["path_override"] = str(default.path)
 
         super().__init__(*args, **kwargs)
@@ -432,6 +439,7 @@ class DojoChallenges(db.Model):
                 Dojos.dojo_id == DojoChallenges.dojo_id,
                 or_(Dojos.official, DojoUsers.user_id != None),
                 ))
+            .join(Users, Users.id == Solves.user_id)
         )
 
         if not ignore_visibility:
@@ -444,7 +452,9 @@ class DojoChallenges(db.Model):
                 .filter(
                     or_(DojoChallengeVisibilities.start == None, Solves.date >= DojoChallengeVisibilities.start),
                     or_(DojoChallengeVisibilities.stop == None, Solves.date <= DojoChallengeVisibilities.stop),
-                ))
+                )
+                .filter(Users.hidden == False)
+            )
 
         if ignore_admins:
             result = result.filter(or_(DojoUsers.type == None, DojoUsers.type != "admin"))
@@ -466,6 +476,9 @@ class DojoChallenges(db.Model):
 
     @property
     def image(self):
+        if self.data.get("image"):
+            assert any(isinstance(dojo_admin.user, Admins) for dojo_admin in self.dojo.admins), "Custom images are only allowed for admin dojos"
+            return self.data["image"]
         return "pwncollege-challenge"
 
     def challenge_paths(self, user):

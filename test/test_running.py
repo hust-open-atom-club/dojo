@@ -1,5 +1,6 @@
 import re
 import subprocess
+import shutil
 
 import requests
 import pytest
@@ -12,7 +13,7 @@ HOST="localhost.pwn.college"
 def dojo_run(*args, **kwargs):
     kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
     container_name = "dojo-test"
-    return subprocess.run(["/usr/bin/docker", "exec", "-i", container_name, "dojo", *args], **kwargs)
+    return subprocess.run([shutil.which("docker"), "exec", "-i", container_name, "dojo", *args], **kwargs)
 
 
 def login(username, password, *, success=True):
@@ -54,21 +55,35 @@ def test_login():
     login("admin", "admin")
 
 
-@pytest.mark.dependency()
-def test_create_dojo(admin_session):
-    create_dojo_json = dict(repository="pwncollege/example-dojo", public_key="", private_key="")
-    response = admin_session.post(f"{PROTO}://{HOST}/pwncollege_api/v1/dojo/create", json=create_dojo_json)
-    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+def create_dojo(repository, *, official=True, session):
+    test_public_key = f"public/{repository}"
+    test_private_key = f"private/{repository}"
+    create_dojo_json = dict(repository=repository, public_key=test_public_key, private_key=test_private_key)
+    response = session.post(f"{PROTO}://{HOST}/pwncollege_api/v1/dojo/create", json=create_dojo_json)
+    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code} - {response.json()}"
     dojo_reference_id = response.json()["dojo"]
 
-    # TODO: add an official endpoint for making dojos official
-    id, dojo_id = dojo_reference_id.split("~", 1)
-    dojo_id = int.from_bytes(bytes.fromhex(dojo_id.rjust(8, "0")), "big", signed=True)
-    sql = f"UPDATE dojos SET official = 1 WHERE id = '{id}' and dojo_id = {dojo_id}"
-    dojo_run("db", input=sql)
-    sql = f"SELECT official FROM dojos WHERE id = '{id}' and dojo_id = {dojo_id}"
-    db_result = dojo_run("db", input=sql)
-    assert db_result.stdout == "official\n1\n", f"Failed to make dojo official: {db_result.stdout}"
+    if official:
+        # TODO: add an official endpoint for making dojos official
+        id, dojo_id = dojo_reference_id.split("~", 1)
+        dojo_id = int.from_bytes(bytes.fromhex(dojo_id.rjust(8, "0")), "big", signed=True)
+        sql = f"UPDATE dojos SET official = 1 WHERE id = '{id}' and dojo_id = {dojo_id}"
+        dojo_run("db", input=sql)
+        sql = f"SELECT official FROM dojos WHERE id = '{id}' and dojo_id = {dojo_id}"
+        db_result = dojo_run("db", input=sql)
+        assert db_result.stdout == "official\n1\n", f"Failed to make dojo official: {db_result.stdout}"
+
+    return dojo_reference_id
+
+
+@pytest.mark.dependency()
+def test_create_dojo(admin_session):
+    create_dojo("pwncollege/example-dojo", session=admin_session)
+
+
+@pytest.mark.dependency(depends=["test_create_dojo"])
+def test_create_import_dojo(admin_session):
+    create_dojo("pwncollege/example-import-dojo", session=admin_session)
 
 
 @pytest.mark.dependency(depends=["test_create_dojo"])
@@ -93,7 +108,7 @@ def test_challenge_privilege_escalation():
     try:
         dojo_run("enter", "admin", input="cat /flag")
     except subprocess.CalledProcessError as e:
-        assert e.stderr == "cat: /flag: Permission denied\n", f"Expected permission denied, but got: {(e.stdout, e.stderr)}"
+        assert "Permission denied" in e.stderr, f"Expected permission denied, but got: {(e.stdout, e.stderr)}"
     else:
         assert False, f"Expected permission denied, but got no error: {(e.stdout, e.stderr)}"
 

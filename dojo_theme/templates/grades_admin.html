@@ -12,44 +12,83 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            {% for key in grades[0] %}
-            <td scope="col"><b>{{ key }}</b></td>
-            {% endfor %}
+            <td scope="col"><b>Student</b></td>
+            <td scope="col" style="width: 80%;"><b>Grade</b></td>
           </tr>
         </thead>
         <tbody>
           {% for user_grades in grades %}
           <tr>
-            {% for key, value in user_grades.items() %}
             <td>
-              {% if key == 'id' %}
-              {% if value is not none %}
-              <a href="{{ generate_account_url(value, admin=True) }}">{{ value }}</a>
+              {% if user_grades.user_id is not none %}
+              <a href="{{ generate_account_url(user_grades.user_id, admin=True) }}">{{ students[user_grades.user_id] }}</a>
               {% else %}
               <b>?</b>
               {% endif %}
-              {% elif value is number %}
-              {{ "%.2f"|format(value) }}%
-              {% elif value is not none %}
-              {{ value }}
-              {% endif %}
             </td>
-            {% endfor %}
+            <td>
+              <details>
+                <summary>{{ user_grades.letter_grade }} ({{ "%.2f"|format(100 * user_grades.overall_grade) }}%)</summary>
+                <table>
+                  <thead>
+                    <tr>
+                      <td>Name</td>
+                      <td>Date</td>
+                      <td>Weight</td>
+                      <td>Progress</td>
+                      <td>Credit</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for grade in user_grades.grades %}
+                    <tr>
+                      <td>{{ grade.name }}</td>
+                      <td>{{ grade.date }}</td>
+                      <td>{{ grade.weight }}</td>
+                      <td>{{ grade.progress }}</td>
+                      <td>
+                        {% if grade.credit is boolean %}
+                          {{ "✓" if grade.credit else "✕" }}
+                        {% elif grade.credit is number %}
+                          {{ "%.2f%%" | format(100 * grade.credit) }}
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </details>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
         <tfoot>
-          {% for statistic in grade_statistics %}
+          {% for statistic, (summary, details) in grade_statistics.items() %}
           <tr>
-            {% for value in statistic.values() %}
+            <td>{{ statistic }}</td>
             <td>
-              {% if value is number %}
-              {{ "%.2f"|format(value) }}%
-              {% elif value is not none %}
-              <b>{{ value }}</b>
-              {% endif %}
+              <details>
+                <summary>{{ summary }}</summary>
+                <table>
+                  <thead>
+                    <tr>
+                      {% for column in details[0] %}
+                      <td>{{ column }}</td>
+                      {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in details %}
+                    <tr>
+                      {% for value in row.values() %}
+                      <td>{{ value }}</td>
+                      {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </details>
             </td>
-            {% endfor %}
           </tr>
           {% endfor %}
         </tfoot>

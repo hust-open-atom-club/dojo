@@ -6,36 +6,39 @@ from sqlalchemy import and_, cast
 from CTFd.models import db, Challenges, Solves, Users
 from CTFd.utils import get_config
 from CTFd.utils.user import get_current_user, is_admin
-from CTFd.utils.decorators import authed_only, admins_only
-from CTFd.cache import cache
+from CTFd.utils.decorators import authed_only, admins_only, ratelimit
 
-from .discord import get_discord_user
 from ..models import DiscordUsers, DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
-from ..utils import module_visible, module_challenges_visible, DOJOS_DIR, is_dojo_admin
+from ..utils import module_visible, module_challenges_visible, is_dojo_admin
 from ..utils.dojo import dojo_route
+from ..utils.discord import add_role, get_discord_user
 from .writeups import WriteupComments, writeup_weeks, all_writeups
 
 
 course = Blueprint("course", __name__)
 
 
-def grade(dojo, users_query):
+def get_letter_grade(dojo, grade):
+    for letter_grade, min_score in dojo.course["letter_grades"].items():
+        if grade >= min_score:
+            return letter_grade
+    return "?"
+
+
+def grade(dojo, users_query, *, ignore_pending=False):
     if isinstance(users_query, Users):
         users_query = Users.query.filter_by(id=users_query.id)
 
+    now = datetime.datetime.now(datetime.timezone.utc)
     assessments = dojo.course["assessments"]
 
     assessment_dates = collections.defaultdict(lambda: collections.defaultdict(dict))
     for assessment in assessments:
         if assessment["type"] not in ["checkpoint", "due"]:
             continue
-        assessment["extensions"] = {
-            int(user_id): days
-            for user_id, days in assessment.get("extensions", {}).items()
-        }
         assessment_dates[assessment["id"]][assessment["type"]] = (
             datetime.datetime.fromisoformat(assessment["date"]).astimezone(datetime.timezone.utc),
-            assessment["extensions"],
+            assessment.get("extensions", {}),
         )
 
     def dated_count(label, date_type):
@@ -47,7 +50,7 @@ def grade(dojo, users_query):
                     return None
                 date, extensions = assessment_dates[module_id][date_type]
                 user_date = db.case(
-                    [(Solves.user_id == user_id, date + datetime.timedelta(days=days))
+                    [(Solves.user_id == int(user_id), date + datetime.timedelta(days=days))
                      for user_id, days in extensions.items()],
                     else_=date
                 ) if extensions else date
@@ -93,31 +96,41 @@ def grade(dojo, users_query):
         for assessment in assessments:
             type = assessment.get("type")
 
+            date = datetime.datetime.fromisoformat(assessment["date"]) if type in ["checkpoint", "due"] else None
+            if ignore_pending and date and date > now:
+                continue
+
             if type == "checkpoint":
                 module_id = assessment["id"]
+                weight = assessment["weight"]
+                percent_required = assessment.get("percent_required", 0.334)
+                extension = assessment.get("extensions", {}).get(str(user_id), 0)
+
                 module_name = module_names.get(module_id)
                 if not module_name:
                     continue
 
                 challenge_count = challenge_counts[module_id]
                 checkpoint_solves, due_solves, all_solves = module_solves.get(module_id, (0, 0, 0))
-                percent_required = assessment.get("percent_required", 0.334)
                 challenge_count_required = int(challenge_count * percent_required)
-
-                date = datetime.datetime.fromisoformat(assessment["date"])
-                extension = assessment.get("extensions", {}).get(user_id, 0)
                 user_date = date + datetime.timedelta(days=extension)
 
                 grades.append(dict(
                     name=f"{module_name} Checkpoint",
                     date=str(user_date) + (" *" if extension else ""),
-                    weight=assessment["weight"],
+                    weight=weight,
                     progress=f"{checkpoint_solves} / {challenge_count_required}",
                     credit=bool(checkpoint_solves // (challenge_count_required)),
                 ))
 
             if type == "due":
                 module_id = assessment["id"]
+                weight = assessment["weight"]
+                percent_required = assessment.get("percent_required", 1.0)
+                late_penalty = assessment.get("late_penalty", 0.0)
+                extension = assessment.get("extensions", {}).get(str(user_id), 0)
+                override = assessment.get("overrides", {}).get(str(user_id), None)
+
                 module_name = module_names.get(module_id)
                 if not module_name:
                     continue
@@ -125,23 +138,27 @@ def grade(dojo, users_query):
                 challenge_count = challenge_counts[module_id]
                 checkpoint_solves, due_solves, all_solves = module_solves.get(module_id, (0, 0, 0))
                 late_solves = all_solves - due_solves
-                percent_required = assessment.get("percent_required", 1.0)
                 challenge_count_required = int(challenge_count * percent_required)
-
-                date = datetime.datetime.fromisoformat(assessment["date"])
-                extension = assessment.get("extensions", {}).get(user_id, 0)
                 user_date = date + datetime.timedelta(days=extension)
-
-                late_penalty = assessment.get("late_penalty", 0.0)
                 late_value = 1 - late_penalty
+
+                if not late_solves:
+                    progress = f"{due_solves} / {challenge_count_required}"
+                else:
+                    progress = f"{due_solves} (+{late_solves}) / {challenge_count_required}"
+
+                if override is None:
+                    credit = min((due_solves + late_value * late_solves) / challenge_count_required, 1.0)
+                else:
+                    credit = override
+                    progress = f"{progress} *"
 
                 grades.append(dict(
                     name=f"{module_name}",
                     date=str(user_date) + (" *" if extension else ""),
-                    weight=assessment["weight"],
-                    progress=(f"{due_solves} (+{late_solves}) / {challenge_count_required}"
-                              if late_solves else f"{due_solves} / {challenge_count_required}"),
-                    credit=min((due_solves + late_value * late_solves) / challenge_count_required, 1.0),
+                    weight=weight,
+                    progress=progress,
+                    credit=credit,
                 ))
 
             if type == "manual":
@@ -167,13 +184,8 @@ def grade(dojo, users_query):
             sum(grade["credit"] for grade in grades if "weight" not in grade)
         )
         overall_grade += extra_credit
-
-        for grade, min_score in dojo.course["letter_grades"].items():
-            if overall_grade >= min_score:
-                letter_grade = grade
-                break
-        else:
-            letter_grade = "?"
+        overall_grade = round(overall_grade, 4)
+        letter_grade = get_letter_grade(dojo, overall_grade)
 
         return dict(user_id=user_id,
                     grades=grades,
@@ -214,6 +226,8 @@ def view_course(dojo, resource=None):
         user = get_current_user()
         name = "Your"
 
+    ignore_pending = request.args.get("ignore_pending") is not None
+
     grades = {}
     identity = {}
 
@@ -223,7 +237,7 @@ def view_course(dojo, resource=None):
     }
 
     if user:
-        grades = next(grade(dojo, user))
+        grades = next(grade(dojo, user, ignore_pending=ignore_pending))
 
         student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
         identity["identity_name"] = dojo.course.get("student_id", "Identity")
@@ -240,7 +254,6 @@ def view_course(dojo, resource=None):
             setup["create_discord"] = "complete"
             setup["link_discord"] = "complete"
 
-        cache.delete_memoized(get_discord_user, user.id)
         if get_discord_user(user.id):
             setup["join_discord"] = "complete"
         else:
@@ -252,14 +265,18 @@ def view_course(dojo, resource=None):
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
 @dojo_route
 @authed_only
+@ratelimit(method="PATCH", limit=10, interval=60)
 def update_identity(dojo):
+    if not dojo.course:
+        abort(404)
+
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
 
     if dojo_user and dojo_user.type == "admin":
         return {"success": False, "error": "Cannot identify admin"}
 
-    identity = request.json.get("identity", None)
+    identity = request.json.get("identity", "").strip()
     if not dojo_user:
         dojo_user = DojoStudents(dojo=dojo, user=user, token=identity)
         db.session.add(dojo_user)
@@ -267,6 +284,19 @@ def update_identity(dojo):
         dojo_user.type = "student"
         dojo_user.token = identity
     db.session.commit()
+
+    students = set(dojo.course.get("students", []))
+    if students and identity not in students:
+        return {"success": True, "warning": f"Your identity ({identity}) is not on the official student roster"}
+
+    discord_role = dojo.course.get("discord_role")
+    if discord_role:
+        discord_user = get_discord_user(user.id)
+        if discord_user is False:
+            return {"success": True, "warning": "Your Discord account is not linked"}
+        if discord_user is None:
+            return {"success": True, "warning": "Your Discord account has not joined the official Discord server"}
+        add_role(discord_user["user"]["id"], discord_role)
 
     return {"success": True}
 
@@ -281,12 +311,66 @@ def view_all_grades(dojo):
     if not dojo.is_admin():
         abort(403)
 
+    ignore_pending = request.args.get("ignore_pending") is not None
+
     users = (
         Users
         .query
         .join(DojoStudents, DojoStudents.user_id == Users.id)
-        .filter(DojoStudents.dojo == dojo)
+        .filter(DojoStudents.dojo == dojo,
+                DojoStudents.token.in_(dojo.course.get("students", [])))
     )
-    grades = grade(dojo, users)
+    grades = sorted(grade(dojo, users, ignore_pending=ignore_pending),
+                    key=lambda grade: grade["overall_grade"],
+                    reverse=True)
 
-    return render_template("grades_admin.html", grades=grades)
+    average_grade = sum(grade["overall_grade"] for grade in grades) / len(grades) if grades else 0.0
+    average_letter_grade = get_letter_grade(dojo, average_grade)
+    average_grade_summary = f"{average_letter_grade} ({average_grade * 100:.2f}%)"
+    average_grade_details = []
+    cumulative_count = 0
+    for letter_grade in dojo.course["letter_grades"]:
+        count = sum(1 for grade in grades if grade["letter_grade"] == letter_grade)
+        cumulative_count += count
+        percent = f"{count / len(grades) * 100:.2f}%" if grades else "0.00%"
+        cumulative_percent = f"{cumulative_count / len(grades) * 100:.2f}%" if grades else "0.00%"
+        average_grade_details.append({
+            "Grade": letter_grade,
+            "Count": count,
+            "Percent": percent,
+            "Cumulative Percent": cumulative_percent,
+        })
+    grade_statistics = {
+        "Average": (average_grade_summary, average_grade_details),
+    }
+
+    students = {student.user_id: student.token for student in dojo.students}
+
+    return render_template("grades_admin.html",
+                           grades=grades,
+                           grade_statistics=grade_statistics,
+                           students=students)
+
+@course.route("/dojo/<dojo>/admin/users/<user_id>")
+@dojo_route
+@authed_only
+def view_user_info(dojo, user_id):
+    if not dojo.course:
+        abort(404)
+
+    if not dojo.is_admin():
+        abort(403)
+
+    user = Users.query.filter_by(id=user_id).first_or_404()
+    student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
+    identity = {}
+    identity["identity_name"] = dojo.course.get("student_id", "Identity")
+    identity["identity_value"] = student.token if student else None
+
+    discord_user = get_discord_user(user.id)
+
+    return render_template("dojo_admin_user.html",
+                           dojo=dojo,
+                           user=user,
+                           discord_user=discord_user,
+                           **identity)

@@ -11,7 +11,7 @@ from CTFd.models import db, Users, Challenges, Solves
 from CTFd.cache import cache
 
 from ..models import Dojos, DojoModules, DojoChallenges
-from ..utils import DATA_DIR
+from ..config import DATA_DIR
 
 
 users = Blueprint("pwncollege_users", __name__)
@@ -34,7 +34,7 @@ def view_hacker(user):
 @users.route("/hacker/<int:user_id>")
 def view_other(user_id):
     user = Users.query.filter_by(id=user_id).first()
-    if user is None:
+    if user is None or user.hidden:
         abort(404)
     return view_hacker(user)
 

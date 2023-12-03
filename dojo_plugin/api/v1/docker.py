@@ -10,9 +10,9 @@ from flask_restx import Namespace, Resource
 from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only
 
-from ...config import HOST_DATA_PATH, INTERNET_FOR_ALL, WINDOWS_VM_ENABLED
+from ...config import HOST_DATA_PATH, INTERNET_FOR_ALL, WINDOWS_VM_ENABLED, SECCOMP, USER_FIREWALL_ALLOWED
 from ...models import Dojos, DojoModules, DojoChallenges
-from ...utils import serialize_user_flag, simple_tar, random_home_path, SECCOMP, USER_FIREWALL_ALLOWED, module_challenges_visible, user_ipv4
+from ...utils import serialize_user_flag, simple_tar, random_home_path, module_challenges_visible, user_ipv4
 from ...utils.dojo import dojo_accessible, get_current_dojo_challenge
 
 
@@ -237,7 +237,8 @@ class RunDocker(Resource):
         if not dojo_challenge:
             return {"success": False, "error": "Invalid challenge"}
 
-        # TODO: check if challenge visible
+        if not dojo_challenge.visible() and not dojo.is_admin():
+            return {"success": False, "error": "Invalid challenge"}
 
         try:
             start_challenge(user, dojo_challenge, practice)
@@ -245,7 +246,7 @@ class RunDocker(Resource):
             print(f"ERROR: Docker failed for {user.id}: {e}", file=sys.stderr, flush=True)
             traceback.print_exc(file=sys.stderr)
             return {"success": False, "error": str(e)}
-        except Exception as e: #pylint:disable=broad-except
+        except Exception as e:
             print(f"ERROR: Docker failed for {user.id}: {e}", file=sys.stderr, flush=True)
             traceback.print_exc(file=sys.stderr)
             return {"success": False, "error": "Docker failed"}

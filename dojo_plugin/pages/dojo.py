@@ -21,7 +21,7 @@ def get_stats(dojo):
     docker_client = docker.from_env()
     filters = {
         "name": "user_",
-        "label": f"dojo={dojo.reference_id}"
+        "label": f"dojo.dojo_id={dojo.reference_id}"
     }
     containers = docker_client.containers.list(filters=filters, ignore_removed=True)
 
@@ -69,7 +69,7 @@ def view_module(dojo, module):
     user_solves = set(solve.challenge_id for solve in (
         module.solves(user=user, ignore_visibility=True, ignore_admins=False) if user else []
     ))
-    total_solves = dict(module.solves(ignore_visibility=True)
+    total_solves = dict(module.solves()
                         .group_by(Solves.challenge_id)
                         .with_entities(Solves.challenge_id, db.func.count()))
     current_dojo_challenge = get_current_dojo_challenge()
@@ -77,7 +77,7 @@ def view_module(dojo, module):
         "module.html",
         dojo=dojo,
         module=module,
-        challenges=[ c for c in module.challenges if c.visible() or is_dojo_admin(user, dojo) ],
+        challenges=module.visible_challenges(),
         user_solves=user_solves,
         total_solves=total_solves,
         user=user,
