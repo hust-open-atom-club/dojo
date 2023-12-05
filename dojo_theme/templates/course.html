@@ -119,7 +119,6 @@
             {% endif %}
             <li class="setup-{{ link_student }}">Link your pwn.college account with your {{ identity_name }} <a href="identity">here</a>. This is how we will be able to give you your official course grade, and how we will be able to verify your student status for an official course role in Discord.</li>
           </ol>
-          {% set setup_complete = create_account == "complete" and link_student == "complete" and create_discord == "complete" and link_discord == "complete" and join_discord == "complete" %}
           {% if setup_complete %}
             <p>Setup complete!</p>
             {% if discord_role %}
