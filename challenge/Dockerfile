@@ -24,7 +24,7 @@ EOF
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         ca-certificates
         curl
@@ -43,7 +43,7 @@ FROM essentials as builder-essentials
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         build-essential
 EOF
@@ -54,7 +54,7 @@ FROM builder-essentials as builder
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         autoconf
         bc
@@ -100,7 +100,7 @@ FROM builder as builder-kernel
 
 RUN <<EOF
     mkdir /opt/linux
-    wget -O - https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.gz | tar xzC /opt/linux
+    wget -O - https://mirrors.hust.edu.cn/git/linux.git/snapshot/linux-5.4.tar.gz | tar xzC /opt/linux
     cd /opt/linux/linux-5.4
     make defconfig
 EOF
@@ -292,7 +292,7 @@ FROM builder-desktop-base as builder-desktop-xfce
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
     apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -349,7 +349,7 @@ FROM essentials as builder-tools-apt
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         arping
         binutils
