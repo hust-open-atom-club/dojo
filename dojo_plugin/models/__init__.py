@@ -243,6 +243,10 @@ class DojoStudents(DojoUsers):
 
     dojo = db.relationship("Dojos", back_populates="students")
 
+    @property
+    def official(self):
+        return self.token in (self.dojo.course or {}).get("students", [])
+
 
 class DojoModules(db.Model):
     __tablename__ = "dojo_modules"

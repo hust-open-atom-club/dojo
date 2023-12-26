@@ -228,38 +228,46 @@ def view_course(dojo, resource=None):
 
     ignore_pending = request.args.get("ignore_pending") is not None
 
-    grades = {}
-    identity = {}
+    student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
 
-    setup = {
-        step: "incomplete"
-        for step in ["create_account", "link_student", "create_discord", "link_discord", "join_discord"]
-    }
+    grades = next(grade(dojo, user, ignore_pending=ignore_pending)) if user else {}
 
-    if user:
-        grades = next(grade(dojo, user, ignore_pending=ignore_pending))
+    identity = dict(identity_name=dojo.course.get("student_id", "Identity"),
+                    identity_value=student.token if student else None)
 
-        student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
-        identity["identity_name"] = dojo.course.get("student_id", "Identity")
-        identity["identity_value"] = student.token if student else None
+    setup = {}
+    setup["create_account"] = "complete" if user else "incomplete"
+    setup["link_student"] = (
+        "incomplete" if not student else
+        "unknown" if not student.official else
+        "complete"
+    )
 
-        setup["create_account"] = "complete"
-
-        if student and student.token in dojo.course.get("students", []):
-            setup["link_student"] = "complete"
-        elif student:
-            setup["link_student"] = "unknown"
-
+    discord_role = dojo.course.get("discord_role")
+    if discord_role:
         if DiscordUsers.query.filter_by(user=user).first():
             setup["create_discord"] = "complete"
             setup["link_discord"] = "complete"
+        else:
+            setup["create_discord"] = "incomplete"
+            setup["link_discord"] = "incomplete"
 
-        if get_discord_user(user.id):
+        if user and get_discord_user(user.id):
             setup["join_discord"] = "complete"
         else:
             setup["join_discord"] = "incomplete"
 
-    return render_template("course.html", name=name, **grades, **identity, **setup, user=user, dojo=dojo)
+    setup_complete = all(status == "complete" for status in setup.values())
+
+    return render_template("course.html",
+                           name=name,
+                           **grades,
+                           **identity,
+                           **setup,
+                           discord_role=discord_role,
+                           setup_complete=setup_complete,
+                           user=user,
+                           dojo=dojo)
 
 
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
@@ -285,9 +293,10 @@ def update_identity(dojo):
         dojo_user.token = identity
     db.session.commit()
 
-    students = set(dojo.course.get("students", []))
-    if students and identity not in students:
-        return {"success": True, "warning": f"Your identity ({identity}) is not on the official student roster"}
+    student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
+    if not student.official:
+        identity_name = dojo.course.get("student_id", "Identity")
+        return {"success": True, "warning": f"Your {identity_name} is not on the official student roster"}
 
     discord_role = dojo.course.get("discord_role")
     if discord_role:
@@ -363,10 +372,8 @@ def view_user_info(dojo, user_id):
 
     user = Users.query.filter_by(id=user_id).first_or_404()
     student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
-    identity = {}
-    identity["identity_name"] = dojo.course.get("student_id", "Identity")
-    identity["identity_value"] = student.token if student else None
-
+    identity = dict(identity_name=dojo.course.get("student_id", "Identity"),
+                    identity_value=student.token if student else None)
     discord_user = get_discord_user(user.id)
 
     return render_template("dojo_admin_user.html",
