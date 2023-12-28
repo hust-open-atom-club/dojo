@@ -4,46 +4,31 @@ Deploy a pwn.college dojo instance!
 
 ## Details
 
-The pwn.college dojo infrastructure is based on [CTFd](https://github.com/CTFd/CTFd).
+The pwn.hust.college dojo infrastructure is based on [CTFd](https://github.com/CTFd/CTFd).
 CTFd provides for a concept of users, challenges, and users solving those challenges by submitting flags.
 From there, this repository provides infrastructure which expands upon these capabilities.
 
-The pwn.college infrastructure allows users the ability to "start" challenges, which spins up a private docker container for that user.
+The pwn.hust.college infrastructure allows users the ability to "start" challenges, which spins up a private docker container for that user.
 This docker container will have the associated challenge binary injected into the container as root-suid, as well as the flag to be submitted as readable only by the the root user.
 Users may enter this container via `ssh`, by supplying a public ssh key in their profile settings, or via vscode in the browser ([code-server](https://github.com/cdr/code-server)).
 The associated challenge binary may be either global, which means all users will get the same binary, or instanced, which means that different users will receive different variants of the same challenge.
 
-## Dependencies
-
-The only dependency to run the infrastructure is docker, which can be installed with:
+## Setup
 
 ```sh
 curl -fsSL https://get.docker.com | /bin/sh
+DOJO_PATH="./dojo"
+git clone https://github.com/HUSTSeclab/dojo.git "$DOJO_PATH"
+docker build -t pwncollege/dojo "$DOJO_PATH"
+docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
 ```
 
-## Setup
-
-First, clone the repository:
-
-```sh
-git clone https://github.com/HUSTSeclab/dojo/ /opt/dojo
-```
-
-Now, build the container:
-
-```sh
-docker build -t pwncollege/dojo .
-```
-
-Finally, run the infrastructure which will be hosted on domain `my.domain.college` with:
-
-```sh
-docker run --privileged -d -v /opt/dojo:/opt/pwn.college:shared -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
-```
+**You can setup dojo using [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh)**
 
 > [!NOTE]
 > This command would map ports(22, 80, 443) in the container to the corresponding ports(22222, 8080, 10443) on the Docker host.
 > If these ports are bound, especially Port 22, you can disable these processes or modify the mapping ports.
+
 
 This will run the initial setup, including building the challenge docker image.
 If you want to build the full 70+ GB challenge image, you can add `-e DOJO_CHALLENGE=challenge` to the docker args.
