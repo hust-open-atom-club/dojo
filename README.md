@@ -1,6 +1,6 @@
 # DOJO
 
-Deploy a pwn.college dojo instance!
+Deploy a pwn.hust.college dojo instance! Pwn.hust.college is forked from pwn.college.
 
 ## Details
 
