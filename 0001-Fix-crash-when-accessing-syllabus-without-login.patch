@@ -1,0 +1,25 @@
+From 371a17a2eaa10e1c2e500d1c31d8c1ccf11de8d7 Mon Sep 17 00:00:00 2001
+From: Adam Doupe <adamdoupe@gmail.com>
+Date: Mon, 11 Dec 2023 15:12:05 -0800
+Subject: [PATCH] Fix crash when accessing syllabus without login
+
+---
+ dojo_plugin/pages/course.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dojo_plugin/pages/course.py b/dojo_plugin/pages/course.py
+index 2068ff7..a1c4a0e 100644
+--- a/dojo_plugin/pages/course.py
++++ b/dojo_plugin/pages/course.py
+@@ -252,7 +252,7 @@ def view_course(dojo, resource=None):
+             setup["create_discord"] = "incomplete"
+             setup["link_discord"] = "incomplete"
+ 
+-        if get_discord_user(user.id):
++        if user and get_discord_user(user.id):
+             setup["join_discord"] = "complete"
+         else:
+             setup["join_discord"] = "incomplete"
+-- 
+2.33.1.windows.1
+
