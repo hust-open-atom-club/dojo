@@ -23,7 +23,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from CTFd.models import db, get_class_by_tablename, Challenges, Solves, Flags, Users
 from CTFd.utils.user import get_current_user, is_admin
 
-from ..utils import DOJOS_DIR
+from ..config import DOJOS_DIR
 
 
 def delete_before_insert(column, null=[]):
@@ -193,6 +193,9 @@ class Dojos(db.Model):
 
     def solves(self, **kwargs):
         return DojoChallenges.solves(dojo=self, **kwargs)
+
+    def completed(self, user):
+        return self.solves(user=user).count() == len(self.challenges)
 
     def is_admin(self, user=None):
         if user is None:
