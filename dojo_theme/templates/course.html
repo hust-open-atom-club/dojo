@@ -70,17 +70,17 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for grade in grades %}
-                    {% if grade.credit is boolean %}
-                      {% set credit = "✓" if grade.credit else "✕" %}
-                    {% elif grade.credit is number %}
-                      {% set credit = "%.2f%%" | format(100 * grade.credit) %}
+                    {% for assessment_grade in assessment_grades %}
+                    {% if assessment_grade.credit is boolean %}
+                      {% set credit = "✓" if assessment_grade.credit else "✕" %}
+                    {% elif assessment_grade.credit is number %}
+                      {% set credit = "%.2f%%" | format(100 * assessment_grade.credit) %}
                     {% endif %}
                     <tr>
-                      <td>{{ grade.name }}</td>
-                      <td>{{ grade.date }}</td>
-                      <td>{{ grade.weight }}</td>
-                      <td>{{ grade.progress }}</td>
+                      <td>{{ assessment_grade.name }}</td>
+                      <td>{{ assessment_grade.date }}</td>
+                      <td>{{ assessment_grade.weight }}</td>
+                      <td>{{ assessment_grade.progress }}</td>
                       <td>{{ credit }}</td>
                     </tr>
                     {% endfor %}
@@ -96,7 +96,7 @@
                 <b><label for="enter-name">{{ identity_name }}</label></b>
                 <small class="form-text text-muted">This will be shared with the admins of this dojo.</small>
                 <br>
-                <input class="form-control" id="identity" name="identity" type="text" value="{{ identity_value or "" }}">
+                <input class="form-control" id="identity" name="identity" type="text" value="{{ identity_value or '' }}">
               </div>
 
               <div id="identity-results" class="form-group">
@@ -111,16 +111,18 @@
         <div class="tab-pane fade" id="setup" role="tabpanel">
           <ol>
             <li class="setup-{{ create_account }}">Create a pwn.college account <a href="/register">here</a>. You can use an existing account, or create a new one specifically for the course. The username <strong>will be visible publicly</strong>: if you want to be anonymous, do not use your real name.</li>
-            <li class="setup-{{ link_student }}">Link your pwn.college account with your {{ identity_name }} <a href="identity">here</a>. This is how we will be able to give you your official course grade, and how we will be able to verify your student status for an official course role in Discord.</li>
             {% if discord_role %}
               <li class="setup-{{ create_discord }}">Create a Discord account <a href="https://discord.com/register">here</a>. You can use an existing account, or create a new one specifically for the course.</li>
-              <li class="setup-{{ link_discord }}">Link your pwn.college account with your Discord <a href="/settings#discord">here</a>. As a verified student, you will receive an official course role in Discord for viewing course announcements.</li>
               <li class="setup-{{ join_discord }}">Join the pwn.college Discord server <a href="https://discord.gg/pwncollege">here</a>. This is where you will be able to discuss the challenges with your peers and see official course announcements.</li>
+              <li class="setup-{{ link_discord }}">Link your pwn.college account with your Discord <a href="/settings#discord">here</a>. As a verified student, you will receive an official course role in Discord for viewing course announcements.</li>
             {% endif %}
+            <li class="setup-{{ link_student }}">Link your pwn.college account with your {{ identity_name }} <a href="identity">here</a>. This is how we will be able to give you your official course grade, and how we will be able to verify your student status for an official course role in Discord.</li>
           </ol>
           {% if setup_complete %}
             <p>Setup complete!</p>
-            <p>If you are missing your official course role in Discord, you can force it to update by updating your course identity <a href="identity">here</a>.</p>
+            {% if discord_role %}
+              <p>If you are missing your official course role in Discord, you can force it to update by updating your course identity <a href="identity">here</a>.</p>
+            {% endif %}
           {% else %}
             <p>Setup incomplete.</p>
           {% endif %}

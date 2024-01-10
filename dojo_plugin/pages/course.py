@@ -1,7 +1,8 @@
 import collections
 import datetime
+import re
 
-from flask import Blueprint, render_template, request, abort
+from flask import Blueprint, Response, render_template, request, abort, stream_with_context
 from sqlalchemy import and_, cast
 from CTFd.models import db, Challenges, Solves, Users
 from CTFd.utils import get_config
@@ -25,12 +26,21 @@ def get_letter_grade(dojo, grade):
     return "?"
 
 
+def assessment_name(dojo, assessment):
+    module_names = {module.id: module.name for module in dojo.modules}
+    if assessment["type"] == "checkpoint":
+        return f"{module_names[assessment['id']]} Checkpoint"
+    if assessment["type"] == "due":
+        return module_names[assessment["id"]]
+    return assessment["name"]
+
+
 def grade(dojo, users_query, *, ignore_pending=False):
     if isinstance(users_query, Users):
         users_query = Users.query.filter_by(id=users_query.id)
 
     now = datetime.datetime.now(datetime.timezone.utc)
-    assessments = dojo.course["assessments"]
+    assessments = dojo.course.get("assessments", [])
 
     assessment_dates = collections.defaultdict(lambda: collections.defaultdict(dict))
     for assessment in assessments:
@@ -57,8 +67,8 @@ def grade(dojo, users_query, *, ignore_pending=False):
                 return Solves.date < user_date
         return db.func.sum(
             db.case([(DojoModules.id == module_id, cast(query(module_id), db.Integer))
-                     for module_id in assessment_dates],
-                    else_=None)
+                     for module_id in assessment_dates] +
+                    [(False, None)])
         ).label(label)
 
     solves = (
@@ -84,14 +94,12 @@ def grade(dojo, users_query, *, ignore_pending=False):
         .with_entities(Users.id, *(column for column in solves.c if column.name != "user_id"))
     )
 
-    module_names = {module.id: module.name for module in dojo.modules}
     challenge_counts = {module.id: len(module.challenges) for module in dojo.modules}
 
     module_solves = {}
-    assigmments = {}
 
     def result(user_id):
-        grades = []
+        assessment_grades = []
 
         for assessment in assessments:
             type = assessment.get("type")
@@ -106,17 +114,13 @@ def grade(dojo, users_query, *, ignore_pending=False):
                 percent_required = assessment.get("percent_required", 0.334)
                 extension = assessment.get("extensions", {}).get(str(user_id), 0)
 
-                module_name = module_names.get(module_id)
-                if not module_name:
-                    continue
-
                 challenge_count = challenge_counts[module_id]
                 checkpoint_solves, due_solves, all_solves = module_solves.get(module_id, (0, 0, 0))
                 challenge_count_required = int(challenge_count * percent_required)
                 user_date = date + datetime.timedelta(days=extension)
 
-                grades.append(dict(
-                    name=f"{module_name} Checkpoint",
+                assessment_grades.append(dict(
+                    name=assessment_name(dojo, assessment),
                     date=str(user_date) + (" *" if extension else ""),
                     weight=weight,
                     progress=f"{checkpoint_solves} / {challenge_count_required}",
@@ -131,16 +135,14 @@ def grade(dojo, users_query, *, ignore_pending=False):
                 extension = assessment.get("extensions", {}).get(str(user_id), 0)
                 override = assessment.get("overrides", {}).get(str(user_id), None)
 
-                module_name = module_names.get(module_id)
-                if not module_name:
-                    continue
-
                 challenge_count = challenge_counts[module_id]
                 checkpoint_solves, due_solves, all_solves = module_solves.get(module_id, (0, 0, 0))
                 late_solves = all_solves - due_solves
                 challenge_count_required = int(challenge_count * percent_required)
                 user_date = date + datetime.timedelta(days=extension)
                 late_value = 1 - late_penalty
+                max_late_solves = challenge_count_required - min(due_solves, challenge_count_required)
+                capped_late_solves = min(max_late_solves, late_solves)
 
                 if not late_solves:
                     progress = f"{due_solves} / {challenge_count_required}"
@@ -148,13 +150,13 @@ def grade(dojo, users_query, *, ignore_pending=False):
                     progress = f"{due_solves} (+{late_solves}) / {challenge_count_required}"
 
                 if override is None:
-                    credit = min((due_solves + late_value * late_solves) / challenge_count_required, 1.0)
+                    credit = min((due_solves + late_value * capped_late_solves) / challenge_count_required, 1.0)
                 else:
                     credit = override
                     progress = f"{progress} *"
 
-                grades.append(dict(
-                    name=f"{module_name}",
+                assessment_grades.append(dict(
+                    name=assessment_name(dojo, assessment),
                     date=str(user_date) + (" *" if extension else ""),
                     weight=weight,
                     progress=progress,
@@ -162,33 +164,33 @@ def grade(dojo, users_query, *, ignore_pending=False):
                 ))
 
             if type == "manual":
-                grades.append(dict(
-                    name=assessment["name"],
+                assessment_grades.append(dict(
+                    name=assessment_name(dojo, assessment),
                     weight=assessment["weight"],
                     progress=assessment.get("progress", {}).get(str(user_id), ""),
                     credit=assessment.get("credit", {}).get(str(user_id), 0.0),
                 ))
 
             if type == "extra":
-                grades.append(dict(
-                    name=assessment["name"],
+                assessment_grades.append(dict(
+                    name=assessment_name(dojo, assessment),
                     progress=assessment.get("progress", {}).get(str(user_id), ""),
                     credit=assessment.get("credit", {}).get(str(user_id), 0.0),
                 ))
 
         overall_grade = (
-            sum(grade["credit"] * grade["weight"] for grade in grades if "weight" in grade) /
-            sum(grade["weight"] for grade in grades if "weight" in grade)
-        )
+            sum(grade["credit"] * grade["weight"] for grade in assessment_grades if "weight" in grade) /
+            sum(grade["weight"] for grade in assessment_grades if "weight" in grade)
+        ) if assessment_grades else 1.0
         extra_credit = (
-            sum(grade["credit"] for grade in grades if "weight" not in grade)
+            sum(grade["credit"] for grade in assessment_grades if "weight" not in grade)
         )
         overall_grade += extra_credit
         overall_grade = round(overall_grade, 4)
         letter_grade = get_letter_grade(dojo, overall_grade)
 
         return dict(user_id=user_id,
-                    grades=grades,
+                    assessment_grades=assessment_grades,
                     overall_grade=overall_grade,
                     letter_grade=letter_grade)
 
@@ -358,7 +360,50 @@ def view_all_grades(dojo):
     return render_template("grades_admin.html",
                            grades=grades,
                            grade_statistics=grade_statistics,
-                           students=students)
+                           students=students,
+                           dojo=dojo)
+
+
+@course.route("/dojo/<dojo>/admin/grades.csv")
+@dojo_route
+@authed_only
+def download_all_grades(dojo):
+    if not dojo.course:
+        abort(404)
+
+    if not dojo.is_admin():
+        abort(403)
+
+    ignore_pending = request.args.get("ignore_pending") is not None
+
+    def stream():
+        fields = ["student", "user", "letter", "overall"]
+        fields.extend([re.sub("[^a-z0-9\-]", "", re.sub("\s+", "-", assessment_name(dojo, assessment).lower()))
+                       for assessment in dojo.course["assessments"]])
+        yield ",".join(fields) + "\n"
+
+        students = {student.user_id: student.token for student in dojo.students}
+        users = (
+            Users
+            .query
+            .join(DojoStudents, DojoStudents.user_id == Users.id)
+            .filter(DojoStudents.dojo == dojo,
+                    DojoStudents.token.in_(dojo.course.get("students", [])))
+        )
+        grades = sorted(grade(dojo, users, ignore_pending=ignore_pending),
+                        key=lambda grade: grade["overall_grade"],
+                        reverse=True)
+        yield from (
+            ",".join(str(value) if not isinstance(value, float) else f"{value:.2f}" for value in [
+                students[grade["user_id"]], grade["user_id"], grade["letter_grade"], grade["overall_grade"],
+                *[float(assessment_grade["credit"]) for assessment_grade in grade["assessment_grades"]],
+            ]) + "\n"
+            for grade in grades
+        )
+
+    headers = {"Content-Disposition": "attachment; filename=data.csv"}
+    return Response(stream_with_context(stream()), headers=headers, mimetype="text/csv")
+
 
 @course.route("/dojo/<dojo>/admin/users/<user_id>")
 @dojo_route
