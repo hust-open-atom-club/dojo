@@ -1,6 +1,6 @@
 # DOJO
 
-Deploy a pwn.hust.college dojo instance! Pwn.hust.college is forked from pwn.college.
+Deploy a pwn.hust.college dojo instance while pwn.hust.college is forked from pwn.college!
 
 ## Details
 
@@ -23,12 +23,11 @@ docker build -t pwncollege/dojo "$DOJO_PATH"
 docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
 ```
 
-**You can setup dojo using [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh)**
+**Note that you can directly setup dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).**
 
 > [!NOTE]
-> This command would map ports(22, 80, 443) in the container to the corresponding ports(22222, 8080, 10443) on the Docker host.
-> If these ports are bound, especially Port 22, you can disable these processes or modify the mapping ports.
-
+> This command would map ports (22, 80, 443) in the container to the corresponding ports (22222, 8080, 10443) on the Docker host.
+> If these ports are bound in you environment, you can disable these processes or revise these mapping ports.
 
 This will run the initial setup, including building the challenge docker image.
 If you want to build the full 70+ GB challenge image, you can add `-e DOJO_CHALLENGE=challenge` to the docker args.
