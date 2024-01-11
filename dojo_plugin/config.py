@@ -83,12 +83,12 @@ MAIL_PORT = os.getenv("MAIL_PORT")
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_ADDRESS = os.getenv("MAIL_ADDRESS")
-#BINARY_NINJA_API_KEY = os.getenv("BINARY_NINJA_API_KEY")
+BINARY_NINJA_API_KEY = os.getenv("BINARY_NINJA_API_KEY")
 INTERNET_FOR_ALL = bool(ast.literal_eval(os.getenv("INTERNET_FOR_ALL") or "False"))
 WINDOWS_VM_ENABLED = os.getenv("WINDOWS_VM") == "full"
 
 missing_errors = ["DOJO_HOST", "HOST_DATA_PATH"]
-#missing_warnings = ["BINARY_NINJA_API_KEY"]
+missing_warnings = ["BINARY_NINJA_API_KEY"]
 
 for config_option in missing_errors:
     config_value = globals()[config_option]
