@@ -8,7 +8,6 @@ from CTFd.models import db, Challenges, Solves, Users
 from CTFd.utils import get_config
 from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only, admins_only, ratelimit
-from CTFd.cache import cache
 
 from ..models import DojoChallenges, DojoUsers, DojoStudents, DojoModules, DojoStudents
 from ..utils import module_visible, module_challenges_visible, is_dojo_admin
@@ -20,7 +19,7 @@ course = Blueprint("course", __name__)
 
 
 def get_letter_grade(dojo, grade):
-    for letter_grade, min_score in dojo.course["letter_grades"].items():
+    for letter_grade, min_score in dojo.course.get("letter_grades", {}).items():
         if grade >= min_score:
             return letter_grade
     return "?"
@@ -279,7 +278,7 @@ def view_course(dojo, resource=None):
 def update_identity(dojo):
     if not dojo.course:
         abort(404)
-        
+    
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
 
