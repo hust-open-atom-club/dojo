@@ -275,19 +275,11 @@ def view_course(dojo, resource=None):
 @course.route("/dojo/<dojo>/course/identity", methods=["PATCH"])
 @dojo_route
 @authed_only
-<<<<<<< HEAD
 @ratelimit(method="PATCH", limit=10, interval=60) # 进行请求限制
 def update_identity(dojo):
     if not dojo.course:
         abort(404)
         
-=======
-@ratelimit(method="PATCH", limit=10, interval=60)
-def update_identity(dojo):
-    if not dojo.course:
-        abort(404)
-
->>>>>>> a072c03 (Automatically add course discord role)
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
 
