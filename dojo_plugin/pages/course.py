@@ -244,20 +244,6 @@ def view_course(dojo, resource=None):
         "complete"
     )
 
-    discord_role = dojo.course.get("discord_role")
-    if discord_role:
-        if DiscordUsers.query.filter_by(user=user).first():
-            setup["create_discord"] = "complete"
-            setup["link_discord"] = "complete"
-        else:
-            setup["create_discord"] = "incomplete"
-            setup["link_discord"] = "incomplete"
-
-        if user and get_discord_user(user.id):
-            setup["join_discord"] = "complete"
-        else:
-            setup["join_discord"] = "incomplete"
-
     setup_complete = all(status == "complete" for status in setup.values())
 
     return render_template("course.html",
@@ -265,7 +251,6 @@ def view_course(dojo, resource=None):
                            **grades,
                            **identity,
                            **setup,
-                           discord_role=discord_role,
                            setup_complete=setup_complete,
                            user=user,
                            dojo=dojo)
@@ -298,15 +283,6 @@ def update_identity(dojo):
     if not student.official:
         identity_name = dojo.course.get("student_id", "Identity")
         return {"success": True, "warning": f"Your {identity_name} is not on the official student roster"}
-
-    discord_role = dojo.course.get("discord_role")
-    if discord_role:
-        discord_user = get_discord_user(user.id)
-        if discord_user is False:
-            return {"success": True, "warning": "Your Discord account is not linked"}
-        if discord_user is None:
-            return {"success": True, "warning": "Your Discord account has not joined the official Discord server"}
-        add_role(discord_user["user"]["id"], discord_role)
 
     return {"success": True}
 
@@ -431,10 +407,8 @@ def view_user_info(dojo, user_id):
     student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
     identity = dict(identity_name=dojo.course.get("student_id", "Identity"),
                     identity_value=student.token if student else None)
-    discord_user = get_discord_user(user.id) if dojo.course.get("discord_role") else None
 
     return render_template("dojo_admin_user.html",
                            dojo=dojo,
                            user=user,
-                           discord_user=discord_user,
                            **identity)
