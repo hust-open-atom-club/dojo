@@ -17,7 +17,7 @@
       <ul class="navbar-nav mr-auto">
         {{ navitem("道场", url_for("pwncollege_dojos.listing"), "fa-bolt") }}
         {{ navitem("工作空间", url_for("pwncollege_workspace.view_workspace", service="vscode"), "fa-terminal") }}
-        {{ navitem("桌面", url_for("pwncollege_desktop.view_desktop"), "fa-desktop") }}
+        {{ navitem("桌面", url_for("pwncollege_workspace.view_workspace", service="desktop"), "fa-desktop") }}
       </ul>
 
       <hr class="d-sm-flex d-md-flex d-lg-none">
