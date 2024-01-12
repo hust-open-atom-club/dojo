@@ -285,8 +285,6 @@ def load_dojo_dir(dojo_dir, *, dojo=None):
     course_yml_path = dojo_dir / "course.yml"
     if course_yml_path.exists():
         course = yaml.safe_load(course_yml_path.read_text())
-        if "discord_role" in course and not dojo.official:
-            raise AssertionError("Unofficial dojos cannot have a discord role")
         dojo.course = course
 
         students_yml_path = dojo_dir / "students.yml"
