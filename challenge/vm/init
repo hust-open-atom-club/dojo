@@ -4,6 +4,7 @@ set -e
 
 mount -t proc proc /proc
 mount -t sysfs sys /sys
+mount -t tmpfs tmp /tmp
 mount -t devpts -o x-mount.mkdir devpts /dev/pts
 mount -t 9p -o trans=virtio,version=9p2000.L,nosuid /home/hacker /home/hacker
 
@@ -39,7 +40,7 @@ if [ -e /challenge/.initvm ]; then
 fi
 
 if [ -e /usr/sbin/docker-init ]; then
-    exec /usr/sbin/docker-init /bin/sleep -- 2h
+    exec /usr/sbin/docker-init /bin/sleep -- 6h
 else
-    exec /bin/sleep 2h
+    exec /bin/sleep 6h
 fi
