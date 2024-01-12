@@ -62,7 +62,16 @@ def view_desktop():
         "password": password,
     }
     iframe_src = url_for("pwncollege_workspace.forward_workspace", service=service, service_path="vnc.html", **vnc_params)
-    return render_template("iframe.html", iframe_src=iframe_src, active=True)
+
+    share_urls = {
+        "Desktop (Interact)": url_for("pwncollege_workspace.view_desktop", user=user.id, password=interact_password, _external=True),
+        "Desktop (View)": url_for("pwncollege_workspace.view_desktop", user=user.id, password=view_password, _external=True),
+    }
+
+    return render_template("iframe.html",
+                           iframe_src=iframe_src,
+                           share_urls=share_urls,
+                           active=True)
 
 
 @workspace.route("/workspace/<service>")
@@ -123,5 +132,9 @@ def forward_workspace(service, service_path=""):
 
     else:
         abort(404)
+
+    current_user = get_current_user()
+    if user != current_user:
+        print(f"User {current_user.id} is accessing User {user.id}'s workspace (port {port})", flush=True)
 
     return redirect_user_socket(user, port, service_path)

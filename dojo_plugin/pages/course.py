@@ -20,7 +20,7 @@ course = Blueprint("course", __name__)
 
 
 def get_letter_grade(dojo, grade):
-    for letter_grade, min_score in dojo.course["letter_grades"].items():
+    for letter_grade, min_score in dojo.course.get("letter_grades", {}).items():
         if grade >= min_score:
             return letter_grade
     return "?"
@@ -324,12 +324,16 @@ def view_all_grades(dojo):
 
     ignore_pending = request.args.get("ignore_pending") is not None
 
+    students = {student.user_id: student.token for student in dojo.students}
+    course_students = dojo.course.get("students", [])
+    missing_students = list(set(course_students) - set(students.values()))
+
     users = (
         Users
         .query
         .join(DojoStudents, DojoStudents.user_id == Users.id)
         .filter(DojoStudents.dojo == dojo,
-                DojoStudents.token.in_(dojo.course.get("students", [])))
+                DojoStudents.token.in_(course_students))
     )
     grades = sorted(grade(dojo, users, ignore_pending=ignore_pending),
                     key=lambda grade: grade["overall_grade"],
@@ -340,7 +344,7 @@ def view_all_grades(dojo):
     average_grade_summary = f"{average_letter_grade} ({average_grade * 100:.2f}%)"
     average_grade_details = []
     cumulative_count = 0
-    for letter_grade in dojo.course["letter_grades"]:
+    for letter_grade in dojo.course.get("letter_grades", {}):
         count = sum(1 for grade in grades if grade["letter_grade"] == letter_grade)
         cumulative_count += count
         percent = f"{count / len(grades) * 100:.2f}%" if grades else "0.00%"
@@ -355,12 +359,11 @@ def view_all_grades(dojo):
         "Average": (average_grade_summary, average_grade_details),
     }
 
-    students = {student.user_id: student.token for student in dojo.students}
-
     return render_template("grades_admin.html",
                            grades=grades,
                            grade_statistics=grade_statistics,
                            students=students,
+                           missing_students=missing_students,
                            dojo=dojo)
 
 
@@ -377,12 +380,17 @@ def download_all_grades(dojo):
     ignore_pending = request.args.get("ignore_pending") is not None
 
     def stream():
+        assessments = dojo.course.get("assessments", [])
+
         fields = ["student", "user", "letter", "overall"]
         fields.extend([re.sub("[^a-z0-9\-]", "", re.sub("\s+", "-", assessment_name(dojo, assessment).lower()))
-                       for assessment in dojo.course["assessments"]])
+                       for assessment in assessments])
         yield ",".join(fields) + "\n"
 
         students = {student.user_id: student.token for student in dojo.students}
+        course_students = dojo.course.get("students", [])
+        missing_students = list(set(course_students) - set(students.values()))
+
         users = (
             Users
             .query
@@ -399,6 +407,11 @@ def download_all_grades(dojo):
                 *[float(assessment_grade["credit"]) for assessment_grade in grade["assessment_grades"]],
             ]) + "\n"
             for grade in grades
+        )
+
+        yield from (
+            ",".join([student, "", "", ""] + [""] * len(dojo.course.get("assessments", []))) + "\n"
+            for student in missing_students
         )
 
     headers = {"Content-Disposition": "attachment; filename=data.csv"}
@@ -419,7 +432,7 @@ def view_user_info(dojo, user_id):
     student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
     identity = dict(identity_name=dojo.course.get("student_id", "Identity"),
                     identity_value=student.token if student else None)
-    discord_user = get_discord_user(user.id)
+    discord_user = get_discord_user(user.id) if dojo.course.get("discord_role") else None
 
     return render_template("dojo_admin_user.html",
                            dojo=dojo,
