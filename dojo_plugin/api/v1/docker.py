@@ -77,7 +77,7 @@ def start_challenge(user, dojo_challenge, practice):
 
         container = docker_client.containers.create(
             dojo_challenge.image,
-            entrypoint=["/bin/sleep", "2h"],
+            entrypoint=["/bin/sleep", "6h"],
             name=f"user_{user.id}",
             hostname=hostname,
             user="hacker",
@@ -176,8 +176,8 @@ def start_challenge(user, dojo_challenge, practice):
     def insert_flag(flag):
         exec_run(f"echo 'pwn.college{{{flag}}}' > /flag", shell=True)
 
-    def insert_secret(secret):
-        exec_run(f"echo '{secret}' > /.secret", shell=True)
+    def insert_auth_token(auth_token):
+        exec_run(f"echo '{auth_token}' > /.authtoken", shell=True)
 
     def initialize_container():
         exec_run(
