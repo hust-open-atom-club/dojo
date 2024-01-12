@@ -51,7 +51,7 @@ def view_desktop():
             abort(403)
         password = password[:8]
     else:
-        password = interact_password[:8]
+        return redirect(url_for("pwncollege_workspace.view_desktop", user=user.id, password=interact_password))
 
     service = "~".join(("desktop", str(user.id), container_password(container, "desktop")))
 
