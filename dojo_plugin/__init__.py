@@ -15,7 +15,7 @@ from CTFd.plugins import register_admin_plugin_menu_bar
 from CTFd.plugins.challenges import CHALLENGE_CLASSES, BaseChallenge
 from CTFd.plugins.flags import FLAG_CLASSES, BaseFlag, FlagException
 
-from .models import Dojos, DojoChallenges
+from .models import Dojos, DojoChallenges, Belts
 from .config import DOJO_HOST, bootstrap
 from .utils import unserialize_user_flag, render_markdown
 from .utils.belts import get_user_belts
@@ -40,6 +40,13 @@ class DojoChallenge(BaseChallenge):
     def solve(cls, user, team, challenge, request):
         super().solve(user, team, challenge, request)
 
+        current_belts = get_user_belts(user)
+        for belt in current_belts:
+            belt_award = Belts.query.filter_by(user=user, name=belt).one()
+            if belt_award:
+                continue
+            db.session.add(Belts(user=user, name=belt))
+            db.session.commit()
 
 class DojoFlag(BaseFlag):
     name = "dojo"
