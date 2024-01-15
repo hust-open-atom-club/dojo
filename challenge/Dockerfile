@@ -214,7 +214,7 @@ EOF
 
 FROM builder as builder-capstone
 RUN <<EOF
-    git clone https://github.com/capstone-engine/capstone /opt/capstone
+    git clone --branch 5.0.1 https://github.com/aquynh/capstone /opt/capstone
     cd /opt/capstone
     make
     make install

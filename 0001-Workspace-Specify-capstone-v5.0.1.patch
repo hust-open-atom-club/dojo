@@ -1,0 +1,29 @@
+From f860f5d118feb4b43d43173f22a41ede991dc5a6 Mon Sep 17 00:00:00 2001
+From: Connor Nelson <Connor@ConnorNelson.com>
+Date: Wed, 10 Jan 2024 14:44:32 -0700
+Subject: [PATCH] Workspace: Specify capstone v5.0.1
+
+---
+ challenge/Dockerfile | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/challenge/Dockerfile b/challenge/Dockerfile
+index 7f4d897..a3b3ca2 100644
+--- a/challenge/Dockerfile
++++ b/challenge/Dockerfile
+@@ -214,11 +214,10 @@ EOF
+ 
+ FROM builder as builder-capstone
+ RUN <<EOF
+-    git clone https://github.com/aquynh/capstone /opt/capstone
++    git clone --branch 5.0.1 https://github.com/aquynh/capstone /opt/capstone
+     cd /opt/capstone
+     ./make.sh
+     ./make.sh install
+-    ln -sf /lib/libcapstone.so /lib/libcapstone.so.3
+ EOF
+ 
+ FROM builder as builder-radare2
+-- 
+2.42.0.windows.2
+
