@@ -19,12 +19,15 @@ The associated challenge binary may be either global, which means all users will
 curl -fsSL https://get.docker.com | /bin/sh
 DOJO_PATH="./dojo"
 git clone https://github.com/HUSTSeclab/dojo.git "$DOJO_PATH"
-# buildx is not the default build, you can use docker buildx install to make buildx as the default option
 docker buildx build --platform linux/arm64,linux/amd64 -t pwncollege/dojo "$DOJO_PATH"
 docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
 ```
 
-This will run the initial setup, including building the challenge docker image. **Note that you can directly setup dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).**
+This will run the initial setup, including building the challenge docker image. You can deploy dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).
+
+> [!NOTE]
+> Using buildx with Docker requires Docker engine 19.03 or newer.
+> You can run `docker buildx install` to set buildx as the default builder.
 
 > [!NOTE]
 > This command would map ports (22, 80, 443) in the container to the corresponding ports (22222, 8080, 10443) on the Docker host.
