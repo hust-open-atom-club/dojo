@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster as build
+FROM --platform=$BUILDPLATFORM python:3.9-slim-buster as build
 WORKDIR /opt/CTFd
 
 RUN apt-get update \
@@ -21,7 +21,7 @@ RUN echo 'from werkzeug.utils import safe_join' >> /opt/venv/lib/python3.9/site-
 
 COPY . /opt/CTFd
 
-FROM python:3.9-slim-buster as release
+FROM --platform=$BUILDPLATFORM python:3.9-slim-buster as release
 WORKDIR /opt/CTFd
 
 RUN apt-get update \
