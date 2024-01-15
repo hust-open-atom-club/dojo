@@ -19,7 +19,8 @@ The associated challenge binary may be either global, which means all users will
 curl -fsSL https://get.docker.com | /bin/sh
 DOJO_PATH="./dojo"
 git clone https://github.com/HUSTSeclab/dojo.git "$DOJO_PATH"
-docker build -t pwncollege/dojo "$DOJO_PATH"
+# buildx is not the default build, you can use docker buildx install to make buildx as the default option
+docker buildx build --platform linux/arm64,linux/amd64 -t pwncollege/dojo "$DOJO_PATH"
 docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
 ```
 
