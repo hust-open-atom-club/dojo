@@ -62,23 +62,17 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         cpio
         openjdk-17-jdk
         flex
-        #g++-multilib
-        #gcc-multilib
         git
-        #libc6-dev-i386
-        #libc6:i386
         libedit-dev
         libelf-dev
         libffi-dev
         libglib2.0-dev
         libgmp-dev
         libini-config-dev
-        #libncurses5:i386
         libpcap-dev
         libpixman-1-dev
         libseccomp-dev
         libssl-dev
-        #libstdc++6:i386
         libtool-bin
         llvm
         man-db
