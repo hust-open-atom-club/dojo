@@ -513,22 +513,22 @@ FROM challenge-mini as challenge-full
 # TODO: probably extra slow to `COPY / /`
 COPY --link --from=builder-essentials / /
 COPY --link --from=builder / /
-#COPY --link --from=builder-kernel /opt/linux /opt/linux
-COPY --link --from=builder-tcpdump / /
-COPY --link --from=builder-capstone / /
-COPY --link --from=builder-radare2 / /
-COPY --link --from=builder-aflplusplus / /
-COPY --link --from=builder-rappel / /
-COPY --link --from=builder-rp / /
-COPY --link --from=builder-geckodriver / /
-COPY --link --from=builder-burpsuite / /
-COPY --link --from=builder-busybox / /
+# COPY --link --from=builder-kernel /opt/linux /opt/linux
+# COPY --link --from=builder-tcpdump / /
+# COPY --link --from=builder-capstone / /
+# COPY --link --from=builder-radare2 / /
+# COPY --link --from=builder-aflplusplus / /
+# COPY --link --from=builder-rappel / /
+# COPY --link --from=builder-rp / /
+# COPY --link --from=builder-geckodriver / /
+# COPY --link --from=builder-burpsuite / /
+# COPY --link --from=builder-busybox / /
 COPY --link --from=builder-glow / /
 COPY --link --from=builder-desktop-xfce / /
-COPY --link --from=builder-virtiofsd /opt/virtiofsd /opt/virtiofsd
+# COPY --link --from=builder-virtiofsd /opt/virtiofsd /opt/virtiofsd
 COPY --link --from=builder-desktop-reversing-tools / /
 COPY --link --from=builder-gdb / /
-COPY --link --from=builder-tools-pip / /
+# COPY --link --from=builder-tools-pip / /
 COPY --link --from=builder-tools-apt / /
 
 RUN cat >> /etc/ssh/ssh_config <<EOF
