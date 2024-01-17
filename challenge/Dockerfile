@@ -513,7 +513,7 @@ FROM challenge-mini as challenge-full
 # TODO: probably extra slow to `COPY / /`
 COPY --link --from=builder-essentials / /
 COPY --link --from=builder / /
-COPY --link --from=builder-kernel /opt/linux /opt/linux
+#COPY --link --from=builder-kernel /opt/linux /opt/linux
 COPY --link --from=builder-tcpdump / /
 COPY --link --from=builder-capstone / /
 COPY --link --from=builder-radare2 / /
