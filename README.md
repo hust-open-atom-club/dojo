@@ -19,19 +19,25 @@ The associated challenge binary may be either global, which means all users will
 curl -fsSL https://get.docker.com | /bin/sh
 DOJO_PATH="./dojo"
 git clone https://github.com/HUSTSeclab/dojo.git "$DOJO_PATH"
-docker buildx build --platform linux/arm64,linux/amd64 -t pwncollege/dojo "$DOJO_PATH"
-docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8080:80 -p 10443:443 --name dojo pwncollege/dojo
+docker buildx install
+docker build --load -t pwncollege/dojo "$DOJO_PATH"
+docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 80:80 -p 443:443 --name dojo pwncollege/dojo
 ```
 
-This will run the initial setup, including building the challenge docker image. You can deploy dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).
+This will run the initial setup, including building the challenge docker image. It would build docker image based on the host architecture.
+You can deploy dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).
 
 > [!NOTE]
 > Using buildx with Docker requires Docker engine 19.03 or newer.
 > You can run `docker buildx install` to set buildx as the default builder.
+> From [Docker driver specification](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver), with the default docker driver,
+> the `--load` flag is implied by default on `buildx build`.
+> However, this is not true on the arm64 platform. So we add this option implicitly.
 
 > [!NOTE]
-> This command would map ports (22, 80, 443) in the container to the corresponding ports (22222, 8080, 10443) on the Docker host.
+> This command would map ports (22, 80, 443) in the container to the corresponding ports (22222, 80, 443) on the Docker host.
 > If these ports are bound in you environment, you can disable these processes or revise these mapping ports.
+> Please do not revise the ports 80 and 443, this will trigger an issue in ngnix-proxy.
 
 ### Local Setup
 
