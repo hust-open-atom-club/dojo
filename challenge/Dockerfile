@@ -269,7 +269,7 @@ EOF
 FROM builder as builder-glow
 RUN <<EOF
     VERSION="1.5.1"
-    DEB_NAME="glow_${VERSION}_amd64.deb"
+    DEB_NAME="glow_${VERSION}_${BUILDARCH}.deb"
     pushd /tmp
     wget -q "https://github.com/charmbracelet/glow/releases/download/v${VERSION}/${DEB_NAME}"
     apt install "./${DEB_NAME}"
