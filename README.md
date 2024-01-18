@@ -21,23 +21,23 @@ DOJO_PATH="./dojo"
 git clone https://github.com/HUSTSeclab/dojo.git "$DOJO_PATH"
 docker buildx install
 docker build --load -t pwncollege/dojo "$DOJO_PATH"
-docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 80:80 -p 443:443 --name dojo pwncollege/dojo
+docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8880:80 -p 44443:443 --name dojo pwncollege/dojo
 ```
 
 This will run the initial setup, including building the challenge docker image. It would build docker image based on the host architecture.
 You can deploy dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).
 
 > [!NOTE]
-> Using buildx with Docker requires Docker engine 19.03 or newer.
-> You can run `docker buildx install` to set buildx as the default builder.
-> From [Docker driver specification](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver), with the default docker driver,
-> the `--load` flag is implied by default on `buildx build`.
-> However, this is not true on the arm64 platform. So we add this option implicitly.
+> Using buildx with Docker requires Docker engine 19.03 or newer.  
+> You can run `docker buildx install` to set buildx as the default builder.  
+> From [Docker driver specification](https://docs.docker.com/engine/reference/commandline/buildx_create/#driver), with the default docker driver,  
+> the `--load` flag is implied by default on `buildx build`.  
+> However, this is not true on the arm64 platform. So we add this option implicitly.  
 
 > [!NOTE]
-> This command would map ports (22, 80, 443) in the container to the corresponding ports (22222, 80, 443) on the Docker host.
-> If these ports are bound in you environment, you can disable these processes or revise these mapping ports.
-> Please do not revise the ports 80 and 443, this will trigger an issue in ngnix-proxy.
+> This command would map ports (22, 80, 443) in the container to the corresponding ports (22222, 8880, 44443) on the Docker host.
+> If these ports are bound in you environment, you can disable these processes or revise these mapping ports.  
+> If you revise ports, please be careful about the revised ports in the following setup.  
 
 ### Local Setup
 
@@ -59,31 +59,32 @@ You can change these admin credentials in the admin panel.
 Customizing the setup process is done through `-e KEY=value` arguments to the `docker run` command.
 You can stop the already running dojo instance with `docker stop dojo`, and then re-run the `docker run` command with the appropriately modified flags.
 
-In order to change where the host is serving from, you can modify `DOJO_HOST`; for example: `-e DOJO_HOST=localhost.pwn.college`.
+In order to change where the host is serving from, you can modify `DOJO_HOST`, e.g., `-e DOJO_HOST=localhost.pwn.college`.
 In order for this to work correctly, you must correctly point the domain at the server's IP via DNS.
 
 By default, a minimal challenge image is built.
-If you want more of the features you are used to, you can modify `DOJO_CHALLENGE`; for example: `-e DOJO_CHALLENGE=challenge-mini`.
+If you want more of the features you are used to, you can modify `DOJO_CHALLENGE`, e.g., `-e DOJO_CHALLENGE=challenge-mini`.
 The following options are available:
 - `challenge-nano`: A very minified setup.
 - `challenge-micro`: Adds VSCode.
 - `challenge-mini`: Adds a minified desktop (by default).
 - `challenge-full`: The full (70+ GB) setup.
 
+For more arguments, please refer to `data/config.env` created in the dojo directory.
+
 Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
 
 ```sh
-cp ./$IP.conf /etc/nginx/sites-enabled/
+cp ./dojo.conf /etc/nginx/sites-enabled/
 nginx -s reload
 ```
 
-If you prefer not to use the `setup.sh` script for setup, here are the nginx forwarding rules I use as a reference. 
-You just need to replace `$YOUR_HTTP_PORT` with the port you want to forward, `$IP` with your current IP, and `$MAP_HTTP_PORT` with the Docker-mapped port.
+If you prefer not to use the `setup.sh` script for setup, the following are the nginx forwarding rules. `$IP` must be replaced with your own IP address. 
 
 ```conf
 server {
-    listen $YOUR_HTTP_PORT;
-    listen [::]:$YOUR_HTTP_PORT;
+    listen 80;
+    listen [::]:80;
 
     #listen $HTTPS_PORT ssl;
     #listen [::]:$HTTPS_PORT ssl;
@@ -93,14 +94,14 @@ server {
     #server_name $DOMAIN;
     location / {
         proxy_http_version 1.1;
-        proxy_set_header Host $IP:$MAP_HTTP_PORT;
+        proxy_set_header Host $IP:8880;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_set_header Accept-Encoding gzip;
-        proxy_set_header Origin "http://$IP:$MAP_HTTP_PORT";
+        proxy_set_header Origin "http://$IP:8880";
         proxy_buffering off;
 
-        proxy_pass http://127.0.0.1:$MAP_HTTP_PORT;
+        proxy_pass http://127.0.0.1:8880;
     }
 }
 ```
