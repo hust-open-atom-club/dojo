@@ -70,6 +70,51 @@ The following options are available:
 - `challenge-mini`: Adds a minified desktop (by default).
 - `challenge-full`: The full (70+ GB) setup.
 
+Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
+
+```sh
+cp ./$IP.conf /etc/nginx/sites-enabled/
+nginx -s reload
+```
+
+If you prefer not to use the `setup.sh` script for setup, here are the nginx forwarding rules I use as a reference. 
+You just need to replace `$YOUR_HTTP_PORT` with the port you want to forward, `$IP` with your current IP, and `$MAP_HTTP_PORT` with the Docker-mapped port.
+
+```conf
+server {
+    listen $YOUR_HTTP_PORT;
+    listen [::]:$YOUR_HTTP_PORT;
+
+    #listen $HTTPS_PORT ssl;
+    #listen [::]:$HTTPS_PORT ssl;
+    #ssl_certificate $CERT_FILE;
+    #ssl_certificate_key $CERT_KEY;
+
+    #server_name $DOMAIN;
+    location / {
+        proxy_http_version 1.1;
+        proxy_set_header Host $IP:$MAP_HTTP_PORT;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Accept-Encoding gzip;
+        proxy_set_header Origin "http://$IP:$MAP_HTTP_PORT";
+        proxy_buffering off;
+
+        proxy_pass http://127.0.0.1:$MAP_HTTP_PORT;
+    }
+}
+```
+
+> [!NOTE]
+> Regarding the nginx-proxy bug issue:\
+> According to [this](https://github.com/nginx-proxy/nginx-proxy/discussions/2271#discussioncomment-8156338), 
+> we can see that the latest version of nginx-proxy has changed the forwarding rule from $http_host to $host, 
+> resulting in the inability to forward the port.\
+> Therefore, we choose to roll back the nginx-proxy version to `1.3.1`.
+
+
+
+
 
 ## Customization
 
