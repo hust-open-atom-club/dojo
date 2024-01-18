@@ -5,8 +5,8 @@ set -eux
 DOJO_PATH="./dojo"
 CONTAINER_DOJO_PATH="/opt/pwn.college:shared"
 IMAGE_NAME="pwncollege/dojo"
-MAP_HTTP_PORT=18080
-MAP_HTTPS_PORT=10443
+MAP_HTTP_PORT=8880
+MAP_HTTPS_PORT=44443
 MAP_SSH_PORT=22222
 
 curl -fsSL https://get.docker.com | /bin/sh

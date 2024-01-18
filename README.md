@@ -74,40 +74,35 @@ For more arguments, please refer to `data/config.env` created in the dojo direct
 
 Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
 
-```sh
-# put your command here
-cp ./dojo.conf /etc/nginx/sites-enabled/
-nginx -s reload
-```
-
-If you prefer not to use the `setup.sh` script for setup, the following are the nginx forwarding rules.
-
 > [!NOTE]
-> `$IP` must be replaced with your own IP address.
+> In the current case, we use a fake IP: 10.10.10.10 as a reference.
+> If you need to configure HTTPS, then you only need to remove the '#' comment symbol.
 
-```conf
-server {
+```sh
+echo 'server {
     listen 80;
     listen [::]:80;
 
-    #listen $HTTPS_PORT ssl;
-    #listen [::]:$HTTPS_PORT ssl;
-    #ssl_certificate $CERT_FILE;
-    #ssl_certificate_key $CERT_KEY;
+    #listen 443 ssl;
+    #listen [::]:443 ssl;
+    #ssl_certificate /etc/nginx/certs/hust.college.cert.pem;
+    #ssl_certificate_key /etc/nginx/certs/hust.college.key.pem
 
-    #server_name $DOMAIN;
+    #server_name pwn.hust.college;
     location / {
         proxy_http_version 1.1;
-        proxy_set_header Host $IP:8880;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Host 10.10.10.10:8880;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection upgrade;
         proxy_set_header Accept-Encoding gzip;
-        proxy_set_header Origin "http://$IP:8880";
+        proxy_set_header Origin "http://10.10.10.10:8880";
         proxy_buffering off;
 
         proxy_pass http://127.0.0.1:8880;
     }
-}
+}' > dojo.conf
+cp ./dojo.conf /etc/nginx/sites-enabled/
+nginx -s reload
 ```
 
 > [!NOTE]
