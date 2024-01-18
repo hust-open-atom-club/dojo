@@ -75,11 +75,15 @@ For more arguments, please refer to `data/config.env` created in the dojo direct
 Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
 
 ```sh
+# put your command here
 cp ./dojo.conf /etc/nginx/sites-enabled/
 nginx -s reload
 ```
 
-If you prefer not to use the `setup.sh` script for setup, the following are the nginx forwarding rules. `$IP` must be replaced with your own IP address. 
+If you prefer not to use the `setup.sh` script for setup, the following are the nginx forwarding rules.
+
+> [!NOTE]
+> `$IP` must be replaced with your own IP address.
 
 ```conf
 server {
