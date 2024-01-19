@@ -75,8 +75,8 @@ For more arguments, please refer to `data/config.env` created in the dojo direct
 Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
 
 > [!NOTE]
-> In the current case, we use a fake IP: 10.10.10.10 as a reference.
-> If you need to configure HTTPS, then you only need to remove the '#' comment symbol.
+> In the current case, we use a fake IP: 10.10.10.10 as a reference. You can change this fake IP with your own IP.  
+> If you need to configure HTTPS and domain name, please remove the '#' comment symbol. The default SSL certificate and certificate key are respectively stored as `/etc/nginx/certs/pwn.hust.college.cert.pem` and `/etc/nginx/certs/pwn.hust.college.key.pem`.
 
 ```sh
 echo 'server {
@@ -85,8 +85,8 @@ echo 'server {
 
     #listen 443 ssl;
     #listen [::]:443 ssl;
-    #ssl_certificate /etc/nginx/certs/hust.college.cert.pem;
-    #ssl_certificate_key /etc/nginx/certs/hust.college.key.pem
+    #ssl_certificate /etc/nginx/certs/pwn.hust.college.cert.pem;
+    #ssl_certificate_key /etc/nginx/certs/pwn.hust.college.key.pem;
 
     #server_name pwn.hust.college;
     location / {
@@ -106,14 +106,11 @@ nginx -s reload
 ```
 
 > [!NOTE]
-> Regarding the nginx-proxy bug issue:\
+> Regarding the nginx-proxy bug issue:  
 > According to [this](https://github.com/nginx-proxy/nginx-proxy/discussions/2271#discussioncomment-8156338), 
-> we can see that the latest version of nginx-proxy has changed the forwarding rule from $http_host to $host, 
-> resulting in the inability to forward the port.\
+> we can see that the latest version of nginx-proxy has changed the forwarding rule from `$http_host` to `$host`, 
+> resulting in the inability to forward the port.  
 > Therefore, we choose to roll back the nginx-proxy version to `1.3.1`.
-
-
-
 
 
 ## Customization
