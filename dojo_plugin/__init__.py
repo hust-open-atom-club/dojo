@@ -18,7 +18,7 @@ from CTFd.plugins.flags import FLAG_CLASSES, BaseFlag, FlagException
 from .models import Dojos, DojoChallenges, Belts
 from .config import DOJO_HOST, bootstrap
 from .utils import unserialize_user_flag, render_markdown
-from .utils.belts import get_user_belts
+from .utils.awards import get_user_belts
 from .pages.dojos import dojos, dojos_override
 from .pages.dojo import dojo
 from .pages.workspace import workspace
