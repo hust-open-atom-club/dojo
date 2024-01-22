@@ -61,6 +61,7 @@ You can stop the already running dojo instance with `docker stop dojo`, and then
 
 In order to change where the host is serving from, you can modify `DOJO_HOST`, e.g., `-e DOJO_HOST=localhost.pwn.college`.
 In order for this to work correctly, you must correctly point the domain at the server's IP via DNS.
+If you don't have a domain name, you can enter your IP address in the `DOJO_HOST` parameter.
 
 By default, a minimal challenge image is built.
 If you want more of the features you are used to, you can modify `DOJO_CHALLENGE`, e.g., `-e DOJO_CHALLENGE=challenge-mini`.
