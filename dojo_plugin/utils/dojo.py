@@ -353,7 +353,7 @@ def dojo_git_command(dojo, *args):
 
 
 def dojo_update(dojo):
-    dojo_git_command(dojo, "pull")
+    dojo_git_command(dojo, "pull", "--recurse-submodules")
     return dojo_from_dir(dojo.path, dojo=dojo)
 
 
