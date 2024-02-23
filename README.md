@@ -71,6 +71,10 @@ The following options are available:
 - `challenge-mini`: Adds a minified desktop (by default).
 - `challenge-full`: The full (70+ GB) setup.
 
+When you want to deploy it on platforms with different architectures, you can use the `ARCH` parameter in 
+the `config.env` file. The default parameter value is `amd64`, and if deploying on ARM architecture, the parameter value is `arm64`.
+
+
 For more arguments, please refer to `data/config.env` created in the dojo directory.
 
 Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
