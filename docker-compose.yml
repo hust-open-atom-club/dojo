@@ -5,6 +5,7 @@ services:
     build:
       context: ./challenge
       target: challenge-final
+      dockerfile: Dockerfile_${ARCH}
       args:
         - INSTALL_IDA=${INSTALL_IDA}
         - UBUNTU_VERSION=${UBUNTU_VERSION}
