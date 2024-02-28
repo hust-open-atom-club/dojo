@@ -22,7 +22,6 @@ define SECRET_KEY $(openssl rand -hex 16)
 define DOCKER_PSLR $(openssl rand -hex 16)
 define UBUNTU_VERSION 20.04
 define INTERNET_FOR_ALL False
-define INSTALL_IDA False
 define MAIL_SERVER
 define MAIL_PORT
 define MAIL_USERNAME
@@ -32,6 +31,10 @@ define DISCORD_CLIENT_ID
 define DISCORD_CLIENT_SECRET
 define DISCORD_BOT_TOKEN
 define DISCORD_GUILD_ID
+define DEFAULT_INSTALL_SELECTION no # default to not installing tools
+define INSTALL_DESKTOP_BASE yes # matches the challenge-mini configuration
+define INSTALL_IDA_FREE no # explicitly disable -- only for free dojos
+
 mv $DOJO_DIR/data/.config.env $DOJO_DIR/data/config.env
 . $DOJO_DIR/data/config.env
 

@@ -15,11 +15,10 @@ from CTFd.plugins import register_admin_plugin_menu_bar
 from CTFd.plugins.challenges import CHALLENGE_CLASSES, BaseChallenge
 from CTFd.plugins.flags import FLAG_CLASSES, BaseFlag, FlagException
 
-from .models import Dojos, DojoChallenges
+from .models import Dojos, DojoChallenges, Belts, Emojis
 from .config import DOJO_HOST, bootstrap
 from .utils import unserialize_user_flag, render_markdown
-from .utils.discord import get_discord_user, get_discord_roles, add_role, send_message
-from .utils.dojo import get_user_belts
+from .utils.awards import update_awards
 from .pages.dojos import dojos, dojos_override
 from .pages.dojo import dojo
 from .pages.workspace import workspace
@@ -30,6 +29,7 @@ from .pages.settings import settings_override
 from .pages.discord import discord
 from .pages.course import course
 from .pages.writeups import writeups
+from .pages.belts import belts
 from .api import api
 
 
@@ -41,21 +41,7 @@ class DojoChallenge(BaseChallenge):
     @classmethod
     def solve(cls, user, team, challenge, request):
         super().solve(user, team, challenge, request)
-
-        discord_user = get_discord_user(user.id)
-        if not discord_user:
-            return
-
-        discord_roles = get_discord_roles()
-        for belt in get_user_belts(user):
-            if discord_roles.get(belt) in discord_user["roles"]:
-                continue
-            user_mention = f"<@{discord_user['user']['id']}>"
-            message = f"{user_mention} earned their {belt}! :tada:"
-            print(message, flush=True)
-            add_role(discord_user["user"]["id"], belt)
-            send_message(message, "belting-ceremony")
-
+        update_awards(user)
 
 class DojoFlag(BaseFlag):
     name = "dojo"
@@ -146,6 +132,7 @@ def load(app):
     app.register_blueprint(users)
     app.register_blueprint(course)
     app.register_blueprint(writeups)
+    app.register_blueprint(belts)
     app.register_blueprint(api, url_prefix="/pwncollege_api/v1")
 
     app.jinja_env.filters["markdown"] = render_markdown

@@ -23,6 +23,10 @@ a {
     text-shadow: 0 0 5px rgba(104,182,255,0.15);
 }
 
+a:hover {
+    text-decoration: none;
+}
+
 nav {
     border-bottom: 1px dashed #b5e853;
 }
@@ -182,11 +186,13 @@ h4 {
 }
 
 .card-icon {
-  width: 35%;
+  width: 50%;
+  font-size: 48px;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  filter: drop-shadow(0px 0px 3px black);
 }
 
 .accordion-item {
@@ -299,5 +305,9 @@ hr {
 }
 
 .module-dojo a {
-    color: #b5e853 !important;
+    color: #b5e853;
+}
+
+.module-due-date {
+    font-size: 1.25em;
 }

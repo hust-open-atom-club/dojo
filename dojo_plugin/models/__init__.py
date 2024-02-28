@@ -20,7 +20,7 @@ from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql import or_, and_
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.ext.associationproxy import association_proxy
-from CTFd.models import db, get_class_by_tablename, Challenges, Solves, Flags, Users, Admins
+from CTFd.models import db, get_class_by_tablename, Challenges, Solves, Flags, Users, Admins, Awards
 from CTFd.utils.user import get_current_user, is_admin
 
 from ..config import DOJOS_DIR
@@ -171,6 +171,11 @@ class Dojos(db.Model):
         from ..utils.dojo import dojo_git_command
         return dojo_git_command(self, "rev-parse", "HEAD").stdout.decode().strip()
 
+    @property
+    def last_commit_time(self):
+        from ..utils.dojo import dojo_git_command
+        return datetime.datetime.fromisoformat(dojo_git_command(self, "show", "--no-patch", "--format=%ci", "HEAD").stdout.decode().strip().replace(" -", "-")[:-2]+":00")
+
     @classmethod
     def ordering(cls):
         return (
@@ -185,6 +190,7 @@ class Dojos(db.Model):
         return (
             (cls.from_id(id) if id is not None else cls.query)
             .filter(or_(cls.official,
+                        and_(cls.data["type"] == "public", cls.password == None),
                         cls.dojo_id.in_(db.session.query(DojoUsers.dojo_id)
                                         .filter_by(user=user)
                                         .subquery())))
@@ -193,6 +199,17 @@ class Dojos(db.Model):
 
     def solves(self, **kwargs):
         return DojoChallenges.solves(dojo=self, **kwargs)
+
+    def completions(self):
+        """
+        Returns a list of (User, completion_timestamp) tuples for users, sorted by time in ascending order.
+        """
+        sq = Solves.query.join(DojoChallenges, Solves.challenge_id == DojoChallenges.challenge_id).add_columns(
+            Solves.user_id.label("solve_user_id"), db.func.count().label("solve_count"), db.func.max(Solves.date).label("last_solve")
+        ).filter(DojoChallenges.dojo == self).group_by(Solves.user_id).subquery()
+        return Users.query.join(sq).filter_by(
+            solve_count=len(self.challenges)
+        ).add_column(sq.columns.last_solve).order_by(sq.columns.last_solve).all()
 
     def completed(self, user):
         return self.solves(user=user, ignore_visibility=True, ignore_admins=False).count() == len(self.challenges)
@@ -339,6 +356,10 @@ class DojoModules(db.Model):
     def path(self):
         return self.dojo.path / self.id
 
+    @property
+    def assessments(self):
+        return [assessment for assessment in (self.dojo.course or {}).get("assessments", []) if assessment.get("id") == self.id]
+
     def visible_challenges(self, user=None):
         return [challenge for challenge in self.challenges if challenge.visible() or self.dojo.is_admin(user=user)]
 
@@ -441,7 +462,7 @@ class DojoChallenges(db.Model):
                 ))
             .join(Dojos, and_(
                 Dojos.dojo_id == DojoChallenges.dojo_id,
-                or_(Dojos.official, DojoUsers.user_id != None),
+                or_(Dojos.official, Dojos.data["type"] == "public", DojoUsers.user_id != None),
                 ))
             .join(Users, Users.id == Solves.user_id)
         )
@@ -641,3 +662,9 @@ class DiscordUsers(db.Model):
     user = db.relationship("Users")
 
     __repr__ = columns_repr(["user", "discord_id"])
+
+class Belts(Awards):
+    __mapper_args__ = {"polymorphic_identity": "belt"}
+
+class Emojis(Awards):
+    __mapper_args__ = {"polymorphic_identity": "emoji"}

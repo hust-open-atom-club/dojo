@@ -11,16 +11,16 @@ from flask import url_for, abort, current_app
 from flask_restx import Namespace, Resource
 from flask_sqlalchemy import Pagination
 from CTFd.cache import cache
-from CTFd.models import db, Solves, Challenges, Users, Submissions
+from CTFd.models import db, Solves, Challenges, Users, Submissions, Awards
 from CTFd.utils.user import get_current_user
 from CTFd.utils.modes import get_model, generate_account_url
 from sqlalchemy import event
 from sqlalchemy.orm.session import Session
 
-from ...models import Dojos, DojoChallenges, DojoUsers, DojoMembers, DojoAdmins, DojoStudents, DojoModules, DojoChallengeVisibilities
-from ...utils import dojo_standings, dojo_completions, user_dojos, first_bloods, daily_solve_counts
+from ...models import Dojos, DojoChallenges, DojoUsers, DojoMembers, DojoAdmins, DojoStudents, DojoModules, DojoChallengeVisibilities, Belts, Emojis
+from ...utils import dojo_standings, user_dojos, first_bloods, daily_solve_counts
 from ...utils.dojo import dojo_route, dojo_accessible
-from .belts import get_belts
+from ...utils.awards import get_belts, belt_asset, get_viewable_emojis
 
 SCOREBOARD_CACHE_TIMEOUT_SECONDS = 60 * 60 * 2 # two hours make to cache all scoreboards
 scoreboard_namespace = Namespace("scoreboard")
@@ -33,18 +33,6 @@ def email_symbol_asset(email):
     else:
         group = "hacker.png"
     return url_for("views.themes", path=f"img/dojo/{group}")
-
-
-def belt_asset(color):
-    if color == "black":
-        belt = "black.svg"
-    elif color == "blue":
-        belt = "blue.svg"
-    elif color == "yellow":
-        belt = "yellow.svg"
-    else:
-        belt = "white.svg"
-    return url_for("views.themes", path=f"img/dojo/{belt}")
 
 @cache.memoize(timeout=SCOREBOARD_CACHE_TIMEOUT_SECONDS)
 def get_scoreboard_for(model, duration):
@@ -76,6 +64,12 @@ def invalidate_scoreboard_cache():
 # handle cache invalidation for new solves, dojo creation, dojo challenge creation
 @event.listens_for(Dojos, 'after_insert', propagate=True)
 @event.listens_for(Solves, 'after_insert', propagate=True)
+@event.listens_for(Awards, 'after_insert', propagate=True)
+@event.listens_for(Belts, 'after_insert', propagate=True)
+@event.listens_for(Emojis, 'after_insert', propagate=True)
+@event.listens_for(Awards, 'after_delete', propagate=True)
+@event.listens_for(Belts, 'after_delete', propagate=True)
+@event.listens_for(Emojis, 'after_delete', propagate=True)
 def hook_object_creation(mapper, connection, target):
     invalidate_scoreboard_cache()
 
@@ -88,6 +82,9 @@ def hook_object_creation(mapper, connection, target):
 @event.listens_for(DojoModules, 'after_update', propagate=True)
 @event.listens_for(DojoChallenges, 'after_update', propagate=True)
 @event.listens_for(DojoChallengeVisibilities, 'after_update', propagate=True)
+@event.listens_for(Belts, 'after_update', propagate=True)
+@event.listens_for(Emojis, 'after_update', propagate=True)
+@event.listens_for(Awards, 'after_insert', propagate=True)
 def hook_object_update(mapper, connection, target):
     # according to the docs, this is a necessary check to see if the
     # target actually was modified (and thus an update was made)
@@ -95,11 +92,14 @@ def hook_object_update(mapper, connection, target):
         invalidate_scoreboard_cache()
 
 def get_scoreboard_page(model, duration=None, page=1, per_page=20):
+    belt_data = get_belts()
     results = get_scoreboard_for(model, duration)
 
     start_idx = (page - 1) * per_page
     end_idx = start_idx + per_page
     pagination = Pagination(None, page, per_page, len(results), results[start_idx:end_idx])
+    user = get_current_user()
+    emojis = get_viewable_emojis(user)
 
     def standing(item):
         if not item:
@@ -107,8 +107,8 @@ def get_scoreboard_page(model, duration=None, page=1, per_page=20):
         result = {key: item[key] for key in item.keys()}
         result["url"] = url_for("pwncollege_users.view_other", user_id=result["user_id"])
         result["symbol"] = email_symbol_asset(result.pop("email"))
-        result["belt"] = belt_asset(None)  # TODO
-        result["badges"] = []  # TODO
+        result["belt"] = belt_asset(belt_data["users"].get(result["user_id"], {"color":None})["color"])
+        result["badges"] = emojis.get(result["user_id"], [])
         return result
 
     result = {
@@ -117,7 +117,6 @@ def get_scoreboard_page(model, duration=None, page=1, per_page=20):
 
     pages = set(page for page in pagination.iter_pages() if page)
 
-    user = get_current_user()
     if user and not user.hidden:
         me = None
         for r in results:

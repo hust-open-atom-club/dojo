@@ -16,9 +16,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from CTFd.models import db, Users, Challenges, Flags, Solves
 from CTFd.utils.user import get_current_user, is_admin
 
-from ...models import Dojos, DojoUsers, DojoModules, DojoChallenges, DojoResources, DojoChallengeVisibilities, DojoResourceVisibilities
-from ...config import DOJOS_DIR
-from ...utils import get_current_container
+from ..models import Dojos, DojoUsers, DojoModules, DojoChallenges, DojoResources, DojoChallengeVisibilities, DojoResourceVisibilities
+from ..config import DOJOS_DIR
+from ..utils import get_current_container
 
 
 ID_REGEX = Regex(r"^[a-z0-9-]{1,32}$")
@@ -125,7 +125,7 @@ def setdefault_subyaml(data, subyaml_path):
     data.update(subyaml_data)
     data.update(topyaml_data)
 
-def load_dojo_spec(dojo_dir):
+def load_dojo_subyamls(data, dojo_dir):
     """
     The dojo yaml gets augmented with additional yamls and markdown files found in the dojo repo structure.
 
@@ -140,14 +140,6 @@ def load_dojo_spec(dojo_dir):
 
     The higher-level details override the lower-level details.
     """
-
-    dojo_yml_path = dojo_dir / "dojo.yml"
-    assert dojo_yml_path.exists(), "Missing file: `dojo.yml`"
-
-    for path in dojo_dir.rglob("**"):
-        assert dojo_dir == path or dojo_dir in path.resolve().parents, f"Error: symlink `{path}` references path outside of the dojo"
-
-    data = yaml.safe_load(dojo_yml_path.read_text())
 
     setdefault_file(data, "description", dojo_dir / "DESCRIPTION.md")
 
@@ -171,9 +163,18 @@ def load_dojo_spec(dojo_dir):
 
     return data
 
-def load_dojo_dir(dojo_dir, *, dojo=None):
-    data = load_dojo_spec(dojo_dir)
+def dojo_from_dir(dojo_dir, *, dojo=None):
+    dojo_yml_path = dojo_dir / "dojo.yml"
+    assert dojo_yml_path.exists(), "Missing file: `dojo.yml`"
 
+    for path in dojo_dir.rglob("**"):
+        assert dojo_dir == path or dojo_dir in path.resolve().parents, f"Error: symlink `{path}` references path outside of the dojo"
+
+    data_raw = yaml.safe_load(dojo_yml_path.read_text())
+    data = load_dojo_subyamls(data_raw, dojo_dir)
+    return dojo_from_spec(data, dojo_dir=dojo_dir, dojo=dojo)
+
+def dojo_from_spec(data, *, dojo_dir=None, dojo=None):
     try:
         dojo_data = DOJO_SPEC.validate(data)
     except SchemaError as e:
@@ -271,28 +272,29 @@ def load_dojo_dir(dojo_dir, *, dojo=None):
         for module in (import_dojo.modules if import_dojo else [])
     ]
 
-    with dojo.located_at(dojo_dir):
-        missing_challenge_paths = [
-            challenge
-            for module in dojo.modules
-            for challenge in module.challenges
-            if not challenge.path.exists()
-        ]
-        assert not missing_challenge_paths, "".join(
-            f"Missing challenge path: {challenge.module.id}/{challenge.id}\n"
-            for challenge in missing_challenge_paths)
+    if dojo_dir:
+        with dojo.located_at(dojo_dir):
+            missing_challenge_paths = [
+                challenge
+                for module in dojo.modules
+                for challenge in module.challenges
+                if not challenge.path.exists()
+            ]
+            assert not missing_challenge_paths, "".join(
+                f"Missing challenge path: {challenge.module.id}/{challenge.id}\n"
+                for challenge in missing_challenge_paths)
 
-    course_yml_path = dojo_dir / "course.yml"
-    if course_yml_path.exists():
-        course = yaml.safe_load(course_yml_path.read_text())
-        if "discord_role" in course and not dojo.official:
-            raise AssertionError("Unofficial dojos cannot have a discord role")
-        dojo.course = course
+        course_yml_path = dojo_dir / "course.yml"
+        if course_yml_path.exists():
+            course = yaml.safe_load(course_yml_path.read_text())
+            if "discord_role" in course and not dojo.official:
+                raise AssertionError("Unofficial dojos cannot have a discord role")
+            dojo.course = course
 
-        students_yml_path = dojo_dir / "students.yml"
-        if students_yml_path.exists():
-            students = yaml.safe_load(students_yml_path.read_text())
-            dojo.course["students"] = students
+            students_yml_path = dojo_dir / "students.yml"
+            if students_yml_path.exists():
+                students = yaml.safe_load(students_yml_path.read_text())
+                dojo.course["students"] = students
 
     return dojo
 
@@ -327,7 +329,7 @@ def dojo_clone(repository, private_key):
     url = f"https://github.com/{repository}"
     if requests.head(url).status_code != 200:
         url = f"git@github.com:{repository}"
-    subprocess.run(["git", "clone", url, clone_dir.name],
+    subprocess.run(["git", "clone", "--recurse-submodules", url, clone_dir.name],
                    env={
                        "GIT_SSH_COMMAND": f"ssh -i {key_file.name}",
                        "GIT_TERMINAL_PROMPT": "0",
@@ -354,7 +356,9 @@ def dojo_git_command(dojo, *args):
 
 def dojo_update(dojo):
     dojo_git_command(dojo, "pull")
-    return load_dojo_dir(dojo.path, dojo=dojo)
+    dojo_git_command(dojo, "submodule", "init")
+    dojo_git_command(dojo, "submodule", "update")
+    return dojo_from_dir(dojo.path, dojo=dojo)
 
 
 def dojo_accessible(id):
@@ -362,6 +366,18 @@ def dojo_accessible(id):
         return Dojos.from_id(id).first()
     return Dojos.viewable(id=id, user=get_current_user()).first()
 
+def dojo_admins_only(func):
+    signature = inspect.signature(func)
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        bound_args = signature.bind(*args, **kwargs)
+        bound_args.apply_defaults()
+
+        dojo = bound_args.arguments["dojo"]
+        if not dojo.is_admin(get_current_user()):
+            abort(403)
+        return func(*bound_args.args, **bound_args.kwargs)
+    return wrapper
 
 def dojo_route(func):
     signature = inspect.signature(func)
@@ -397,18 +413,3 @@ def get_current_dojo_challenge(user=None):
                 DojoChallenges.dojo == Dojos.from_id(container.labels.get("dojo.dojo_id")).first())
         .first()
     )
-
-
-def get_user_belts(user):
-    belts = {
-        "Orange Belt": ["intro-to-cybersecurity"],
-        "Yellow Belt": ["intro-to-cybersecurity", "program-security"],
-        "Green Belt": ["intro-to-cybersecurity", "program-security", "system-security"],
-        "Blue Belt": ["intro-to-cybersecurity", "program-security", "system-security", "software-exploitation"],
-    }
-    result = []
-    for belt, dojo_ids in belts.items():
-        dojos = Dojos.query.filter(Dojos.official, Dojos.id.in_(dojo_ids))
-        if all(dojo.completed(user) for dojo in dojos):
-            result.append(belt)
-    return result

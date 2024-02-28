@@ -32,7 +32,7 @@ def listing():
     typed_dojos = {
         "Topics": [],
         "Courses": [],
-        "More": [],
+        "More Material": [],
     }
     for dojo in Dojos.viewable(user=user):
         if dojo.type == "topic":
@@ -41,8 +41,12 @@ def listing():
             typed_dojos["Courses"].append(dojo)
         elif dojo.type == "hidden":
             continue
+        elif dojo.type == "example" and dojo.official:
+            continue
+        elif dojo.type == "welcome":
+            continue
         else:
-            typed_dojos["More"].append(dojo)
+            typed_dojos["More Material"].append(dojo)
 
     return render_template("dojos.html", user=user, typed_dojos=typed_dojos)
 
@@ -55,6 +59,7 @@ def dojo_create():
         "dojo_create.html",
         public_key=public_key,
         private_key=private_key,
+        example_dojos=Dojos.viewable().where(Dojos.data["type"] == "example").all()
     )
 
 
@@ -72,9 +77,6 @@ def join_dojo(dojo, password=None):
     dojo = Dojos.from_id(dojo).first()
     if not dojo:
         abort(404)
-
-    if dojo.official:
-        return redirect(url_for("pwncollege_dojo.listing", dojo=dojo.reference_id))
 
     if dojo.password and dojo.password != password:
         abort(403)

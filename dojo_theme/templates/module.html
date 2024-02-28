@@ -4,9 +4,16 @@
 {% block content %}
 <div class="jumbotron">
   <div class="container">
-    <h1>{{ module.name }}<h1>
+    <h1>{{ module.name }}</h1>
     <br>
-    <h2 class="module-dojo"><a href="{{ url_for("pwncollege_dojos.view_dojo", dojo=dojo.reference_id) }}">{{ dojo.name }}</a></h2>
+    <h2 class="module-dojo"><a href="{{ url_for('pwncollege_dojos.view_dojo', dojo=dojo.reference_id) }}">{{ dojo.name }}</a></h2>
+
+    {% if assessments %}
+    <br>
+    {% for assessment in assessments %}
+    <h3 class="module-due-date" title="{{ assessment.date }}">{{ assessment.name }} in {{ assessment.until }}</h3>
+    {% endfor %}
+    {% endif %}
   </div>
 </div>
 <div class="container">
