@@ -30,6 +30,7 @@ define MAIL_PORT
 define MAIL_USERNAME
 define MAIL_PASSWORD
 define MAIL_ADDRESS
+define ARCH $(dpkg --print-architecture)
 mv $DOJO_DIR/data/.config.env $DOJO_DIR/data/config.env
 . $DOJO_DIR/data/config.env
 
