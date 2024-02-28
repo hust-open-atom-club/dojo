@@ -1,7 +1,6 @@
 #!/bin/sh
 
 DOJO_DIR=/opt/pwn.college
-PLATFORM=linux/$(dpkg --print-architecture)
 
 >> $DOJO_DIR/data/config.env
 
@@ -22,7 +21,6 @@ define WINDOWS_VM none
 define SECRET_KEY $(openssl rand -hex 16)
 define DOCKER_PSLR $(openssl rand -hex 16)
 define UBUNTU_VERSION 20.04
-define BUILDPLATFORM $(PLATFORM)
 define INTERNET_FOR_ALL False
 define INSTALL_IDA False
 define MAIL_SERVER
