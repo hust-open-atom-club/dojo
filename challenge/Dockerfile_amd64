@@ -176,7 +176,7 @@ EOF
 FROM essentials as builder-code-server
 
 RUN <<EOF
-    curl -fsSL https://code-server.dev/install.sh | /bin/sh /dev/stdin
+    curl -fsSL https://gitee.com/mirrors/code-server/raw/main/install.sh | /bin/sh /dev/stdin
     mkdir -p /opt/code-server/extensions
     code-server --extensions-dir=/opt/code-server/extensions --install-extension ms-python.python
     rm -rf /root/.cache/code-server
