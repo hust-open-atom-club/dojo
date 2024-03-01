@@ -4,9 +4,16 @@
 {% block content %}
 <div class="jumbotron">
   <div class="container">
-    <h1>{{ module.name }}<h1>
+    <h1>{{ module.name }}</h1>
     <br>
     <h2 class="module-dojo"><a href="{{ url_for("pwncollege_dojos.view_dojo", dojo=dojo.reference_id) }}">{{ dojo.name }}</a></h2>
+  
+    {% if assessments %}
+    <br>
+    {% for assessment in assessments %}
+    <h3 class="module-due-date" title="{{ assessment.date }}">{{ assessment.name }} in {{ assessment.until }}</h3>
+    {% endfor %}
+    {% endif %}
   </div>
 </div>
 <div class="container">
@@ -27,7 +34,7 @@
         {% else %}
           {% if resource.type == "lecture" %}
           {% if resource.video %}
-	        {% set src = "//player.bilibili.com/player.html" + "?" + "aid=" + resource.video + "&" + "bvid=" + resource.playlist + "&page=1&autoplay=0&high_quality=1&danmaku=0" %}
+	  {% set src = "//player.bilibili.com/player.html" + "?" + "aid=" + resource.video + "&" + ("bvid=" + resource.playlist + "&" if resource.playlist else "") +"page=1&autoplay=0&high_quality=1&danmaku=0" %}
           <div class="embed-responsive embed-responsive-16by9">
             <iframe class="embed-responsive-item" data-src="{{ src }}" title="Bilibili video player" allowfullscreen></iframe>
           </div>
