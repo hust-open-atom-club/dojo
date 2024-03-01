@@ -4,7 +4,6 @@ from CTFd.cache import cache
 from CTFd.models import db
 from flask import url_for
 
-from .discord import get_discord_roles, get_discord_user, add_role, send_message
 from ..models import Dojos, Belts, Emojis
 
 
@@ -70,21 +69,6 @@ def update_awards(user):
         db.session.add(Belts(user=user, name=belt))
         db.session.commit()
         current_belts.append(belt)
-
-    discord_user = get_discord_user(user.id)
-    discord_roles = get_discord_roles()
-    for belt in BELT_REQUIREMENTS:
-        if belt not in current_belts:
-            continue
-        belt_role = belt.title() + " Belt"
-        missing_role = discord_user and discord_roles.get(belt_role) not in discord_user["roles"]
-        if not missing_role:
-            continue
-        user_mention = f"<@{discord_user['user']['id']}>"
-        message = f"{user_mention} earned their {belt_role}! :tada:"
-        add_role(discord_user["user"]["id"], belt_role)
-        send_message(message, "belting-ceremony")
-        cache.delete_memoized(get_discord_user, user.id)
 
     current_emojis = get_user_emojis(user)
     for emoji,dojo_name,dojo_id in current_emojis:
