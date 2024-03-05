@@ -315,7 +315,7 @@ def generate_ssh_keypair():
     return (public_key.read_text().strip(), private_key.read_text())
 
 
-def dojo_clone(repository, private_key):
+def dojo_clone(repository_type, repository, private_key):
     tmp_dojos_dir = DOJOS_DIR / "tmp"
     tmp_dojos_dir.mkdir(exist_ok=True)
     clone_dir = tempfile.TemporaryDirectory(dir=tmp_dojos_dir)  # TODO: ignore_cleanup_errors=True
@@ -324,9 +324,15 @@ def dojo_clone(repository, private_key):
     key_file.write(private_key)
     key_file.flush()
 
-    url = f"https://github.com/{repository}"
+    if repository_type == "github":
+        url = f"https://github.com/{repository}"
+    elif repository_type == "gitee":
+        url = f"https://gitee.com/{repository}"
+    else:
+        raise ValueError("Invalid repository_type")
+
     if requests.head(url).status_code != 200:
-        url = f"git@github.com:{repository}"
+        url = f"git@{repository_type}.com:{repository}"
     subprocess.run(["git", "clone", "--recurse-submodules", url, clone_dir.name],
                    env={
                        "GIT_SSH_COMMAND": f"ssh -i {key_file.name}",

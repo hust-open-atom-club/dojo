@@ -8,7 +8,8 @@
     </div>
 </div>
 <div class="container">
-  <p>pwn.college dojos are defined in a git repository. You can use the example repositories listed below, or our <a href="https://github.com/pwncollege/official-dojos">official dojo repositories</a>, for examples on how to build a dojo!</p>
+  
+    <p>pwn.hust.college 的道场是在一个 git 仓库中定义的。您可以使用下面列出的示例仓库，或者我们的<a href="https://github.com/HUSTSeclab/official-dojos">官方道馆仓库</a>，作为构建道馆的示例！</p>
     <ul class="card-list">
       {% for dojo in example_dojos %}
       {{ card(url_for("pwncollege_dojos.view_dojo", dojo=dojo.reference_id),
@@ -18,11 +19,39 @@
       emoji=dojo.award.emoji ) }}
       {% endfor %}
     </ul>
-  <p>When you are ready, create your dojo from your repository using the form below!</p>
+  <p>当您准备好后，填写下面的表单从您的仓库创建您的道馆！</p>
     <form method="post" id="dojo-create-form" autocomplete="off">
         <div class="form-group">
-            <b><label>GitHub 仓库</label></b>
+            <b><label>Git 仓库</label></b>
             <small class="form-text text-muted">https://github.com/<b>pwncollege/example-dojo</b></small>
+            <small class="form-text text-muted">https://gitee.com/<b>pwncollege/example-dojo</b></small>
+            <small class="form-text text-muted">选择 Git 仓库类型：</small>
+            <select class="form-control" name="repository_type">
+                <option value="github">GitHub</option>
+                <option value="gitee">Gitee</option>
+            </select>
+            <input class="form-control" name="repository" type="text" placeholder="pwncollege/example-dojo" value="">
+        </div>
+
+        <br>
+
+        <div id="dojo-create-results" class="form-group">
+        </div>
+
+        <div class="form-group text-right">
+            <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit" value="Create">
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block entrypoint %}
+    <script defer src="{{ url_for('views.themes', path='js/pages/settings.js') }}"></script>
+{% endblock %}
+
+{% block scripts %}
+<script defer src="{{ url_for('views.themes', path='js/dojo/settings.js') }}"></script>
+{% endblock %}
             <br>
             <input class="form-control" name="repository" type="text" placeholder="pwncollege/example-dojo" value="">
 
