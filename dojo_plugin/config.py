@@ -78,11 +78,6 @@ USER_FIREWALL_ALLOWED = {
 
 DOJO_HOST = os.getenv("DOJO_HOST")
 HOST_DATA_PATH = os.getenv("HOST_DATA_PATH")
-MAIL_SERVER = os.getenv("MAIL_SERVER")
-MAIL_PORT = os.getenv("MAIL_PORT")
-MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-MAIL_ADDRESS = os.getenv("MAIL_ADDRESS")
 BINARY_NINJA_API_KEY = os.getenv("BINARY_NINJA_API_KEY")
 INTERNET_FOR_ALL = bool(ast.literal_eval(os.getenv("INTERNET_FOR_ALL") or "False"))
 WINDOWS_VM_ENABLED = os.getenv("WINDOWS_VM") == "full"
@@ -112,14 +107,6 @@ def bootstrap():
     set_config("account_visibility", "public")
 
     set_config("ctf_theme", "dojo_theme")
-
-    set_config("mail_server", MAIL_SERVER)
-    set_config("mail_port", MAIL_PORT)
-    set_config("mail_username", MAIL_USERNAME)
-    set_config("mail_password", MAIL_PASSWORD)
-    set_config("mailfrom_addr", MAIL_ADDRESS)
-    set_config("mail_useauth", bool(MAIL_USERNAME))
-    set_config("mail_tls", MAIL_PORT == "587")
 
     if not config.is_setup():
         admin = Admins(

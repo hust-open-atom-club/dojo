@@ -22,11 +22,6 @@ define SECRET_KEY $(openssl rand -hex 16)
 define DOCKER_PSLR $(openssl rand -hex 16)
 define UBUNTU_VERSION 20.04
 define INTERNET_FOR_ALL False
-define MAIL_SERVER
-define MAIL_PORT
-define MAIL_USERNAME
-define MAIL_PASSWORD
-define MAIL_ADDRESS
 define ARCH $(dpkg --print-architecture)
 define INSTALL_AFL no # needs compilation
 define INSTALL_ANGR_MANAGEMENT no
