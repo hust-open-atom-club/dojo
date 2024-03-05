@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% from "macros/widgets.html" import card %}
-
 {% block content %}
 <div class="jumbotron">
     <div class="container">
@@ -8,7 +7,6 @@
     </div>
 </div>
 <div class="container">
-  
     <p>pwn.hust.college 的道场是在一个 git 仓库中定义的。您可以使用下面列出的示例仓库，或者我们的<a href="https://github.com/HUSTSeclab/official-dojos">官方道馆仓库</a>，作为构建道馆的示例！</p>
     <ul class="card-list">
       {% for dojo in example_dojos %}
@@ -31,34 +29,10 @@
                 <option value="gitee">Gitee</option>
             </select>
             <input class="form-control" name="repository" type="text" placeholder="pwncollege/example-dojo" value="">
-        </div>
-
-        <br>
-
-        <div id="dojo-create-results" class="form-group">
-        </div>
-
-        <div class="form-group text-right">
-            <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit" value="Create">
-        </div>
-    </form>
-</div>
-{% endblock %}
-
-{% block entrypoint %}
-    <script defer src="{{ url_for('views.themes', path='js/pages/settings.js') }}"></script>
-{% endblock %}
-
-{% block scripts %}
-<script defer src="{{ url_for('views.themes', path='js/dojo/settings.js') }}"></script>
-{% endblock %}
             <br>
-            <input class="form-control" name="repository" type="text" placeholder="pwncollege/example-dojo" value="">
-
-            <br>
-
-            <b><label>部署秘钥</label></b>
-            <small class="form-text text-muted">
+	    <b><label>部署秘钥</label></b>
+            
+	    <small class="form-text text-muted">
             私库必需： <a href="https://docs.github.com/en/developers/overview/managing-deploy-keys#deploy-keys" target="_blank">部署秘钥文档</a>
             </small>
             <br>
