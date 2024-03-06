@@ -9,13 +9,14 @@
 </div>
 <div class="container">
   {% for type, dojos in typed_dojos.items() %}
-    <h2>{{ type | title }}</h2>
     {% if type == "Topics" %}
-    
-    <p>这些关卡构成了 pwn.hust.college 的正式课程，完成关卡后你可以获得 <a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。我们建议按照顺序进行学习，祝你好运！</p>
+    <h2>主题</h2>
+    <p>这些关卡构成了 pwn.hust.college 的正式课程，完成关卡后你可以获得<a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。我们建议按照顺序进行学习，祝你好运！</p>
     {% elif type == "Courses" %}
+    <h2>课程</h2>
     <p>在此平台，我们开展了众多课程。这些课程大多采纳上文提及的教材，然而部分课程将引入崭新的观点与挑战。</p>
     {% elif type.startswith("More") %}
+    <h2>更多素材</h2>
     <p>这部分包含了pwn.hust.college社区创建的道馆。完成这些道馆将会授予你对应的徽章！</p>
     {% endif %}
     <ul class="card-list">
