@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% from "macros/widgets.html" import card %}
 
+{% block stylesheets %}
+<style>
+  .card-icon img {
+    width: 50%;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="jumbotron">
   <div class="container">
