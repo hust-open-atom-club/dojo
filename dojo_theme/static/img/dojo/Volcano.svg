@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="527.9112 104.2491 54.9741 61.0985" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="linearGradient4071" x1="553.40948" y1="140.93207" x2="584.96075" y2="132.60956" gradientUnits="userSpaceOnUse" xlink:href="#linearGradient4065"/>
+    <linearGradient id="linearGradient4065">
+      <stop style="stop-color:#db003f;stop-opacity:1" offset="0" id="stop4067"/>
+      <stop style="stop-color:#ffb8e2;stop-opacity:1" offset="1" id="stop4069"/>
+    </linearGradient>
+    <linearGradient id="linearGradient4081" x1="549.85938" y1="143.03719" x2="564.75739" y2="143.17387" gradientUnits="userSpaceOnUse" xlink:href="#linearGradient4075"/>
+    <linearGradient id="linearGradient4075">
+      <stop style="stop-color:#f32d6b;stop-opacity:1" offset="0" id="stop4077"/>
+      <stop style="stop-color:#e67baa;stop-opacity:1" offset="1" id="stop4079"/>
+    </linearGradient>
+    <filter id="filter4115" x="-0.17823546" width="1.3564709" y="-0.16232124" height="1.3246425">
+      <feGaussianBlur stdDeviation="0.51767152" id="feGaussianBlur4117"/>
+    </filter>
+    <filter id="filter4111" x="-0.29322563" width="1.5864513" y="-0.073306451" height="1.1466129">
+      <feGaussianBlur stdDeviation="0.51767152" id="feGaussianBlur4113"/>
+    </filter>
+  </defs>
+  <path style="fill: url('#linearGradient4071'); stroke: rgb(0, 0, 0); stroke-width: 1; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-dasharray: none; fill-opacity: 1; display: inline;" d="m 532.40939,111.37164 c 0.86224,0.16996 5.62149,6.74684 9.36914,6.6219 3.74766,-0.125 11.11804,-13.61864 13.74141,-13.74358 2.62335,-0.125 9.11928,12.74404 13.2417,12.86898 4.12242,0.125 7.99511,-8.63507 8.74453,-8.62097 0.74942,0.0146 6.24882,6.85599 5.2467,12.6191 -0.99936,5.74732 -5.62147,9.49556 -5.62147,12.74404 0,3.24848 5.99626,6.37201 5.74641,11.99439 -0.24984,5.62237 -8.36976,19.36593 -25.10928,19.49087 -16.73953,0.12501 -27.35788,-9.87037 -26.98311,-18.9911 0.37477,-9.12074 4.62211,-8.87086 4.74702,-11.99439 0.13185,-3.29592 -7.72199,-8.59028 -7.62023,-14.49321 0.10174,-5.90294 3.63495,-8.66599 4.49718,-8.49603 z" id="path4351"/>
+  <path style="color:#000000;fill:#fd163d;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1" d="m 558.51806,159.47412 c -9.74534,-0.0626 -21.86132,-4.87271 -22.11117,-13.2438 -0.24984,-8.37108 3.37289,-6.8701 3.37289,-11.49462 0,-4.99766 -8.4766,-8.44418 -6.8707,-15.74264 0.59614,-2.70931 5.91745,4.63136 11.36789,3.12355 5.45041,-1.5078 9.24421,-11.49465 11.24295,-11.74451 1.99875,-0.24985 7.995,12.6191 12.11742,12.11933 4.12242,-0.49976 9.49406,-6.49697 10.36852,-5.9972 4.13272,7.81241 -4.50064,12.32237 -4.99688,17.36688 -0.24984,3.87319 4.24734,7.24661 3.9975,12.11933 -0.24984,4.87271 -8.7431,13.55626 -18.48842,13.49368 z" id="path4355"/>
+  <path style="color:#000000;fill:url(#linearGradient4081);stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1" d="m 547.89663,143.65324 c -0.0441,-1.10433 8.12662,-13.16372 9.18662,-13.25204 1.06,-0.0883 9.27496,11.4851 9.18664,12.63361 -0.0883,1.14852 -6.88996,10.69 -8.5683,10.95503 -1.67834,0.26503 -9.7608,-9.23227 -9.80496,-10.3366 z" id="path4385"/>
+  <path id="path4073" d="m 549.53793,143.39325 c -0.0362,-0.90703 6.67475,-10.81193 7.54537,-10.88447 0.87062,-0.0725 7.61792,9.43321 7.54538,10.37652 -0.0725,0.94334 -5.65902,8.78016 -7.03751,8.99784 -1.37849,0.21768 -8.01696,-7.58286 -8.05324,-8.48989 z" style="color:#000000;fill:#ff669e;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"/>
+  <path style="fill: none; stroke: rgb(255, 255, 255); stroke-width: 1; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-dasharray: none; filter: url('#filter4115'); display: inline;" d="m 555.05318,106.81727 c 3.14361,2.27799 7.51734,8.51966 9.84088,11.071" id="path4083"/>
+  <path style="fill: none; stroke: rgb(255, 255, 255); stroke-width: 1; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-dasharray: none; filter: url('#filter4111'); display: inline;" d="m 576.10174,136.74995 c 0,0 3.82701,4.10037 3.96369,8.88414 0.13668,4.78377 -6.69727,11.48103 -6.69727,11.48103" id="path4085"/>
+</svg>
