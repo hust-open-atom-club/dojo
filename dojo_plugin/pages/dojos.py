@@ -145,7 +145,7 @@ def delete_dojo(dojo, update_code=None):
 def view_dojo_admin(dojo):
     if not dojo.is_admin():
         abort(403)
-    return render_template("dojo_admin.html", dojo=dojo)
+    return render_template("dojo_admin.html", dojo=dojo, is_admin=is_admin)
 
 
 @dojos.route("/dojo/<dojo>/admin/activity")
