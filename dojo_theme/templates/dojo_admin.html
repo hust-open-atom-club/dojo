@@ -54,7 +54,8 @@
             </figure>
           </div>
         {% endif %}
-      <br>
+    </div>
+    <div>
       <form method="post" id="dojo-award-prune-form" autocomplete="off">
         <div class="form-group">
           <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="Prune Legacy Emoji Awards">
@@ -62,6 +63,15 @@
         <div id="dojo-award-prune-results" class="form-group">
         </div>
       </form>
+      {% if is_admin() %}
+      <form method="post" id="dojo-promote-dojo-form" autocomplete="off">
+        <div class="form-group">
+          <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="Make This Dojo Official">
+        </div>
+        <div id="dojo-promote-dojo-results" class="form-group">
+        </div>
+      </form>
+      {% endif %}
     </div>
     <b style="font-family: 'Courier New', Courier, monospace">参考 ID: </b><code>{{ dojo.reference_id }}</code>
     <br>
@@ -90,18 +100,6 @@
       <div id="dojo-promote-admin-results" class="form-group">
       </div>
     </form>
-
-    {% if is_admin() %}
-    <b style="font-family: 'Courier New', Courier, monospace">Promote to Official Dojo</b>
-    <form method="post" id="dojo-promote-dojo-form" autocomplete="off">
-      <div class="form-group">
-        <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="Make This Dojo Official">
-      </div>
-      <div id="dojo-promote-dojo-results" class="form-group">
-      </div>
-    </form>
-
-    {% endif %}
 </div>
 {% endblock %}
 
