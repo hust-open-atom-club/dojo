@@ -34,22 +34,26 @@
 
   <br>
 
-  <h2 class="row">道场简介</h2>
+  <h2 class="row">道馆简介</h2>
   <br>
-  {% if dojo.description %}
-  <p>{{ dojo.description | markdown }}</p>
+  <div class="row">
+    <p>
+      {% if dojo.description %}
+      {{ dojo.description | markdown }}</p>
+    </p>
+  </div>
   <br>
   {% endif %}
 
   <br>
 
   {% if dojo.award and dojo.award.get("emoji") %}
-  <h2 class="row">奖项： <b>{{ dojo.award["emoji"] }}</b></h2>
+  <h2 class="row">道馆奖项： <b>{{ dojo.award["emoji"] }}</b></h2>
   <br>
   {% endif %}
 
 
-  <h2 class="row">状态</h2>
+  <h2 class="row">道馆状态</h2>
   <br>
   <div class="row">
     <p>
