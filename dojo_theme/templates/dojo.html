@@ -9,18 +9,13 @@
 <div class="container">
   {% include "components/errors.html" %}
 
-  {% if dojo.description %}
-  <p>{{ dojo.description | markdown }}</p>
-  <br>
-  {% endif %}
-
   <div class="row text-center">
     {% if dojo.course and user %}
     <div class="col-lg-auto m-3">
       <figure>
         <a class="text-decoration-none" href="{{ url_for('course.view_course', dojo=dojo.reference_id) }}">
           <i class="fas fa-graduation-cap fa-3x"></i>
-          <figcaption><b style="font-family: 'Courier New', Courier, monospace">Course</b></figcaption>
+          <figcaption><b style="font-family: 'Courier New', Courier, monospace">课程</b></figcaption>
         </a>
       </figure>
     </div>
@@ -30,12 +25,19 @@
       <figure>
         <a class="text-decoration-none" href="{{ url_for('pwncollege_dojos.view_dojo_admin', dojo=dojo.reference_id) }}">
           <i class="fas fa-users-cog fa-3x"></i>
-          <figcaption><b style="font-family: 'Courier New', Courier, monospace">Admin</b></figcaption>
+          <figcaption><b style="font-family: 'Courier New', Courier, monospace">管理员</b></figcaption>
         </a>
       </figure>
     </div>
     {% endif %}
   </div>
+
+  <br>
+
+  {% if dojo.description %}
+  {{ dojo.description | markdown }}</p>
+  <br>
+  {% endif %}
 
   <br>
 
