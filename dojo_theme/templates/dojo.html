@@ -34,8 +34,10 @@
 
   <br>
 
+  <h2 class="row">道场简介</h2>
+  <br>
   {% if dojo.description %}
-  {{ dojo.description | markdown }}
+  <p>{{ dojo.description | markdown }}</p>
   <br>
   {% endif %}
 
