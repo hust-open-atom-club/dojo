@@ -8,6 +8,16 @@
 </div>
 <div class="container">
   {% include "components/errors.html" %}
+  {% if dojo_user.type == "admin" %}
+  <div class="col-lg-auto m-3">
+    <figure>
+      <a class="text-decoration-none" href="{{ url_for('pwncollege_dojos.view_dojo_admin', dojo=dojo.reference_id) }}">
+        <i class="fas fa-users-cog fa-3x"></i>
+        <figcaption><b style="font-family: 'Courier New', Courier, monospace">管理员</b></figcaption>
+      </a>
+    </figure>
+  </div>
+  {% endif %}
   <h2 class="row">道馆简介</h2>
   {% if dojo.description %}
   <p>{{ dojo.description | markdown }}</p>
@@ -24,16 +34,7 @@
       </figure>
     </div>
     {% endif %}
-    {% if dojo_user.type == "admin" %}
-    <div class="col-lg-auto m-3">
-      <figure>
-        <a class="text-decoration-none" href="{{ url_for('pwncollege_dojos.view_dojo_admin', dojo=dojo.reference_id) }}">
-          <i class="fas fa-users-cog fa-3x"></i>
-          <figcaption><b style="font-family: 'Courier New', Courier, monospace">管理员</b></figcaption>
-        </a>
-      </figure>
-    </div>
-    {% endif %}
+
   </div>
 
   <br>
