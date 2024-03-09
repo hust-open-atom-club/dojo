@@ -8,7 +8,11 @@
 </div>
 <div class="container">
   {% include "components/errors.html" %}
-
+  <h2 class="row">道馆简介</h2>
+  {% if dojo.description %}
+  <p>{{ dojo.description | markdown }}</p>
+  <br>
+  {% endif %}
   <div class="row text-center">
     {% if dojo.course and user %}
     <div class="col-lg-auto m-3">
@@ -31,19 +35,6 @@
     </div>
     {% endif %}
   </div>
-
-  <br>
-
-  <h2 class="row">道馆简介</h2>
-  <br>
-  <div class="row">
-    <p>
-      {% if dojo.description %}
-      {{ dojo.description | markdown }}
-    </p>
-  </div>
-  <br>
-  {% endif %}
 
   <br>
 
