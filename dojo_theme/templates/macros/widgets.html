@@ -1,4 +1,4 @@
-{% macro navitem(name, url, icon, new=False, shrink=False) %}
+{% macro navitem(name, url, icon, new=False, shrink=False, img=None) %}
 <li class="nav-item">
   {% if not new %}
   <a class="nav-link" href="{{ url }}">
@@ -9,7 +9,12 @@
       <i class="fas {{ icon }} d-none d-md-block d-lg-none"></i>
     </span>
     <span class="d-sm-block d-md-none d-lg-block text-nowrap">
+      {% if img %}
+      <img src="{{ img }}" class="nav-icon-img" style="height: 16px;">
+      {% else %}
       <i class="fas {{ icon }} pr-1"></i>
+      {% endif %}
+
       {% if not shrink %}
       {{ name }}
       {% else %}
