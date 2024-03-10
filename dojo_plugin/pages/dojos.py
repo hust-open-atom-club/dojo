@@ -126,7 +126,7 @@ def delete_dojo(dojo, update_code=None):
         return {"success": False, "error": "Forbidden"}, 403
 
     # Check if the current user is an admin of the dojo
-    if not dojo.is_admin():
+    if not is_admin():
         abort(403)
 
     try:
