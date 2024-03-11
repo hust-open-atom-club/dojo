@@ -238,7 +238,7 @@ def dojo_from_spec(data, *, dojo_dir=None, dojo=None):
 
     dojo.modules = [
         DojoModules(
-            **{kwarg: module_data.get(kwarg) for kwarg in ["id", "name", "description"]},
+            **{kwarg: module_data.get(kwarg) for kwarg in ["id", "name", "description","image"]},
             challenges=[
                 DojoChallenges(
                     **{kwarg: challenge_data.get(kwarg) for kwarg in ["id", "name", "description"]},
