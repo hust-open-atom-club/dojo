@@ -41,6 +41,14 @@
   </a>
 {%- endmacro %}
 
+{% macro module_icon(icon=None) %}
+  <div class="card-icon">
+    {% if icon %}<img src="{{ icon }}">{% endif %}
+    {% if emoji %}{{ emoji }}{% endif %}
+  </div>
+{% endmacro %}
+
+
 {% macro accordion_item(accordion_id, item_id) %}
   <div class="accordion-item">
     <div class="accordion-item-header" id="{{ accordion_id }}-header-{{ item_id }}">

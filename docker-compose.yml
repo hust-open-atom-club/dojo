@@ -117,6 +117,8 @@ services:
       - MYSQL_USER=ctfd
       - MYSQL_PASSWORD=ctfd
       - MYSQL_DATABASE=ctfd
+    ports:
+      - "13306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
     command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]

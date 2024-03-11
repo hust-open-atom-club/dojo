@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/widgets.html" import module_icon %}
 
 {% block content %}
 <div class="jumbotron">
@@ -70,6 +71,9 @@
       <li class="card card-small">
         <div class="card-body">
           <h4 class="card-title">{{ module.name or module.id }}</h4>
+            {% if module.data.image %}
+              {{ module_icon(icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(module.data.image) if (module.data.image) else None,) }}  
+            {% endif %}
           <p class="card-text">
             {{ module.solves(user=user, ignore_visibility=True, ignore_admins=False).count() if user else 0 }} / {{ module.visible_challenges() | length }}
           </p>

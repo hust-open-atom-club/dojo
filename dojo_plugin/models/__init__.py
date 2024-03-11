@@ -279,7 +279,7 @@ class DojoModules(db.Model):
     description = db.Column(db.Text)
 
     data = db.Column(db.JSON)
-    data_fields = []
+    data_fields = ["image"]
 
     dojo = db.relationship("Dojos", back_populates="_modules")
     _challenges = db.relationship("DojoChallenges",
