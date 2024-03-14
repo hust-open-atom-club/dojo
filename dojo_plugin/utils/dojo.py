@@ -61,7 +61,7 @@ DOJO_SPEC = Schema({
     Optional("modules", default=[]): [{
         **ID_NAME_DESCRIPTION,
         **VISIBILITY,
-
+        Optional("icon"): IMAGE_REGEX,
         Optional("image"): IMAGE_REGEX,
 
         Optional("import"): {
@@ -238,7 +238,7 @@ def dojo_from_spec(data, *, dojo_dir=None, dojo=None):
 
     dojo.modules = [
         DojoModules(
-            **{kwarg: module_data.get(kwarg) for kwarg in ["id", "name", "description","image"]},
+            **{kwarg: module_data.get(kwarg) for kwarg in ["id", "name", "description","icon"]},
             challenges=[
                 DojoChallenges(
                     **{kwarg: challenge_data.get(kwarg) for kwarg in ["id", "name", "description"]},
