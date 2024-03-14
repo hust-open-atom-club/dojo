@@ -72,8 +72,9 @@ DOJO_SPEC = Schema({
         Optional("challenges", default=[]): [{
             **ID_NAME_DESCRIPTION,
             **VISIBILITY,
-
+            Optional("level"): IMAGE_REGEX,
             Optional("image"): IMAGE_REGEX,
+            Optional("icon"): IMAGE_REGEX,
             # Optional("path"): Regex(r"^[^\s\.\/][^\s\.]{,255}$"),
 
             Optional("import"): {
@@ -241,7 +242,7 @@ def dojo_from_spec(data, *, dojo_dir=None, dojo=None):
             **{kwarg: module_data.get(kwarg) for kwarg in ["id", "name", "description","icon"]},
             challenges=[
                 DojoChallenges(
-                    **{kwarg: challenge_data.get(kwarg) for kwarg in ["id", "name", "description"]},
+                    **{kwarg: challenge_data.get(kwarg) for kwarg in ["id", "name", "description","icon","level"]},
                     image=shadow("image", dojo_data, module_data, challenge_data, default=None),
                     challenge=challenge(module_data.get("id"), challenge_data.get("id")) if "import" not in challenge_data else None,
                     visibility=visibility(DojoChallengeVisibilities, dojo_data, module_data, challenge_data),

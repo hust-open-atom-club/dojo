@@ -392,7 +392,7 @@ class DojoChallenges(db.Model):
     description = db.Column(db.Text)
 
     data = db.Column(db.JSON)
-    data_fields = ["image", "path_override"]
+    data_fields = ["image", "path_override","level","icon"]
 
     dojo = db.relationship("Dojos",
                            foreign_keys=[dojo_id],
@@ -423,7 +423,9 @@ class DojoChallenges(db.Model):
 
             # TODO: maybe we should track the entire import
             kwargs["data"]["image"] = default.data.get("image")
+            kwargs["data"]["icon"] = default.data.get("icon")
             kwargs["data"]["path_override"] = str(default.path)
+            kwargs["data"]["level"] = default.data.get("level")
 
         super().__init__(*args, **kwargs)
 
