@@ -78,10 +78,20 @@
               {% endif %}
             </span>
           </h4>
+          <div class="rating-container" style="float: right;">
+          {% if challenge.data.level %}
+          <span id="rating-{{ challenge.challenge_id }}" class="rating" data-level="{{ challenge.data.level }}" style="padding-right: 5px; margin-right: 5px; color: #b5e853;">
+            {% set levelStr = challenge.data.level %}
+            {% set level = levelStr|int %}
+          </span>
+
+          {% endif %}
           <span class="total-solves">{{ total_solves.get(challenge.challenge_id, 0) }} solves</span>
+        </div>
         {% else %}
           <div class="embed-responsive">
             <p>{{ challenge.description | markdown }}</p>
+            <p>{{ challenge.data }}</p>
           </div>
           <div class="row">
             <div class="col-sm-6 form-group text-center">
@@ -122,7 +132,16 @@
         {% endif %}
       {% endcall %}
     {% endfor %}
-  </div>
+    <script>
+      const getStar = (rate) => '★★★★★☆☆☆☆☆'.slice(5 - rate, 10 - rate);
+      document.addEventListener('DOMContentLoaded', function() {
+        const ratings = document.querySelectorAll('.rating');
+        ratings.forEach(function(rating) {
+          const level = parseInt(rating.dataset.level);
+          rating.innerText = getStar(level);
+        });
+      });
+    </script>
 
   <br>
 
@@ -137,6 +156,8 @@
 {% endblock %}
 
 {% block scripts %}
+
 <script defer src="{{ url_for('views.themes', path='js/dojo/challenges.js') }}"></script>
 <script defer onload="loadScoreboard(0, 1);" src="{{ url_for('views.themes', path='js/dojo/scoreboard.js') }}"></script>
+
 {% endblock %}
