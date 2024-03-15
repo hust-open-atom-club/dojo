@@ -425,7 +425,7 @@ class DojoChallenges(db.Model):
             kwargs["data"]["image"] = default.data.get("image")
             kwargs["data"]["icon"] = default.data.get("icon")
             kwargs["data"]["path_override"] = str(default.path)
-            kwargs["data"]["level"] = default.data.get("level")
+            kwargs["data"]["level"] = str(default.data.get("level"))
 
         super().__init__(*args, **kwargs)
 

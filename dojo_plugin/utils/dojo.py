@@ -25,6 +25,7 @@ ID_REGEX = Regex(r"^[a-z0-9-]{1,32}$")
 UNIQUE_ID_REGEX = Regex(r"^[a-z0-9-~]{1,128}$")
 NAME_REGEX = Regex(r"^[\S ]{1,128}$")
 IMAGE_REGEX = Regex(r"^[\S]{1,256}$")
+INT_REGEX = int
 DATE = Use(datetime.datetime.fromisoformat)
 
 ID_NAME_DESCRIPTION = {
@@ -72,7 +73,7 @@ DOJO_SPEC = Schema({
         Optional("challenges", default=[]): [{
             **ID_NAME_DESCRIPTION,
             **VISIBILITY,
-            Optional("level"): IMAGE_REGEX,
+            Optional("level"): INT_REGEX,
             Optional("image"): IMAGE_REGEX,
             Optional("icon"): IMAGE_REGEX,
             # Optional("path"): Regex(r"^[^\s\.\/][^\s\.]{,255}$"),
