@@ -9,10 +9,7 @@ from ..models import Dojos, Belts, Emojis
 
 BELT_ORDER = [ "orange", "yellow", "green", "purple", "blue", "brown", "red", "black" ]
 BELT_REQUIREMENTS = {
-    "orange": "intro-to-cybersecurity",
-    "yellow": "program-security",
-    "green": "system-security",
-    "blue": "software-exploitation",
+    "orange": "welcome",
 }
 
 def belt_asset(color):
