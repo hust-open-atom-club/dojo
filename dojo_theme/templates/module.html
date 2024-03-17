@@ -133,7 +133,7 @@
       {% endcall %}
     {% endfor %}
     <script>
-      const getStar = (rate) => '★★★★★☆☆☆☆☆'.slice(5 - rate, 10 - rate);
+      const getStar = (rate) => '⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐'.slice(0, rate);
       document.addEventListener('DOMContentLoaded', function() {
         const ratings = document.querySelectorAll('.rating');
         ratings.forEach(function(rating) {
