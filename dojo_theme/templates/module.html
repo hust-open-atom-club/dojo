@@ -78,9 +78,9 @@
               {% endif %}
             </span>
           </h4>
-          <div class="rating-container" style="float: right;">
+          <div class="rating-container" style="float: right; font-size: 40px;">
           {% if challenge.data.level %}
-          <span id="rating-{{ challenge.challenge_id }}" class="rating" data-level="{{ challenge.data.level }}" style="padding-right: 5px; margin-right: 5px; color: #b5e853;">
+          <span id="rating-{{ challenge.challenge_id }}" class="rating" data-level="{{ challenge.data.level }}" style="padding-right: 5px; margin-right: 5px; color: #b5e853; font-size: larger;">
             {% set levelStr = challenge.data.level %}
             {% set level = levelStr|int %}
           </span>
