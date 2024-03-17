@@ -660,3 +660,15 @@ class Belts(Awards):
 
 class Emojis(Awards):
     __mapper_args__ = {"polymorphic_identity": "emoji"}
+
+class KookUsers(db.Model):
+    __tablename__ = "kook_users"
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    kook_id = db.Column(db.Text, index=True)
+
+    user = db.relationship("Users")
+
+    __repr__ = columns_repr(["user", "kook"])

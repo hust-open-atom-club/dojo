@@ -18,6 +18,9 @@ DATA_DIR = pathlib.Path("/var/data")
 
 INDEX_HTML = pathlib.Path("/var/index.html").read_text()
 
+KOOK_TOKEN = os.getenv("KOOK_TOKEN")
+KOOK_GUILD_ID = os.getenv("KOOK_GUILD_ID")
+
 def create_seccomp():
     seccomp = json.load(pathlib.Path("/etc/docker/seccomp.json").open())
 
