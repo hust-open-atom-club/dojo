@@ -4,6 +4,22 @@ function loadScoreboard(duration, page) {
     const scoreboard = $("#scoreboard");
 
     const endpoint = `/pwncollege_api/v1/scoreboard/${dojo}/${module}/${duration}/${page}`;
+    scoreboard.empty();
+    message = "Loading."
+    scoreboard.html(`<td colspan=6>${message}</td>`);
+    setTimeout(function loadmsg() {
+        if (scoreboard.html().includes(message)) {
+            message += "."
+            scoreboard.html(`<td colspan=6>${message}</td>`);
+            setTimeout(loadmsg, 1000);
+        }
+    }, 500);
+    $("#scoreboard-control-week").removeClass("scoreboard-page-selected");
+    $("#scoreboard-control-month").removeClass("scoreboard-page-selected");
+    $("#scoreboard-control-all").removeClass("scoreboard-page-selected");
+    if (duration == 7) $("#scoreboard-control-week").addClass("scoreboard-page-selected");
+    if (duration == 30) $("#scoreboard-control-month").addClass("scoreboard-page-selected");
+    if (duration == 0) $("#scoreboard-control-all").addClass("scoreboard-page-selected");
 
     CTFd.fetch(endpoint, {
         method: "GET",
@@ -16,6 +32,7 @@ function loadScoreboard(duration, page) {
         return response.json()
     }).then(result => {
         scoreboard.empty();
+
         const standings = result.standings;
         if (result.me) {
             if (result.me.rank < standings[0].rank)

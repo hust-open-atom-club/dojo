@@ -100,18 +100,7 @@ def start_challenge(user, dojo_challenge, practice):
                     "bind",
                     propagation="shared",
                 )
-            ]
-            + (
-                [
-                    docker.types.Mount(
-                        target="/run/media/windows",
-                        source="pwncollege_windows",
-                        read_only=True,
-                    )
-                ]
-                if WINDOWS_VM_ENABLED
-                else []
-            ),
+            ],
             devices=devices,
             network=None,
             extra_hosts={
@@ -184,14 +173,8 @@ def start_challenge(user, dojo_challenge, practice):
     def initialize_container():
         exec_run(
             f"""
-            /opt/pwn.college/docker-initialize.sh
-
             export DOJO_PRIVILEGED={"1" if practice else "0"}
-
-            if [ -x "/challenge/.init" ]; then
-                /challenge/.init
-            fi
-
+            /opt/pwn.college/docker-initialize.sh
             touch /opt/pwn.college/.initialized
             """,
             shell=True
@@ -250,6 +233,9 @@ class RunDocker(Resource):
 
         if not dojo_challenge.visible() and not dojo.is_admin():
             return {"success": False, "error": "Invalid challenge"}
+
+        if practice and not dojo_challenge.allow_privileged:
+            return {"success": False, "error": "This challenge does not support practice mode."}
 
         try:
             start_challenge(user, dojo_challenge, practice)
