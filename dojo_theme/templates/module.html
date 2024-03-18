@@ -80,7 +80,7 @@
           </h4>
           <div class="rating-container" style="float: right;">
           {% if challenge.data.level %}
-          <span id="rating-{{ challenge.challenge_id }}" class="rating" data-level="{{ challenge.data.level }}" style="padding-right: 5px; margin-right: 5px; color: #b5e853; font-size: 30px;">
+          <span id="rating-{{ challenge.challenge_id }}" class="rating" data-level="{{ challenge.data.level }}" style="padding-right: 5px; margin-right: 5px; color: #b5e853; font-size: 25px;">
             {% set levelStr = challenge.data.level %}
             {% set level = levelStr|int %}
           </span>
@@ -132,7 +132,7 @@
       {% endcall %}
     {% endfor %}
     <script>
-      const getStar = (rate) => '⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐'.slice(0, rate);
+      const getStar = (rate) => '★★★★★★★★★★☆☆☆☆☆☆☆☆☆☆'.slice(10-rate, 20-rate);
       document.addEventListener('DOMContentLoaded', function() {
         const ratings = document.querySelectorAll('.rating');
         ratings.forEach(function(rating) {
