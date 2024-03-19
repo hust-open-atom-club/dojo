@@ -245,14 +245,6 @@ RUN <<EOF
 EOF
 FROM builder-capstone-${INSTALL_CAPSTONE} as builder-capstone
 
-FROM builder as builder-radare2-no
-FROM builder as builder-radare2-yes
-RUN <<EOF
-    git clone --depth 1 https://github.com/radareorg/radare2 /opt/radare2
-    cd /opt/radare2
-    sys/install.sh
-EOF
-FROM builder-radare2-${INSTALL_RADARE2} as builder-radare2
 
 FROM builder as builder-aflplusplus-no
 FROM builder as builder-aflplusplus-yes
@@ -388,16 +380,6 @@ FROM builder-desktop-xfce-${INSTALL_XFCE} as builder-desktop-xfce
 
 ################################################################################
 
-FROM essentials as builder-desktop-angr-management-no
-FROM essentials as builder-desktop-angr-management-yes
-
-COPY desktop/angr-management.desktop /usr/share/applications/
-ARG UBUNTU_VERSION=20.04
-RUN <<EOF
-    wget -q -O - https://github.com/angr/angr-management/releases/download/nightly/angr-management-ubuntu-${UBUNTU_VERSION}.tar.gz | tar xvz -C /opt
-EOF
-
-FROM builder-desktop-angr-management-${INSTALL_ANGR_MANAGEMENT} as builder-desktop-angr-management
 
 ################################################################################
 
@@ -416,20 +398,6 @@ FROM builder-desktop-ghidra-${INSTALL_GHIDRA} as builder-desktop-ghidra
 
 ################################################################################
 
-FROM essentials as builder-desktop-ida-free-no
-FROM essentials as builder-desktop-ida-free-yes
-
-# IDA Freeware: only permissible for free and open deployments of the dojo!
-COPY desktop/ida64.desktop /usr/share/applications/
-COPY desktop/ida.opt /opt/ida/ida.opt
-RUN <<EOF
-    wget -O /tmp/idafree80_linux.run https://out7.hex-rays.com/files/idafree80_linux.run
-    chmod 755 /tmp/idafree80_linux.run
-    /tmp/idafree80_linux.run --optionfile /opt/ida/ida.opt
-    rm /tmp/idafree80_linux.run /tmp/installbuilder_installer.log
-EOF
-
-FROM builder-desktop-ida-free-${INSTALL_IDA_FREE} as builder-desktop-ida-free
 
 ################################################################################
 
@@ -540,7 +508,7 @@ COPY vm /opt/pwn.college/vm
 COPY windows /opt/pwn.college/windows
 COPY .tmux.conf /opt/pwn.college/.tmux.conf
 COPY .gdbinit /opt/pwn.college/.gdbinit
-COPY .radare2rc /opt/pwn.college/.radare2rc
+#COPY .radare2rc /opt/pwn.college/.radare2rc
 COPY .pwn.conf /opt/pwn.college/.pwn.conf
 
 RUN gcc /opt/pwn.college/setuid_interpreter.c -DSUID_PYTHON -o /opt/pwn.college/python && \
@@ -566,7 +534,7 @@ RUN <<EOF
 
     ln -sf /home/hacker/.tmux.conf /root/.tmux.conf
     ln -sf /home/hacker/.gdbinit /root/.gdbinit
-    ln -sf /home/hacker/.radare2rc /root/.radare2rc
+    #ln -sf /home/hacker/.radare2rc /root/.radare2rc
     ln -sf /home/hacker/.pwn.conf /root/.pwn.conf
 
     mkdir /challenge
@@ -593,7 +561,7 @@ COPY --link --from=builder / /
 # COPY --link --from=builder-kernel /opt/linux /opt/linux
 COPY --link --from=builder-tcpdump / /
 COPY --link --from=builder-capstone / /
-COPY --link --from=builder-radare2 / /
+#COPY --link --from=builder-radare2 / /
 # COPY --link --from=builder-aflplusplus / /
 COPY --link --from=builder-rappel / /
 # COPY --link --from=builder-rp / /
@@ -603,9 +571,9 @@ COPY --link --from=builder-busybox / /
 COPY --link --from=builder-glow / /
 COPY --link --from=builder-desktop-xfce / /
 COPY --link --from=builder-virtiofsd /opt/virtiofsd /opt/virtiofsd
-COPY --link --from=builder-desktop-ida-free / /
+#COPY --link --from=builder-desktop-ida-free / /
 COPY --link --from=builder-desktop-ghidra / /
-COPY --link --from=builder-desktop-angr-management / /
+#COPY --link --from=builder-desktop-angr-management / /
 COPY --link --from=builder-gdb / /
 COPY --link --from=builder-tools-pip / /
 COPY --link --from=builder-tools-apt / /
@@ -622,7 +590,7 @@ COPY --link --from=builder / /
 COPY --link --from=builder-kernel-yes /opt/linux /opt/linux
 COPY --link --from=builder-tcpdump-yes / /
 COPY --link --from=builder-capstone-yes / /
-COPY --link --from=builder-radare2-yes / /
+#COPY --link --from=builder-radare2-yes / /
 COPY --link --from=builder-aflplusplus-yes / /
 COPY --link --from=builder-rappel-yes / /
 COPY --link --from=builder-rp-yes / /
@@ -632,9 +600,9 @@ COPY --link --from=builder-busybox-yes / /
 COPY --link --from=builder-glow-yes / /
 COPY --link --from=builder-desktop-xfce-yes / /
 COPY --link --from=builder-virtiofsd-yes /opt/virtiofsd /opt/virtiofsd
-COPY --link --from=builder-desktop-ida-free / /
+#COPY --link --from=builder-desktop-ida-free / /
 COPY --link --from=builder-desktop-ghidra-yes / /
-COPY --link --from=builder-desktop-angr-management-yes / /
+#COPY --link --from=builder-desktop-angr-management-yes / /
 COPY --link --from=builder-gdb-yes / /
 COPY --link --from=builder-tools-pip-yes / /
 COPY --link --from=builder-tools-apt-yes / /
