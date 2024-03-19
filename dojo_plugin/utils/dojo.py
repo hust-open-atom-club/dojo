@@ -53,6 +53,8 @@ DOJO_SPEC = Schema({
         Optional("belt"): IMAGE_REGEX
     },
 
+    Optional("comparator"): INT_REGEX,
+
     Optional("image"): IMAGE_REGEX,
 
     Optional("import"): {
@@ -197,7 +199,7 @@ def dojo_from_spec(data, *, dojo_dir=None, dojo=None):
 
     dojo_kwargs = {
         field: dojo_data.get(field, getattr(import_dojo, field, None))
-        for field in ["id", "name", "description", "password", "type", "award"]
+        for field in ["id", "name", "description", "password", "type", "award","comparator"]
     }
 
     if dojo is None:
