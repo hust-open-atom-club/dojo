@@ -49,7 +49,9 @@ function loadScoreboard(duration, page) {
                 var count = badge.count <= 1 ? "" : `<sub>x${badge.count}</sub>`
                 row.find(".scoreboard-completions").append($(`
                     <span title="${badge.text}">
-                    <a href="${badge.url}">${badge.emoji}</a>${count}
+                    <a href="${badge.url}">
+                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" >
+                    </a>${count}
                     </span><span> </span>
                 `));
             })
