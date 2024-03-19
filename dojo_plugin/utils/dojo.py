@@ -49,7 +49,7 @@ DOJO_SPEC = Schema({
 
     Optional("type"): ID_REGEX,
     Optional("award"): {
-        Optional("emoji"): Regex(r"^\S$"),
+        Optional("emoji"): IMAGE_REGEX,
         Optional("belt"): IMAGE_REGEX
     },
 
