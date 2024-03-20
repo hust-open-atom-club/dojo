@@ -47,7 +47,8 @@
 
   {% if dojo.award and dojo.award.get("emoji") %}
   {% set emoji = dojo.award["emoji"] %}
-  <h2 class="row">道馆奖项： <b><img src="/themes/dojo_theme/static/img/dojo/{{ emoji }}.svg"></b></h2>
+  <h2 class="row">道馆奖项</h2>
+  <img style="width: 120px; margin: 24px 0;" src="/themes/dojo_theme/static/img/dojo/{{ emoji }}.svg">
   <br>
   {% endif %}
 
@@ -91,7 +92,7 @@
 
   <br>
 
-  <h2 class="row">道馆排名：</h2>
+  <h2 class="row">道馆排名</h2>
   <br>
   {% from "macros/scoreboard.html" import scoreboard %}
   {{ scoreboard() }}
