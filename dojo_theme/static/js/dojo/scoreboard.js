@@ -67,7 +67,7 @@ function loadScoreboard(duration, page) {
                 row.find(".scoreboard-completions").append($(`
                     <span title="${badge.text}">
                     <a href="${badge.url}">
-                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" class="scoreboard-symbol">
+                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" style="width: 1.5rem;">
                     </a>${count}
                     </span><span> </span>
                 `));
