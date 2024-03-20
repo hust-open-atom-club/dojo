@@ -56,7 +56,6 @@ DOJO_SPEC = Schema({
     Optional("comparator"): INT_REGEX,
 
     Optional("image"): IMAGE_REGEX,
-    Optional("practice_enabled"): bool,
 
     Optional("import"): {
         "dojo": UNIQUE_ID_REGEX,
@@ -67,7 +66,6 @@ DOJO_SPEC = Schema({
         **VISIBILITY,
         Optional("icon"): IMAGE_REGEX,
         Optional("image"): IMAGE_REGEX,
-        Optional("practice_enabled"): bool,
 
         Optional("import"): {
             Optional("dojo"): UNIQUE_ID_REGEX,
@@ -80,7 +78,6 @@ DOJO_SPEC = Schema({
             Optional("level"): INT_REGEX,
             Optional("image"): IMAGE_REGEX,
             Optional("icon"): IMAGE_REGEX,
-            Optional("practice_enabled"): bool,
             # Optional("path"): Regex(r"^[^\s\.\/][^\s\.]{,255}$"),
 
             Optional("import"): {
@@ -250,7 +247,6 @@ def dojo_from_spec(data, *, dojo_dir=None, dojo=None):
                 DojoChallenges(
                     **{kwarg: challenge_data.get(kwarg) for kwarg in ["id", "name", "description","icon","level"]},
                     image=shadow("image", dojo_data, module_data, challenge_data, default=None),
-                    practice_enabled=shadow("practice_enabled", dojo_data, module_data, challenge_data, default=True),
                     challenge=challenge(module_data.get("id"), challenge_data.get("id")) if "import" not in challenge_data else None,
                     visibility=visibility(DojoChallengeVisibilities, dojo_data, module_data, challenge_data),
                     default=(assert_one(DojoChallenges.from_id(*import_ids(["dojo", "module", "challenge"], dojo_data, module_data, challenge_data)),
