@@ -10,6 +10,8 @@ import logging
 import re
 import zlib
 
+from .config import DOJO_PREREQUISITES
+
 import pytz
 import yaml
 from flask import current_app
@@ -222,6 +224,14 @@ class Dojos(db.Model):
 
     __repr__ = columns_repr(["name", "id"])
 
+    def check_prerequisites(self, user):
+        dojo_id = self.id
+        prerequisite_ids = DOJO_PREREQUISITES.get(dojo_id, [])
+        for prerequisite_id in prerequisite_ids:
+            prerequisite_dojo = Dojos.from_id(prerequisite_id).first()  
+            if not prerequisite_dojo.completed(user):  
+                return False
+        return True    
 
 class DojoUsers(db.Model):
     __tablename__ = "dojo_users"

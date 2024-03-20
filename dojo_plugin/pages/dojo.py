@@ -52,6 +52,9 @@ def listing(dojo):
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
     stats = get_stats(dojo)
+    if not dojo.check_prerequisites(user):
+        abort(404)  
+    
     return render_template(
         "dojo.html",
         dojo=dojo,
