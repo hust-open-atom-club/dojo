@@ -230,9 +230,8 @@ class Dojos(db.Model):
         for prerequisite_id in prerequisite_ids:
             prerequisite_dojo = Dojos.from_id(prerequisite_id).first()  
             if not prerequisite_dojo.completed(user):  
-                return False
-        return True    
-
+                return (False, prerequisite_ids)
+        return (True, None)
 class DojoUsers(db.Model):
     __tablename__ = "dojo_users"
     __mapper_args__ = {"polymorphic_on": "type"}
