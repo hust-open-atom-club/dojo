@@ -59,7 +59,7 @@
               {{ form.country(class="form-control custom-select", value=user.country) }}
             </div>
             <div class="form-group">
-              <b><label for="hidden">Visibility</label></b>
+              <b><label for="hidden">可见性</label></b>
               <select class="form-control custom-select" id="hidden" name="hidden" value="{{ user.hidden }}">
                 <option value="False" {{ "selected" if not user.hidden else "" }}>Visible</option>
                 <option value="True" {{ "selected" if user.hidden else "" }}>Hidden</option>
