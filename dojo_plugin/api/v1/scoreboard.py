@@ -26,8 +26,8 @@ SCOREBOARD_CACHE_TIMEOUT_SECONDS = 60 * 60 * 2 # two hours make to cache all sco
 scoreboard_namespace = Namespace("scoreboard")
 
 def email_symbol_asset(email):
-    if email.endswith("@asu.edu"):
-        group = "fork.png"
+    if email.endswith("@hust.edu.cn"):
+        group = "hust.png"
     elif ".edu" in email.split("@")[1]:
         group = "student.png"
     else:
