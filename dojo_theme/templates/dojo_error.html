@@ -33,7 +33,7 @@
         <div class="card-body">
           <h4 class="card-title">{{ module.name or module.id }}</h4>
             {% if module.data.icon %}
-              {{ module_icon(icon="/themes/dojo_theme/static/img/dojo/padlock.svg") }}  
+              {{ module_icon(icon="/themes/dojo_theme/static/img/dojo/lock.svg") }}  
             {% endif %}
           <p class="card-text">
             {{ module.solves(user=user, ignore_visibility=True, ignore_admins=False).count() if user else 0 }} / {{ module.visible_challenges() | length }}
