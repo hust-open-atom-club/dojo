@@ -53,7 +53,8 @@ def listing(dojo):
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
     stats = get_stats(dojo)
     if not dojo.check_prerequisites(user):
-        abort(404)  
+        infos.append("请完成前置关卡后再进入此关卡")
+        return render_template("dojo.html", dojo=None, user=None, dojo_user=None, stats=stats, infos=infos)  
     
     return render_template(
         "dojo.html",
