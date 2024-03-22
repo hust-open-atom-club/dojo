@@ -1,11 +1,17 @@
 {% extends "base.html" %}
-{% from "macros/widgets.html" import module_icon %}
+{% from "macros/widgets.html" import module_icon_lock %}
 {% from "macros/widgets.html" import card %}
 
 {% block content %}
+<div class="jumbotron">
+    <div class="container">
+    <h2 class="row">请神奇宝贝训练家前往本道馆的前置神奇宝贝道馆学习与挑战！</h2>
+    </div>
+</div>
+
 <div class="container">
 
-  <h2 class="row">请神奇宝贝训练家前往本道馆的前置神奇宝贝道馆学习与挑战！</h2>
+  
   <div class="row">
     <img src="/themes/dojo_theme/static/img/dojo/deteat.png" style="width: 500px;">
   </div>
@@ -33,7 +39,7 @@
         <div class="card-body">
           <h4 class="card-title">{{ module.name or module.id }}</h4>
             {% if module.data.icon %}
-              {{ module_icon(icon="/themes/dojo_theme/static/img/dojo/lock.svg") }}  
+            {{ module_icon_lock(icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(module.data.icon) if (module.data.icon) else None) }}  
             {% endif %}
           <p class="card-text">
             {{ module.solves(user=user, ignore_visibility=True, ignore_admins=False).count() if user else 0 }} / {{ module.visible_challenges() | length }}

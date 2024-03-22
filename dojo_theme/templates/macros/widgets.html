@@ -48,6 +48,13 @@
   </div>
 {% endmacro %}
 
+{% macro module_icon_lock(icon=None) %}
+  <div class="card-icon">
+    {% if icon %}<img src="{{ icon }}" style="filter: brightness(0.05) drop-shadow(0px 0px 6px white);">{% endif %}
+    {% if emoji %}{{ emoji }}{% endif %}
+  </div>
+{% endmacro %}
+
 
 {% macro accordion_item(accordion_id, item_id) %}
   <div class="accordion-item">
