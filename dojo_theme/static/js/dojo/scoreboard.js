@@ -42,7 +42,7 @@ function loadScoreboard(duration, page) {
         }
         standings.forEach(user => {
             const row = $(`
-            <tr>
+            <tr style="font-size:1.5em">
               <td scope="row"><b>#${user.rank}</b></td>
               <td class="p-0">
                 <img src="${user.symbol}" class="scoreboard-symbol">
@@ -67,7 +67,7 @@ function loadScoreboard(duration, page) {
                 row.find(".scoreboard-completions").append($(`
                     <span title="${badge.text}">
                     <a href="${badge.url}">
-                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" style="width: 1.5rem;">
+                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" style="width: 1.5em;">
                     </a>${count}
                     </span><span> </span>
                 `));
