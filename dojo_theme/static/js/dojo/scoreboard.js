@@ -45,7 +45,7 @@ function loadScoreboard(duration, page) {
             <tr style="font-size:1.5em">
               <td scope="row"><b>#${user.rank}</b></td>
               <td class="p-0">
-                <img src="${user.symbol}" class="scoreboard-symbol">
+                <img src="${user.symbol}" class="scoreboard-symbol" style="width:3.0em">
               </td>
               <td>
                 <a href="${user.url}" class="scoreboard-name text-decoration-none">
