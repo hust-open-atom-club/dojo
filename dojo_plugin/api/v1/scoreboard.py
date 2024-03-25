@@ -27,7 +27,7 @@ scoreboard_namespace = Namespace("scoreboard")
 
 def email_symbol_asset(email):
     if email.endswith("@hust.edu.cn"):
-        group = "hust.png"
+        group = "hust2.png"
     elif ".edu" in email.split("@")[1]:
         group = "student.jpeg"
     else:
