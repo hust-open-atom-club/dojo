@@ -1,6 +1,6 @@
 source /opt/pwndbg/gdbinit.py
 source /opt/splitmind/gdbinit.py
-source /opt/gef/gdbinit-gef.py
+# source /opt/gef/gdbinit-gef.py
 
 python
 import splitmind
