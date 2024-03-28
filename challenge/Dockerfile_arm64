@@ -184,9 +184,10 @@ RUN <<EOF
     git clone --depth 1 --recurse-submodules https://github.com/pwndbg/pwndbg /opt/pwndbg
     cd /opt/pwndbg
     ./setup.sh
-    ln -sf /home/hacker/.gdbinit /root/.gdbinit
 
-    git clone --depth 1 https://github.com/hugsy/gef /opt/gef
+    mkdir -p /opt/gef
+    wget -O /opt/gef/gdbinit-gef.py -q https://gef.blah.cat/py
+
     git clone --depth 1 https://github.com/jerdna-regeiz/splitmind /opt/splitmind
 EOF
 
