@@ -189,6 +189,7 @@ RUN <<EOF
     wget -O /opt/gef/gdbinit-gef.py -q https://gef.blah.cat/py
 
     git clone --depth 1 https://github.com/jerdna-regeiz/splitmind /opt/splitmind
+    git clone https://github.com/scwuaptx/Pwngdb.git /opt/Pwngdb
 EOF
 
 FROM builder-gdb-${INSTALL_GDB} as builder-gdb
