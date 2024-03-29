@@ -32,12 +32,12 @@ end
 # ).build(nobanner=True)
 # end
 
-set context-clear-screen on
-set follow-fork-mode parent
-set context-code-lines 30
-set context-source-code-lines 30
+# set context-clear-screen on
+# set follow-fork-mode parent
+# set context-code-lines 30
+# set context-source-code-lines 30
 # set context-ghidra always
 # set context-sections  "regs code disasm stack backtrace expressions args ghidra"
 
-shell echo tty $(tmux list-panes -F '#P #{pane_tty}' | grep '^3 ' | cut -d' ' -f2) > /tmp/gdb_tmux
-source /tmp/gdb_tmux
+# shell echo tty $(tmux list-panes -F '#P #{pane_tty}' | grep '^3 ' | cut -d' ' -f2) > /tmp/gdb_tmux
+# source /tmp/gdb_tmux
