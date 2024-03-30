@@ -13,6 +13,7 @@ BELT_REQUIREMENTS = {
     "yellow": "cerulean",
     "green": "vermilion",
     "purple": "saffron",
+    "blue": "leagueconference",
 }
 
 def belt_asset(color):
