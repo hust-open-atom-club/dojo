@@ -16,10 +16,10 @@
     <div class="collapse navbar-collapse" id="base-navbars">
       <ul class="navbar-nav mr-auto">
         {{ navitem("道馆", url_for("pwncollege_dojos.listing"), "fa-torii-gate", img="/themes/dojo_theme/static/img/dojo/pokemon-gym.svg") }}
-        {{ navitem("工作空间", url_for("pwncollege_workspace.view_workspace", service="vscode"), "fa-terminal", new=True) }}
+        {{ navitem("VS Code", url_for("pwncollege_workspace.view_workspace", service="vscode"), "fa-terminal", new=True) }}
         {{ navitem("桌面", url_for("pwncollege_workspace.view_workspace", service="desktop"), "fa-desktop", new=True) }}
         {{ navitem("聊天", "https://kook.top/soUkFL", "fa-comments", new=True) }}
-        {{ navitem("帮助","https://kook.top/5ecHF2","fa-question",new=True)}}
+        {{ navitem("帮助", "https://kook.top/5ecHF2", "fa-question", new=True) }}
       </ul>
 
       <hr class="d-sm-flex d-md-flex d-lg-none">
