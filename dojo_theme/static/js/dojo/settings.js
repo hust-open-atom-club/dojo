@@ -73,7 +73,7 @@ function button_fetch_and_show(name, endpoint, method,data, success_message, con
         });
     });
 }
-//点击，然后让他弹框，复制到用户的剪贴板
+
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
         alert("链接已复制到剪贴板!");
