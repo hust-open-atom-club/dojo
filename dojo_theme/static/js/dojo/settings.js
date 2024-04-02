@@ -73,6 +73,29 @@ function button_fetch_and_show(name, endpoint, method,data, success_message, con
         });
     });
 }
+//点击，然后让他弹框，复制到用户的剪贴板
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert("链接已复制到剪贴板!");
+    }, function(err) {
+        console.error('无法复制到剪贴板: ', err);
+    });
+}
+
+function inviteButton(name) {
+    const button = $(`#${name}-button`);
+    const results = $(`#${name}-results`);
+    var join_url = button.attr('data-dojo');
+    var domain = window.location.origin;
+    button.click(()=>{
+        results.empty();    
+        url = domain + join_url;
+        copyToClipboard(url);
+    }
+    );
+}
+
+
 
 $(() => {
     form_fetch_and_show("ssh-key", "/pwncollege_api/v1/ssh_key", "PATCH", "Your public key has been updated");
@@ -88,7 +111,9 @@ $(() => {
         return `Prune all awarded emoji based on updated completion requirements?`;
     });
     button_fetch_and_show("dojo-delete",  `/dojo/${init.dojo}/delete/`, "POST", {dojo: init.dojo} ,"Dojo has been deleted.",x=> `Are you sure you want to delete the dojo "${x.dojo}"? This action cannot be undone.`);
-
+    
+    inviteButton("dojo-invite");
+    
     $(".copy-button").click((event) => {
         let input = $(event.target).parents(".input-group").children("input")[0];
         input.select();
@@ -106,3 +131,4 @@ $(() => {
         }, 1500);
     })
 });
+
