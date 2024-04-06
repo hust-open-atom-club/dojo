@@ -29,8 +29,7 @@ define INSTALL_BURPSUITE no
 define INSTALL_BUSYBOX no # needs compilation
 define INSTALL_CAPSTONE no
 define DEFAULT_INSTALL_SELECTION no # default to not installing tools
-define INSTALL_DESKTOP_BASE yes # matches the challenge-mini configuration
-define INSTALL_XFCE yes # matches the challenge-mini configuration
+define INSTALL_DESKTOP yes # matches the challenge-mini configuration
 define INSTALL_IDA_FREE no # explicitly disable -- only for free dojos
 define INSTALL_BINJA_FREE no # explicitly disable -- only for free dojos
 define KOOK_TOKEN
