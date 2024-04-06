@@ -19,6 +19,10 @@ port_names = {
     "desktop": 6081,
     "desktop-windows": 6082,
 }
+init_scripts = {
+    "vscode": "/opt/pwn.college/start-vscode.sh",
+    "desktop": "/opt/pwn.college/start-desktop.sh"
+}
 
 
 def container_password(container, *args):
@@ -42,7 +46,7 @@ def view_desktop():
         return render_template("iframe.html", active=False)
 
     exec_run(
-        "/opt/pwn.college/start-desktop.sh 2>&1 > /tmp/.dojo/desktop.log",
+        f"{init_scripts['desktop']} 2>&1 > /tmp/.dojo/service-desktop.log",
         user="hacker", pwncollege_uid=user.id, shell=True,
         assert_success=True
     )
@@ -107,6 +111,13 @@ def forward_workspace(service, service_path=""):
             port = int(port_names.get(port, port))
         except ValueError:
             abort(404)
+
+        if service in init_scripts:
+            exec_run(
+                f"{init_scripts[service]} 2>&1 > /tmp/.dojo/service-{service}.log",
+                user="hacker", pwncollege_uid=user.id, shell=True,
+                assert_success=True
+            )
 
     elif service.count("~") == 1:
         port, user_id = service.split("~", 1)
