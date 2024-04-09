@@ -153,7 +153,7 @@ class CreateDojo(Resource):
         data = request.get_json()
         user = get_current_user()
 
-        repository_type = data.get("repository_type","")
+        repository_type = data.get("repository_type","github")
         repository = data.get("repository", "")
         public_key = data.get("public_key", "")
         private_key = data.get("private_key", "").replace("\r\n", "\n")
