@@ -6,7 +6,7 @@ import re
 import os
 
 PROTO="http"
-HOST="localhost.pwn.hust.college"
+HOST="localhost.pwn.hust.college:8000"
 CONTAINER_NAME = os.environ.get("CONTAINER_NAME", "dojo-test")
 TEST_DOJOS_LOCATION = pathlib.Path(__file__).parent / "dojos"
 
