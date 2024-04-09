@@ -31,7 +31,7 @@ jobs:
             --privileged \
             -d \
             -v ./dojo-test-data:/opt/pwn.college/data:shared \
-            -p 2222:22 -p 80:80 -p 443:443 \
+            -p 22222:22 -p 8080:80 -p 10443:443 \
             --name dojo-test \
             dojo-test
 
