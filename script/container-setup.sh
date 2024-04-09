@@ -14,7 +14,7 @@ define () {
     value="${current:-${defined:-$default}}"
     echo "${name}=${value}" >> $DOJO_DIR/data/.config.env
 }
-define DOJO_HOST localhost.pwn.college
+define DOJO_HOST localhost.pwn.hust.college
 define DOJO_ENV development
 define DOJO_CHALLENGE challenge-mini
 define WINDOWS_VM none
