@@ -35,6 +35,7 @@ jobs:
             --name dojo-test \
             dojo-test
 
+
       - name: Wait for services to build and start
         run: |
           docker exec dojo-test dojo wait
