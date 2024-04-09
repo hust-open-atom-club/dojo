@@ -53,7 +53,7 @@ def create_dojo_yml(user, spec):
 
     return {"success": True, "dojo": dojo.reference_id}, 200
 
-def create_dojo(user,repository_type, repository, public_key, private_key):
+def create_dojo(user, repository, public_key, private_key,repository_type="github"):
     DOJO_EXISTS = "This repository already exists as a dojo"
 
     try:
