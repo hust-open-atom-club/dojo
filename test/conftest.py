@@ -35,7 +35,7 @@ def guest_dojo_admin():
 
 @pytest.fixture(scope="session")
 def example_dojo(admin_session):
-    rid = create_dojo("pwncollege/example-dojo", session=admin_session)
+    rid = create_dojo("HUSTSeclab/example-dojo", session=admin_session)
     make_dojo_official(rid, admin_session)
     return rid
 
