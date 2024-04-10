@@ -65,7 +65,7 @@ def desktop_terminal(wd, user_id):
 # Expands the accordion entry of the challenge
 def challenge_expand(wd, idx):
     wd.refresh()
-    wd.find_element("id", f"challenges-header-button-{idx}").click()
+    wd.find_element("id", f"challenges-header-{idx}").click()
     time.sleep(0.5)
 
 def challenge_start(wd, idx, practice=False):
@@ -87,7 +87,7 @@ def challenge_submit(wd, idx, flag):
 # Gets the accordion entry index
 def challenge_idx(wd, name):
     num_challenges = len(wd.find_elements("id", "challenge-start"))
-    idx = next(n for n in range(num_challenges) if wd.find_element("id", f"challenges-header-button-{n+1}").text.split("\n")[0] == name)
+    idx = next(n for n in range(num_challenges) if wd.find_element("id", f"challenges-header-{n+1}").text.split("\n")[0] == name)
     return idx+1
 
 def test_welcome_desktop(random_user_webdriver, welcome_dojo):
