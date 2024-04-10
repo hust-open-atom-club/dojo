@@ -44,7 +44,7 @@ def belt_dojos(admin_session):
     belt_dojo_rids = {
         color: create_dojo_yml(
             open(TEST_DOJOS_LOCATION / f"fake_{color}.yml").read(), session=admin_session
-        ) for color in [ "orange", "yellow", "green", "blue" ]
+        ) for color in [ "orange", "yellow", "green","purple","blue" ]
     }
     for rid in belt_dojo_rids.values():
         make_dojo_official(rid, admin_session)
