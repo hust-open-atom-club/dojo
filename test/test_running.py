@@ -172,7 +172,7 @@ def test_cumulative_belts(belt_dojos, random_user):
             assert "blue" in us["belt"]
         else:
             # until orange, we should be stuck in white
-            assert "white" in us["belt"]
+            assert "Beginner_Sprite" in us["belt"]
 
 @pytest.mark.dependency(depends=["test_start_challenge"])
 @pytest.mark.parametrize("path", ["/flag", "/challenge/apple"])
