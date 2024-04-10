@@ -7,5 +7,5 @@ modules:
         import:
           dojo: example
           module: world
-          challenge: saffron
+          challenge: mars
       
