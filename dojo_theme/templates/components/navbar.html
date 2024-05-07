@@ -40,6 +40,7 @@
         {% endif %}
 
         {{ navitem("登录", url_for("auth.login", next=request.full_path), "fa-sign-in-alt") }}
+        {{ navitem("统一身份认证", url_for("pwncollege_sso.cas_login", next=request.full_path), "fa-sign-in-alt") }}
         {% endif %}
 
         <li class="nav-item">
