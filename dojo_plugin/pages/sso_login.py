@@ -27,7 +27,7 @@ def cas_login():
         if user:
             # 用户认证成功，创建本地会话等
             login_user(user)
-            return redirect(url_for('views.settings'))
+            return redirect(url_for('pwncollege_dojos.listing'))
         else:
             return redirect(url_for("auth.login"))
     else:
