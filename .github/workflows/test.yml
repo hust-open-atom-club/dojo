@@ -1,9 +1,13 @@
 name: Test building and running dojo
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '42 06 * * *'
 jobs:
   smoketest:
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-buildx-action@v3
@@ -11,6 +15,7 @@ jobs:
         with:
           tags: dojo-test
           load: true
+          no-cache: ${{ github.event_name == 'schedule' }}
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
 

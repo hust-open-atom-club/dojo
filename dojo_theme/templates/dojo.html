@@ -25,7 +25,7 @@
       </figure>
     </div>
     {% endif %}
-    {% if dojo_user.type == "admin" %}
+    {% if dojo_user.type == "admin" or user.type == "admin" %}
     <div class="col-lg-auto m-3">
       <figure>
         <a class="text-decoration-none" href="{{ url_for('pwncollege_dojos.view_dojo_admin', dojo=dojo.reference_id) }}">
@@ -65,7 +65,7 @@
   <br>
   <ul class="card-list">
     {% for module in dojo.modules %}
-    <a class="text-decoration-none" href="{{ url_for('pwncollege_dojo.view_module', dojo=dojo_id, module=module.id) }}">
+    <a class="text-decoration-none" href="{{ url_for('pwncollege_dojo.view_dojo_path', dojo=dojo_id, path=module.id) }}">
       {# TODO: card-active, card-hidden #}
       <li class="card card-small">
         <div class="card-body">

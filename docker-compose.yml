@@ -11,7 +11,7 @@ services:
         - INSTALL_ANGR_MANAGEMENT=${INSTALL_ANGR_MANAGEMENT:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_BUSYBOX=${INSTALL_BUSYBOX:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_CAPSTONE=${INSTALL_CAPSTONE:-${DEFAULT_INSTALL_SELECTION}}
-        - INSTALL_DESKTOP_BASE=${INSTALL_DESKTOP_BASE:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_DESKTOP=${INSTALL_DESKTOP:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_GDB=${INSTALL_GDB:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_GECKODRIVER=${INSTALL_GECKODRIVER:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_GHIDRA=${INSTALL_GHIDRA:-${DEFAULT_INSTALL_SELECTION}}
@@ -26,7 +26,6 @@ services:
         - INSTALL_TOOLS_APT=${INSTALL_TOOLS_APT:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_TOOLS_PIP=${INSTALL_TOOLS_PIP:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_VIRTIOFSD=${INSTALL_VIRTIOFSD:-${DEFAULT_INSTALL_SELECTION}}
-        - INSTALL_XFCE=${INSTALL_XFCE:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_WINDOWS=${INSTALL_WINDOWS:-${DEFAULT_INSTALL_SELECTION}}
         - UBUNTU_VERSION=${UBUNTU_VERSION}
         - DOJO_CHALLENGE=${DOJO_CHALLENGE}
@@ -60,7 +59,7 @@ services:
             hard: 1048576
     environment:
       - UPLOAD_FOLDER=/var/uploads
-      - DATABASE_URL=mysql+pymysql://ctfd:ctfd@db/ctfd
+      - DATABASE_URL=mysql+pymysql://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}
       - REDIS_URL=redis://cache:6379
       - WORKERS=8
       - LOG_FOLDER=/var/log/CTFd
@@ -81,9 +80,9 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
       - INTERNET_FOR_ALL=${INTERNET_FOR_ALL}
-      - VIRTUAL_HOST=${DOJO_HOST},localhost
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
       - VIRTUAL_PORT=8000
-      - LETSENCRYPT_HOST=${DOJO_HOST}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
     volumes:
       - ./data:/var/data
       - ./data/CTFd/logs:/var/log/CTFd
@@ -119,18 +118,20 @@ services:
 
   db:
     container_name: db
-    image: mariadb:10.4.12
+    build:
+      context: ./db
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=ctfd
-      - MYSQL_USER=ctfd
-      - MYSQL_PASSWORD=ctfd
-      - MYSQL_DATABASE=ctfd
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_DATABASE=${DB_NAME}
+      - DB_EXTERNAL=${DB_EXTERNAL}
     volumes:
       - ./data/mysql:/var/lib/mysql
-    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
+    command: [/start.sh]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-pctfd"]
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASS}", "-u${DB_USER}", "-h${DB_HOST}"]
       interval: 10s
       timeout: 10s
       retries: 3
@@ -149,6 +150,11 @@ services:
     volumes:
       - ./data/ssh_host_keys:/etc/ssh:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
     ports:
       - "22:22"
 
@@ -172,6 +178,7 @@ services:
     environment:
       - DOCKER_HOST=unix:///tmp/${DOCKER_PSLR}/docker.sock
       - DEFAULT_HOST=${DOJO_HOST}
+      - LOG_JSON=true
     volumes:
       - conf:/etc/nginx/conf.d
       - html:/usr/share/nginx/html

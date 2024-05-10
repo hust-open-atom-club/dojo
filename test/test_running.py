@@ -78,6 +78,14 @@ def test_create_dojo(example_dojo, admin_session):
 
 
 @pytest.mark.dependency(depends=["test_create_dojo"])
+def test_delete_dojo(admin_session):
+    reference_id = create_dojo_yml("""id: delete-test""", session=admin_session)
+    assert admin_session.get(f"{PROTO}://{HOST}/{reference_id}/").status_code == 200
+    assert admin_session.post(f"{PROTO}://{HOST}/dojo/{reference_id}/delete/", json={"dojo": reference_id}).status_code == 200
+    assert admin_session.get(f"{PROTO}://{HOST}/{reference_id}/").status_code == 404
+
+
+@pytest.mark.dependency(depends=["test_create_dojo"])
 def test_create_import_dojo(example_import_dojo, admin_session):
     assert admin_session.get(f"{PROTO}://{HOST}/{example_import_dojo}/").status_code == 200
     assert admin_session.get(f"{PROTO}://{HOST}/example-import/").status_code == 200
@@ -139,6 +147,16 @@ def test_no_practice(no_practice_challenge_dojo, no_practice_dojo, random_user):
         assert response.status_code == 200
         assert not response.json()["success"]
         assert "practice" in response.json()["error"]
+
+@pytest.mark.dependency(depends=["test_join_dojo"])
+def test_lfs(lfs_dojo, random_user):
+    uid, session = random_user
+    assert session.get(f"{PROTO}://{HOST}/dojo/{lfs_dojo}/join/").status_code == 200
+    start_challenge(lfs_dojo, "test", "test", session=session)
+    try:
+        workspace_run("[ -f '/challenge/dojo.txt' ]", user=uid)
+    except subprocess.CalledProcessError:
+        assert False, "LFS didn't create dojo.txt"
 
 @pytest.mark.dependency(depends=["test_join_dojo"])
 def test_no_import(no_import_challenge_dojo, admin_session):

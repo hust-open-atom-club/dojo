@@ -38,6 +38,14 @@ def delete_before_insert(column, null=[]):
     return decorator
 
 
+deferred_definitions = []
+def deferred_definition(func):
+    deferred_definitions.append(
+        lambda: setattr(func.__globals__[func.__qualname__.split(".")[0]],
+                        func.__name__,
+                        func()))
+
+
 def columns_repr(column_names):
     def __repr__(self):
         description = " ".join(f"{name}={getattr(self, name)!r}" for name in column_names)
@@ -63,9 +71,10 @@ class Dojos(db.Model):
     password = db.Column(db.String(128))
 
     data = db.Column(db.JSON)
-    data_fields = ["type", "award", "comparator", "course", "importable"]
+    data_fields = ["type", "award", "course", "pages", "importable", "comparator"]
     data_defaults = {
-        "importable": True
+        "pages": [],
+        "importable": True,
     }
 
     users = db.relationship("DojoUsers", back_populates="dojo")
@@ -154,6 +163,22 @@ class Dojos(db.Model):
             for challenge in module.challenges:
                 challenge.module_index = module_index
         self._modules = value
+
+    @deferred_definition
+    def modules_count():
+        return db.column_property(
+            db.select([db.func.count()])
+            .where(Dojos.dojo_id == DojoModules.dojo_id)
+            .scalar_subquery(),
+            deferred=True)
+
+    @deferred_definition
+    def challenges_count():
+        return db.column_property(
+            db.select([db.func.count()])
+            .where(Dojos.dojo_id == DojoChallenges.dojo_id)
+            .scalar_subquery(),
+            deferred=True)
 
     @property
     def path(self):
@@ -681,3 +706,8 @@ class Belts(Awards):
 
 class Emojis(Awards):
     __mapper_args__ = {"polymorphic_identity": "emoji"}
+
+
+for deferral in deferred_definitions:
+    deferral()
+del deferred_definitions

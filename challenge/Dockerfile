@@ -14,8 +14,7 @@ ARG INSTALL_GECKODRIVER=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_BURPSUITE=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_BUSYBOX=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_GLOW=${DEFAULT_INSTALL_SELECTION}
-ARG INSTALL_DESKTOP_BASE=${DEFAULT_INSTALL_SELECTION}
-ARG INSTALL_XFCE=${DEFAULT_INSTALL_SELECTION}
+ARG INSTALL_DESKTOP=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_VIRTIOFSD=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_IDA_FREE=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_BINJA_FREE=${DEFAULT_INSTALL_SELECTION}
@@ -50,6 +49,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         ca-certificates
         curl
+        netcat-openbsd
         socat
         sudo
         vim
@@ -81,6 +81,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         autoconf
         bc
         bison
+        cargo
         clang
         cmake
         cpio
@@ -121,6 +122,22 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         mysql-server
         php-mysql
         libapache2-mod-php
+EOF
+
+################################################################################
+
+FROM builder as builder-github-tools
+RUN <<EOF
+    git clone --depth 1 --recurse-submodules https://github.com/pwncollege/dojjail /opt/dojjail
+    pip install -e /opt/dojjail
+
+    git clone --depth 1 --recurse-submodules https://github.com/zolutal/kropr /opt/kropr
+    cd /opt/kropr
+    cargo install --path . --root /tmp
+    mv /tmp/bin/ropr /usr/bin/kropr
+    chmod +x /usr/bin/kropr
+
+    git clone --depth 1 --recurse-submodules https://github.com/zolutal/gdb-pt-dump /opt/pt-dump
 EOF
 
 ################################################################################
@@ -203,6 +220,10 @@ RUN <<EOF
 
     git clone --depth 1 https://github.com/hugsy/gef /opt/gef
     git clone --depth 1 https://github.com/jerdna-regeiz/splitmind /opt/splitmind
+
+    git clone --depth 1 https://github.com/nccgroup/libslub /opt/libslub
+    cd /opt/libslub
+    pip install -r requirements.txt
 EOF
 
 FROM builder-gdb-${INSTALL_GDB} as builder-gdb
@@ -355,36 +376,22 @@ FROM builder-virtiofsd-${INSTALL_VIRTIOFSD} as builder-virtiofsd
 
 ################################################################################
 
-FROM essentials as builder-desktop-base-no
-FROM essentials as builder-desktop-base-yes
+FROM essentials as builder-desktop-no
+FROM essentials as builder-desktop-yes
 
 ARG UBUNTU_VERSION=20.04
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     [ "${UBUNTU_VERSION}" == "20.04" ] && TGR=common || TGR=tools; \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
+    apt-get update && xargs apt-get install -yqq <<EOF && \
+    apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
+    apt-get -y autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         novnc
         tigervnc-standalone-server
         tigervnc-$TGR
         websockify
-        fluxbox
         xterm
-EOF
-
-FROM builder-desktop-base-${INSTALL_DESKTOP_BASE} as builder-desktop-base
-
-################################################################################
-
-FROM builder-desktop-base-no as builder-desktop-xfce-no
-FROM builder-desktop-base-yes as builder-desktop-xfce-yes
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install -yqq <<EOF && \
-    apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
-    apt-get -y autoremove && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
         dbus-x11
         mousepad
         xclip
@@ -398,7 +405,7 @@ COPY desktop/pwncollege_background.jpg /usr/share/backgrounds/
 
 RUN rm /etc/xdg/autostart/*
 
-FROM builder-desktop-xfce-${INSTALL_XFCE} as builder-desktop-xfce
+FROM builder-desktop-${INSTALL_DESKTOP} as builder-desktop
 
 ################################################################################
 
@@ -485,6 +492,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         expect
         fish
         findutils
+	finger
         firefox
         gcc-aarch64-linux-gnu
         gdb
@@ -504,7 +512,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         nano
         neovim
         net-tools
-        netcat-openbsd
         nmap
         openssh-server
         parallel
@@ -562,6 +569,7 @@ RUN mkdir /opt/pwn.college
 COPY docker-initialize.sh /opt/pwn.college/docker-initialize.sh
 COPY docker-entrypoint.d /opt/pwn.college/docker-entrypoint.d
 COPY docker-entrypoint.sh /opt/pwn.college/docker-entrypoint.sh
+COPY services.d /opt/pwn.college/services.d
 COPY setuid_interpreter.c /opt/pwn.college/setuid_interpreter.c
 COPY bash.bashrc /opt/pwn.college/bash.bashrc
 COPY vm /opt/pwn.college/vm
@@ -583,8 +591,7 @@ FROM builder-tools-apt as builder-windows-no
 FROM builder-tools-apt as builder-windows-base
 
 WORKDIR /opt/windows
-COPY windows/Autounattend.xml windows/setup.ps1 windows/startup.ps1 windows/sshd_config ./
-COPY windows/challenge-proxy ./challenge-proxy
+COPY windows/Autounattend.xml windows/setup.ps1 windows/config_startup.ps1 windows/sshd_config ./
 COPY windows/shutdown.py .
 
 
@@ -602,8 +609,8 @@ RUN <<EOF
     sed -i "s/INSTALL_IDA_FREE/yes/g" ./setup.ps1
     touch ./practice-mode-enabled
     mkfs.fat -F 12 -C ./build/floppy.img 1440
-    mcopy -si ./build/floppy.img ./Autounattend.xml ./setup.ps1 ./startup.ps1 ./practice-mode-enabled ./sshd_config ./challenge-proxy/ ::
-    rm -rf ./Autounattend.xml ./setup.ps1 ./startup.ps1 ./practice-mode-enabled ./sshd_config ./challenge-proxy/
+    mcopy -si ./build/floppy.img ./Autounattend.xml ./setup.ps1 ./config_startup.ps1 ./practice-mode-enabled ./sshd_config ::
+    rm -rf ./Autounattend.xml ./setup.ps1 ./practice-mode-enabled ./sshd_config
 EOF
 
 FROM builder-windows-base as builder-windows-base-ida-no
@@ -619,11 +626,11 @@ RUN <<EOF
     rm -rf /var/lib/apt/lists/*
     touch ./practice-mode-enabled
     mkfs.fat -F 12 -C ./build/floppy.img 1440
-    mcopy -si ./build/floppy.img ./Autounattend.xml ./setup.ps1 ./startup.ps1 ./practice-mode-enabled ./sshd_config ./challenge-proxy/ ::
-    rm -rf ./Autounattend.xml ./setup.ps1 ./startup.ps1 ./practice-mode-enabled ./sshd_config ./challenge-proxy/
+    mcopy -si ./build/floppy.img ./Autounattend.xml ./setup.ps1 ./practice-mode-enabled ./sshd_config ::
+    rm -rf ./Autounattend.xml ./setup.ps1 ./practice-mode-enabled ./sshd_config
 EOF
 
-from builder-windows-base-ida-${INSTALL_IDA_FREE} as builder-windows-yes
+from builder-windows-base-ida-${INSTALL_IDA_FREE} as builder-windows-install
 
 RUN <<EOF
     echo "Building virtio drivers disk"
@@ -670,6 +677,11 @@ RUN --security=insecure <<EOF
     rm -rf ./build/monitor.sock
 EOF
 
+# This step also does the "post-install building as hacker with admin privs"
+from builder-windows-install as builder-windows-yes
+
+COPY windows/challenge-proxy.c windows/post_install.sh windows/post_install.ps1 windows/startup.ps1 ./
+
 RUN --security=insecure <<EOF
     echo "Performing initial bootup"
     qemu-system-x86_64 \
@@ -687,10 +699,8 @@ RUN --security=insecure <<EOF
       -drive "file=./build/server-2022.iso,media=cdrom" \
       -drive "file=./build/virtio-win-processed.iso,media=cdrom" \
       -drive "file=./build/clean.qcow2,if=virtio,cache=writeback,discard=ignore,format=qcow2" &
-    python3 ./shutdown.py
+    ./post_install.sh
     rm -f ./build/monitor.sock
-    touch ./build/image-built
-    echo "Windows image built"
 EOF
 
 FROM builder-windows-${INSTALL_WINDOWS} as builder-windows
@@ -724,11 +734,12 @@ EOF
 
 FROM challenge-nano as challenge-micro
 COPY --link --from=builder-code-server / /
+COPY --link --from=builder-github-tools / /
 
 ################################################################################
 
 FROM challenge-micro as challenge-mini
-COPY --link --from=builder-desktop-base / /
+COPY --link --from=builder-desktop-yes / /
 
 ################################################################################
 
@@ -748,7 +759,6 @@ COPY --link --from=builder-geckodriver / /
 COPY --link --from=builder-burpsuite / /
 COPY --link --from=builder-busybox / /
 COPY --link --from=builder-glow / /
-COPY --link --from=builder-desktop-xfce / /
 COPY --link --from=builder-virtiofsd /opt/virtiofsd /opt/virtiofsd
 COPY --link --from=builder-desktop-ida-free / /
 COPY --link --from=builder-desktop-binja-free / /
@@ -782,7 +792,6 @@ COPY --link --from=builder-geckodriver-yes / /
 COPY --link --from=builder-burpsuite-yes / /
 COPY --link --from=builder-busybox-yes / /
 COPY --link --from=builder-glow-yes / /
-COPY --link --from=builder-desktop-xfce-yes / /
 COPY --link --from=builder-virtiofsd-yes /opt/virtiofsd /opt/virtiofsd
 COPY --link --from=builder-desktop-ida-free / /
 COPY --link --from=builder-desktop-binja-free / /
