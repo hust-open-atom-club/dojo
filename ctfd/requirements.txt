@@ -8,6 +8,7 @@ flask-shell-ipython==0.5.1
 
 # CTFd
 Flask==2.2.5
+pycountry==23.12.11
 Werkzeug==2.2.3
 Flask-SQLAlchemy==2.5.1
 Flask-Caching==2.0.2
