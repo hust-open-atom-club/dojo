@@ -236,22 +236,10 @@ def view_course(dojo, resource=None):
     identity = dict(identity_name=dojo.course.get("student_id", "Identity"),
                     identity_value=student.token if student else None)
 
-    setup = {}
-    setup["create_account"] = "complete" if user else "incomplete"
-    setup["link_student"] = (
-        "incomplete" if not student else
-        "unknown" if not student.official else
-        "complete"
-    )
-
-    setup_complete = all(status == "complete" for status in setup.values())
-
     return render_template("course.html",
                            name=name,
                            **grades,
                            **identity,
-                           **setup,
-                           setup_complete=setup_complete,
                            user=user,
                            dojo=dojo)
 
