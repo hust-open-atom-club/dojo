@@ -25,8 +25,9 @@
     {% elif type == "Advanced" %}
     <h2>高级篇</h2>
     <p> 神奇宝贝联盟大会 </p>
-    <!-- <h2>课程</h2>
-    <p>在此平台，我们开展了众多课程。这些课程大多采纳上文提及的教材，然而部分课程将引入崭新的观点与挑战。</p> -->
+    {% elif type == "Archive" %}
+    <h2>归档</h2>
+    <p>历史课程</p>
     {% endif %}
     <ul class="card-list">
       {% for dojo in dojos %}
@@ -50,6 +51,7 @@
     </ul>
     <br>
   {% endfor %}
+
 {% endblock %}
 
 {% block scripts %}
