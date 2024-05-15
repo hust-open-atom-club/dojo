@@ -30,18 +30,17 @@
 {% block content %}
 <div class="jumbotron">
   <div class="container">
-    <h1>Course</h1>
+    <h1>课程</h1>
   </div>
 </div>
 <div class="container">
   <div class="row">
     <div class="col-md-2 offset-md-1">
       <div class="nav flex-column nav-pills" role="tablist">
-        <a class="nav-link active" id="course-syllabus-tab" data-toggle="pill" href="#syllabus" role="tab">Syllabus</a>
+        <a class="nav-link active" id="course-syllabus-tab" data-toggle="pill" href="#syllabus" role="tab">教学大纲</a>
         {% if user %}
-          <a class="nav-link" id="course-grades-tab" data-toggle="pill" href="#grades" role="tab">Grades</a>
-          <a class="nav-link" id="course-identity-tab" data-toggle="pill" href="#identity" role="tab">Identity</a>
-          <a class="nav-link" id="course-setup-tab" data-toggle="pill" href="#setup" role="tab">Setup</a>
+          <a class="nav-link" id="course-grades-tab" data-toggle="pill" href="#grades" role="tab">成绩</a>
+          <a class="nav-link" id="course-identity-tab" data-toggle="pill" href="#identity" role="tab">身份信息</a>
         {% endif %}
       </div>
     </div>
@@ -62,11 +61,11 @@
                 <table class="table table-striped">
                   <thead>
                     <tr>
-                      <td scope="col"><b>Name</b></td>
-                      <td scope="col"><b>Date</b></td>
-                      <td scope="col"><b>Weight</b></td>
-                      <td scope="col"><b>Progress</b></td>
-                      <td scope="col"><b>Credit</b></td>
+                      <td scope="col"><b>姓名</b></td>
+                      <td scope="col"><b>日期</b></td>
+                      <td scope="col"><b>权重</b></td>
+                      <td scope="col"><b>进度</b></td>
+                      <td scope="col"><b>学分</b></td>
                     </tr>
                   </thead>
                   <tbody>
@@ -94,7 +93,7 @@
             <form method="post" id="identity-form" autocomplete="off">
               <div class="form-group">
                 <b><label for="enter-name">{{ identity_name }}</label></b>
-                <small class="form-text text-muted">This will be shared with the admins of this dojo.</small>
+                <small class="form-text text-muted">这将共享给本道馆的所有管理员。</small>
                 <br>
                 <input class="form-control" id="identity" name="identity" type="text" value="{{ identity_value or '' }}">
               </div>
@@ -108,18 +107,6 @@
             </form>
           </div>
         {% endif %}
-        <div class="tab-pane fade" id="setup" role="tabpanel">
-          <ol>
-            <li class="setup-{{ create_account }}">Create a pwn.hust.college account <a href="/register">here</a>. You can use an existing account, or create a new one specifically for the course. The username <strong>will be visible publicly</strong>: if you want to be anonymous, do not use your real name.</li>
-            <li class="setup-{{ link_student }}">Link your pwn.hust.college account with your {{ identity_name }} <a href="identity">here</a>. This is how we will be able to give you your official course grade, and how we will be able to verify your student status for an official course role in Discord.</li>
-          </ol>
-          {% if setup_complete %}
-            <p>Setup complete!</p>
-          {% else %}
-            <p>Setup incomplete.</p>
-          {% endif %}
-          <p></p>
-        </div>
       </div>
     </div>
   </div>
