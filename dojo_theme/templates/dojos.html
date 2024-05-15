@@ -28,6 +28,9 @@
     {% elif type == "Course" %}
     <h2>课程</h2>
     <p>我们在平台上提供了众多课程，包含软件安全。</p>
+    {% elif type == "Archive" %}
+    <h2>归档</h2>
+    <p>历史课程</p>
     {% endif %}
     <ul class="card-list">
       {% for dojo in dojos %}
@@ -51,6 +54,7 @@
     </ul>
     <br>
   {% endfor %}
+
 {% endblock %}
 
 {% block scripts %}

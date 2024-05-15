@@ -36,6 +36,7 @@ def listing():
         "Advanced": [],
         "Topics": [],
         "Courses": [],
+        "Archive":[],
         "More Material": [],
     }
     for dojo in Dojos.viewable(user=user):
@@ -49,6 +50,8 @@ def listing():
             typed_dojos["Advanced"].append(dojo)
         elif dojo.type == "topic":
             typed_dojos["Topics"].append(dojo)
+        elif dojo.type == "archive":
+            typed_dojos["Archive"].append(dojo)
         elif dojo.type == "course":
             typed_dojos["Courses"].append(dojo)
         elif dojo.type == "hidden":

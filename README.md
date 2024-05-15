@@ -119,20 +119,20 @@ docker kill pwncollege/dojo
 docker rm pwncollege/dojo
 git pull
 docker build -t pwncollege/dojo "$DOJO_PATH"
-docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8880:80 -p 44443:443 --name dojo pwncollege/dojo
+docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22:22 -p 80:80 -p 443:443 --name dojo pwncollege/dojo
 ```
 
 This will cause downtime when the dojo is rebuilding.
 
 Some changes _can_ be applied without a complete restart, however this is not guaranteed.
 
-If you really know what you're doing (the changes that you're pulling in are just to `ctfd`), you can do the following:
+If you really know what you're doing (the changes that you're pulling in are just to `ctfd`), inside the `pwncollege/dojo` container you can do the following:
 
 ```sh
-docker exec dojo dojo update
+dojo update
 ```
 
-Note that `docker exec dojo dojo update` is not guaranteed to be successful and should only be used if you fully understand each commit/change that you are updating.
+Note that `dojo update` is not guaranteed to be successful and should only be used if you fully understand each commit/change that you are updating.
 
 ## Customization
 
