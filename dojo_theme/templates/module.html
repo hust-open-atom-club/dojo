@@ -19,12 +19,12 @@
 <div class="container">
 
   {% if module.description %}
-  <p>{{ module.description | markdown }}</p>
+  <p class="row">{{ module.description | markdown }}</p>
   <br>
   {% endif %}
 
   {% if module.resources %}
-  <h2>课程讲解与资料学习</h2>
+  <h2 class="row">课程讲解与资料学习</h2>
 
   <div class="accordion" id="resources">
     {% for resource in module.resources %}
@@ -60,7 +60,7 @@
   {% endif %}
 
   {% if challenges %}
-  <h2>挑战关卡</h2>
+  <h2 class="row">挑战关卡</h2>
 
   <div class="accordion" id="challenges">
     {% for challenge in challenges %}
@@ -144,8 +144,8 @@
 
   <br>
 
-  <h2>模块排名</h2>
-  <p>此计分板反映了本道馆模块启动后挑战成功的记录。</p>
+  <h2 class="row">模块排名</h2>
+  <p class="row">此计分板反映了本道馆模块启动后挑战成功的记录。</p>
   {% from "macros/scoreboard.html" import scoreboard %}
   {{ scoreboard() }}
 
