@@ -31,6 +31,7 @@ def listing():
     user = get_current_user()
     typed_dojos = {
         "Start Here": [],
+        "Tools Learning": [],
         "Elementary": [],
         "Intermediate": [],
         "Advanced": [],
@@ -42,6 +43,8 @@ def listing():
     for dojo in Dojos.viewable(user=user):
         if dojo.type == "welcome":
             typed_dojos["Start Here"].append(dojo)
+        elif dojo.type == "tools":
+            typed_dojos["Tools Learning"].append(dojo)
         elif dojo.type == "elementary":
             typed_dojos["Elementary"].append(dojo)
         elif dojo.type == "intermediate":
