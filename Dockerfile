@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_CTYPE=C.UTF-8
 
-RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list
+RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y \
         build-essential \

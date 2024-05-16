@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster as build
 WORKDIR /opt/CTFd
 
-RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list
+RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
@@ -25,7 +25,7 @@ COPY . /opt/CTFd
 FROM python:3.9-slim-buster as release
 WORKDIR /opt/CTFd
 
-RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list
+RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libffi6 \
