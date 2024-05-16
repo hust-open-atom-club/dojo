@@ -45,6 +45,7 @@ EOF
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         ca-certificates
@@ -64,6 +65,7 @@ FROM essentials as builder-essentials
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         build-essential
@@ -75,6 +77,7 @@ FROM builder-essentials as builder
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         autoconf
@@ -356,6 +359,7 @@ ARG UBUNTU_VERSION=20.04
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     [ "${UBUNTU_VERSION}" == "20.04" ] && TGR=common || TGR=tools; \
+    sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         novnc
@@ -376,6 +380,7 @@ FROM builder-desktop-base-yes as builder-desktop-xfce-yes
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
     apt-get update && xargs apt-get install -yqq <<EOF && \
     apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
     apt-get -y autoremove && \
@@ -462,6 +467,7 @@ FROM essentials as builder-tools-apt-yes
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         arping
