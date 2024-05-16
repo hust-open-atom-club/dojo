@@ -1,8 +1,8 @@
 FROM python:3.9-slim-buster as build
 WORKDIR /opt/CTFd
 
-RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
-    apt-get update \
+RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         libffi-dev \
@@ -25,8 +25,8 @@ COPY . /opt/CTFd
 FROM python:3.9-slim-buster as release
 WORKDIR /opt/CTFd
 
-RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list \
-    apt-get update \
+RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libffi6 \
         libssl1.1 \

@@ -1,5 +1,6 @@
 FROM ubuntu:20.04 AS full
 
+RUN sed -i.bak 's|https\?://archive.ubuntu.com|https://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN echo 'APT::Install-Recommends 0;' >> /etc/apt/apt.conf.d/01norecommends \
   && echo 'APT::Install-Suggests 0;' >> /etc/apt/apt.conf.d/01norecommends \
   && apt-get update \
