@@ -30,9 +30,7 @@
         {{ navitem("管理面板", url_for("admin.view"), "fa-wrench") }}
         {% endif %}
 
-        {% if not is_admin() %}
         {{ navitem("简介", url_for("pwncollege_users.view_self"), "fa-user-circle") }}
-        {% endif %}
         {{ navitem("设置", url_for("views.settings"), "fa-cogs") }}
         {{ navitem("注销", url_for("auth.logout"), "fa-sign-out-alt", shrink=True) }}
 
