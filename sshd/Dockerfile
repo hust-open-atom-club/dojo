@@ -1,5 +1,6 @@
 FROM alpine:latest
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.hust.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache \
         python3 \
         py3-pip \
