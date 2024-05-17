@@ -45,6 +45,8 @@ def listing():
             typed_dojos["Start Here"].append(dojo)
         elif dojo.type == "tools":
             typed_dojos["Tools Learning"].append(dojo)
+        elif dojo.type == "course":
+            typed_dojos["Courses"].append(dojo)
         elif dojo.type == "elementary":
             typed_dojos["Elementary"].append(dojo)
         elif dojo.type == "intermediate":
@@ -55,8 +57,6 @@ def listing():
             typed_dojos["Topics"].append(dojo)
         elif dojo.type == "archive":
             typed_dojos["Archive"].append(dojo)
-        elif dojo.type == "course":
-            typed_dojos["Courses"].append(dojo)
         elif dojo.type == "hidden":
             continue
         elif dojo.type == "example" and dojo.official:
