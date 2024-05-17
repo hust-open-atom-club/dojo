@@ -32,11 +32,11 @@ def listing():
     typed_dojos = {
         "Start Here": [],
         "Tools Learning": [],
+        "Courses": [],
         "Elementary": [],
         "Intermediate": [],
         "Advanced": [],
         "Topics": [],
-        "Courses": [],
         "Archive":[],
         "More Material": [],
     }
