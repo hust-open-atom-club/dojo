@@ -29,6 +29,7 @@ from .pages.settings import settings_override
 from .pages.course import course
 from .pages.writeups import writeups
 from .pages.belts import belts
+from .pages.index import static_html_override
 from .pages.kook import kook
 from .api import api
 
@@ -114,6 +115,7 @@ def load(app):
     CHALLENGE_CLASSES["dojo"] = DojoChallenge
     FLAG_CLASSES["dojo"] = DojoFlag
 
+    app.view_functions["views.static_html"] = static_html_override
     app.view_functions["views.settings"] = settings_override
     app.view_functions["challenges.listing"] = dojos_override
     del app.view_functions["scoreboard.listing"]
