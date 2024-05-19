@@ -110,7 +110,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 ```yaml
 id: your_dojo_id
 name: your_dojo_name
-type: welcome/course/topic/example/hidden/Elementary/Intermediate/Advanced
+type: welcome/course/topic/example/hidden/elementary/intermediate/advanced
 award:
   belt: PokeBall
   emoji: PokeBall
