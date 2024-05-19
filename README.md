@@ -17,14 +17,13 @@ The associated challenge binary may be either global, which means all users will
 
 ```sh
 curl -fsSL https://get.docker.com | /bin/sh
-DOJO_PATH="./dojo"
-git clone https://github.com/HUSTSeclab/dojo.git "$DOJO_PATH"
-docker build -t pwncollege/dojo "$DOJO_PATH"
-docker run --privileged -d -v "${DOJO_PATH}:/opt/pwn.college:shared" -p 22222:22 -p 8880:80 -p 44443:443 --name dojo pwncollege/dojo
+git clone https://github.com/HUSTSeclab/dojo.git
+docker build -t pwncollege/dojo dojo
+docker run --privileged -d -v "dojo:/opt/pwn.college:shared" -p 22222:22 -p 8880:80 -p 44443:443 --name dojo pwncollege/dojo
 ```
 
 This will run the initial setup, including building the challenge docker image. It would build docker image based on the host architecture.
-You can deploy dojo with [setup.sh](https://github.com/HUSTSeclab/dojo/blob/hustsec_dev/setup.sh).
+You can deploy dojo with [setup.sh](https://github.com/hust-open-atom-club/dojo/blob/hustsec_dev/setup.sh).
 
 
 > [!NOTE]
