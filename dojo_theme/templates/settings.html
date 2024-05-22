@@ -12,6 +12,7 @@
       <div class="nav flex-column nav-pills" role="tablist">
         <a class="nav-link active" id="settings-profile-tab" data-toggle="pill" href="#profile" role="tab">简介</a>
         <a class="nav-link" id="settings-ssh-key-tab" data-toggle="pill" href="#ssh-key" role="tab">SSH 公钥</a>
+        <a class="nav-link" id="settings-kook-tab" data-toggle="pill" href="#kook" role="tab">KOOK</a>
       </div>
     </div>
     <div class="col-md-8">
@@ -23,7 +24,7 @@
           {% with form = Forms.self.SettingsForm(country=user.country) %}
           {% from "macros/forms.html" import render_extra_fields %}
           <form id="user-profile-form" method="post" accept-charset="utf-8" autocomplete="off" role="form"
-                class="form-horizontal">
+            class="form-horizontal">
             <div class="form-group">
               <b>{{ form.name.label }}</b>
               {{ form.name(class="form-control", value=user.name) }}
@@ -66,7 +67,7 @@
               </select>
             </div>
 
-	    {{ render_extra_fields(form.extra) }}
+            {{ render_extra_fields(form.extra) }}
 
             <div id="results" class="form-group">
             </div>
@@ -91,9 +92,30 @@
             </div>
 
             <div class="form-group text-right">
-              <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit" value="Update">
+              <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit"
+                value="Update">
             </div>
           </form>
+        </div>
+
+        <div class="tab-pane fade" id="kook" role="tabpanel">
+          {% if not kook_user %}
+          <a href="{{ url_for('kook.kook_connect') }}">
+            <button class="btn btn-primary btn-lg">连接到KOOK</button>
+          </a>
+
+          {% else %}
+          <h3>你的账户已经连接到KOOK。</h3>
+          <div style="margin-bottom: 24px;">用户名: {{ kook_user.username }}</div>
+
+          <a href="{{ url_for('kook.kook_connect') }}">
+            <button class="btn btn-primary btn-lg">更换账户</button>
+          </a>
+
+          <a href="{{ url_for('kook.kook_disconnect') }}">
+            <button class="btn btn-primary btn-lg">解除绑定</button>
+          </a>
+          {% endif %}
         </div>
 
         <div class="tab-pane fade" id="tokens" role="tabpanel">

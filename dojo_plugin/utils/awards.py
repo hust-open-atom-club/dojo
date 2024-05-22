@@ -1,8 +1,11 @@
 import datetime
+import asyncio
 
 from CTFd.cache import cache
 from CTFd.models import db, Users
 from flask import url_for
+
+from .kook import get_kook_user, send_message
 
 from ..models import Dojos, Belts, Emojis
 
@@ -101,6 +104,16 @@ def update_awards(user):
         db.session.add(Belts(user=user, name=belt))
         db.session.commit()
         current_belts.append(belt)
+
+    kook_user = get_kook_user(user.id)
+    if kook_user:
+        for belt in BELT_REQUIREMENTS:
+            if belt not in current_belts:
+                continue
+            belt_role = belt.title() + " Belt"
+            user_mention = f"<@{kook_user.id}>"
+            message = f"{user_mention} earned their {belt_role}! :tada:"
+            send_message(message, "belting-ceremony")
 
     current_emojis = get_user_emojis(user)
     for emoji,dojo_name,dojo_id in current_emojis:
