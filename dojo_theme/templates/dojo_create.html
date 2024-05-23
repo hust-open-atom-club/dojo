@@ -44,37 +44,37 @@ dojo create
                     value="">
                 </div>
             </div>
-                    <br>
-                    <b><label>部署秘钥</label></b>
+            <br>
+            <b><label>部署秘钥</label></b>
 
-                    <small class="form-text text-muted">
-                        Github 私库必需： <a href="https://docs.github.com/zh/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys" arget="_blank">部署秘钥文档</a>
-                    </small>
-                    <small class="form-text text-muted">
-                        Gitee 私库必需： <a href="https://help.gitee.com/repository/ssh/settings" arget="_blank">部署秘钥文档</a>
-                    </small>
-                    <br>
-                    <div class="input-group mb-3">
-                        <input class="form-control" name="public_key" type="text" value="{{ public_key }}" readonly>
-                        <div class="input-group-append copy-button">
-                            <button class="btn btn-outline-secondary" type="button">
-                                <i class="fas fa-clipboard"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <input class="form-control" name="private_key" type="hidden" value="{{ private_key }}">
+            <small class="form-text text-muted">
+                Github 私库必需： <a href="https://docs.github.com/zh/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys" arget="_blank">部署秘钥文档</a>
+            </small>
+            <small class="form-text text-muted">
+                Gitee 私库必需： <a href="https://help.gitee.com/repository/ssh/settings" arget="_blank">部署秘钥文档</a>
+            </small>
+            <br>
+            <div class="input-group mb-3">
+                <input class="form-control" name="public_key" type="text" value="{{ public_key }}" readonly>
+                <div class="input-group-append copy-button">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-clipboard"></i>
+                    </button>
                 </div>
+            </div>
 
-                <br>
+            <input class="form-control" name="private_key" type="hidden" value="{{ private_key }}">
+        </div>
 
-                <div id="dojo-create-results" class="form-group">
-                </div>
+        <br>
 
-                <div class="form-group text-right">
-                    <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit"
-                        value="Create">
-                </div>
+        <div id="dojo-create-results" class="form-group">
+        </div>
+
+        <div class="form-group text-right">
+            <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit"
+                   value="Create">
+        </div>
     </form>
 </div>
 {% endblock %}
