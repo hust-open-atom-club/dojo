@@ -85,5 +85,5 @@ iptables -I DOCKER-USER -i user_network -j DROP
 for host in $(cat $DOJO_DIR/user_firewall.allowed); do
     iptables -I DOCKER-USER -i user_network -d $(host $host | awk '{print $NF; exit}') -j ACCEPT
 done
-iptables -I DOCKER-USER -i user_network -s 10.0.0.0/24 -m conntrack --ctstate NEW -j ACCEPT
-iptables -I DOCKER-USER -i user_network -d 10.0.0.0/8 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -I DOCKER-USER -i user_network -s 10.114.0.0/24 -m conntrack --ctstate NEW -j ACCEPT
+iptables -I DOCKER-USER -i user_network -d 10.114.0.0/16 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
