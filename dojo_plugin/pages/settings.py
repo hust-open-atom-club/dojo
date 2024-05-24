@@ -6,6 +6,7 @@ from CTFd.utils.decorators import authed_only
 from CTFd.utils.user import get_current_user
 
 from ..models import Dojos, SSHKeys, DojoMembers
+from ..utils.kook import get_kook_user
 
 
 @authed_only
@@ -17,6 +18,8 @@ def settings_override():
 
     ssh_key = SSHKeys.query.filter_by(user_id=user.id).first()
     ssh_key = ssh_key.value if ssh_key else None
+
+    kook_user = get_kook_user(user.id)
 
     prevent_name_change = get_config("prevent_name_change")
 
@@ -37,4 +40,5 @@ def settings_override():
         ssh_key=ssh_key,
         prevent_name_change=prevent_name_change,
         infos=infos,
+        kook_user=kook_user,
     )

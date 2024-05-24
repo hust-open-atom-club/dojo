@@ -76,6 +76,12 @@ services:
       - VIRTUAL_HOST=${DOJO_HOST},localhost
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=${DOJO_HOST}
+      - KOOK_TOKEN=${KOOK_TOKEN}
+      - KOOK_GUILD_ID=${KOOK_GUILD_ID}
+      - KOOK_CHANNEL_ID=${KOOK_CHANNEL_ID}
+      - KOOK_CLIENT_ID=${KOOK_CLIENT_ID}
+      - KOOK_CLIENT_SECRET=${KOOK_CLIENT_SECRET}
+      - KOOK_APP_ID=${KOOK_APP_ID}
     volumes:
       - ./data:/var/data
       - ./data/CTFd/logs:/var/log/CTFd
