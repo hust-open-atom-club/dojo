@@ -90,7 +90,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 ## 2.1 道馆编写
 
-道馆是 pwn.hust.college 平台的核心概念，同学们（神奇宝贝训练家）可以通过道馆挑战学习软件安全课程的核心概念与实践各种知识点，并且获得道馆徽章。教师们可参考 [example-dojo](https://github.com/HUSTSeclab/example-dojo))，自行编写自己的道馆及挑战关卡。
+道馆是 pwn.hust.college 平台的核心概念，同学们（神奇宝贝训练家）可以通过道馆挑战学习软件安全课程的核心概念与实践各种知识点，并且获得道馆徽章。教师们可参考 [example-dojo](https://github.com/hust-open-atom-club/example-dojo))，自行编写自己的道馆及挑战关卡。
 
 ### 2.1.1 字段解释
 
@@ -199,7 +199,7 @@ resources:
 
 ![](static/Z4a7bHIdXotSYzx97NRcFDBCnIb.png)
 
-1. 根据道馆仓库所在的托管平台，选择 Github 或 Gitee，并输入相应的仓库路径，如 HUSTSeclab/example-道馆。若道馆仓库是开源的，即可点击 Create 按钮，创建道馆及其挑战关卡。反之，则需要在道馆仓库中添加如图所示的部署秘钥，详见 Github 或 Gitee 部署秘钥文档。
+1. 根据道馆仓库所在的托管平台，选择 Github 或 Gitee，并输入相应的仓库路径，如 hust-open-atom-club/example-dojo。若道馆仓库是开源的，即可点击 Create 按钮，创建道馆及其挑战关卡。反之，则需要在道馆仓库中添加如图所示的部署秘钥，详见 Github 或 Gitee 部署秘钥文档。
 
 ![](static/NESzbol3HoOzZ4xeUysc9uNTnbb.png)
 

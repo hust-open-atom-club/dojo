@@ -17,7 +17,7 @@ The associated challenge binary may be either global, which means all users will
 
 ```sh
 export DOWNLOAD_URL="https://mirrors.hust.edu.cn/docker-ce" && curl -fsSL https://get.docker.com | /bin/sh
-git clone https://github.com/HUSTSeclab/dojo.git
+git clone https://github.com/hust-open-atom-club/dojo.git
 docker build -t pwncollege/dojo dojo
 docker run --privileged -d -v "dojo:/opt/pwn.college:shared" -p 22:22 -p 80:80 -p 443:443 --name dojo pwncollege/dojo
 ```

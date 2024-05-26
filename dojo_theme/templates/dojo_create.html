@@ -9,7 +9,7 @@ dojo create
 </div>
 <div class="container">
   
-    <p>pwn.hust.college 的道场是在一个 git 仓库中定义的。您可以使用下面列出的示例仓库，或者我们的<a href="https://github.com/HUSTSeclab/official-dojos">官方道馆仓库</a>，作为构建道馆的示例！</p>
+    <p>pwn.hust.college 的道场是在一个 git 仓库中定义的。您可以使用下面列出的示例仓库，或者我们的<a href="https://github.com/hust-open-atom-club/official-dojos">官方道馆仓库</a>，作为构建道馆的示例！</p>
     <ul class="card-list">
         {% for dojo in example_dojos %}
         {{ card(url_for("pwncollege_dojos.view_dojo", dojo=dojo.reference_id),
@@ -25,8 +25,8 @@ dojo create
     <form method="post" id="dojo-create-form" autocomplete="off">
         <div class="form-group">
             <b><label>Git 仓库</label></b>
-            <small class="form-text text-muted">https://github.com/<b>HUSTSeclab/example-dojo</b></small>
-            <small class="form-text text-muted">https://gitee.com/<b>HUSTSeclab/example-dojo</b></small>
+            <small class="form-text text-muted">https://github.com/<b>hust-open-atom-club/example-dojo</b></small>
+            <small class="form-text text-muted">https://gitee.com/<b>hust-open-atom-club/example-dojo</b></small>
             <small class="form-text text-muted">选择 Git 仓库类型：</small>
             <br>
             <div style="display: flex;
@@ -40,7 +40,7 @@ dojo create
                     </select>
                 </div>
                 <div class="col-sm-6 form-group ">
-                <input class="form-control btn btn-md btn-outline-secondary w-100" name="repository" type="text" placeholder="HUSTSeclab/example-dojo"
+                <input class="form-control btn btn-md btn-outline-secondary w-100" name="repository" type="text" placeholder="hust-open-atom-club/example-dojo"
                     value="">
                 </div>
             </div>
