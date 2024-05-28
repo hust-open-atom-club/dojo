@@ -30,7 +30,6 @@ services:
         - INSTALL_WINDOWS=${INSTALL_WINDOWS:-${DEFAULT_INSTALL_SELECTION}}
         - UBUNTU_VERSION=${UBUNTU_VERSION}
         - DOJO_CHALLENGE=${DOJO_CHALLENGE}
-      privileged: true
     platform: linux/${ARCH}
     entrypoint: /bin/true
     networks:
