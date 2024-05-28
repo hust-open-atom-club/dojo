@@ -12,15 +12,15 @@ from ..models import Dojos, Belts, Emojis
 
 BELT_ORDER = [ "orange", "yellow", "green", "purple", "blue", "brown", "red", "black" ]
 BELT_REQUIREMENTS = {
-    "orange": "pewter",
-    "yellow": "cerulean",
-    "green": "vermilion",
-    "purple": "saffron",
+    "orange": "welcome",
+    "yellow": "pwntools",
+    "green": "saffron",
+    "purple": "viridian",
     "blue": "leagueconference",
 }
 
 def belt_asset(color):
-    belt = color + ".png" if color in BELT_REQUIREMENTS else "Beginner_Sprite.png"
+    belt = color + ".png" if color in BELT_REQUIREMENTS else "white.png"
     return url_for("views.themes", path=f"img/belts/{belt}")
 
 def get_user_emojis(user):
