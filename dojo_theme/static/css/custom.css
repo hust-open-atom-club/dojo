@@ -280,6 +280,9 @@ h4 {
     font-weight: bold;
 }
 
+.scoreboard tr {
+    display: flex;
+}
 
 #syllabus ul li {
   list-style-image:url('../img/bullet.png');
