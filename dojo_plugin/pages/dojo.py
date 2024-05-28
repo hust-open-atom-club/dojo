@@ -1,9 +1,10 @@
+import collections
 import datetime
 import docker
 import pytz
 
 from flask import Blueprint, render_template, abort, send_file
-from CTFd.models import db, Solves, Challenges, Users
+from CTFd.models import db, Solves, Challenges, Users, Awards
 from CTFd.utils.user import get_current_user
 from CTFd.utils.helpers import get_infos
 from CTFd.cache import cache
@@ -50,6 +51,7 @@ def listing(dojo):
     user = get_current_user()
     dojo_user = DojoUsers.query.filter_by(dojo=dojo, user=user).first()
     stats = get_stats(dojo)
+    awards = dojo.awards()
     return render_template(
         "dojo.html",
         dojo=dojo,
@@ -57,6 +59,7 @@ def listing(dojo):
         dojo_user=dojo_user,
         stats=stats,
         infos=infos,
+        awards=awards,
     )
 
 
@@ -82,6 +85,12 @@ def view_module(dojo, module):
                         .group_by(Solves.challenge_id)
                         .with_entities(Solves.challenge_id, db.func.count()))
     current_dojo_challenge = get_current_dojo_challenge()
+
+    module_containers = docker.from_env().containers.list(filters={
+        "name": "user_",
+        "label": [ f"dojo.dojo_id={dojo.reference_id}", f"dojo.module_id={module.id}" ]
+    }, ignore_removed=True)
+    challenge_container_counts = collections.Counter(c.labels['dojo.challenge_id'] for c in module_containers)
 
     student = DojoStudents.query.filter_by(dojo=dojo, user=user).first()
     assessments = []
@@ -115,6 +124,7 @@ def view_module(dojo, module):
         user=user,
         current_dojo_challenge=current_dojo_challenge,
         assessments=assessments,
+        challenge_container_counts=challenge_container_counts,
     )
 
 

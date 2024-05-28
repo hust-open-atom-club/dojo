@@ -79,7 +79,16 @@
               {% endif %}
             </span>
           </h4>
-          <span class="total-solves">{{ total_solves.get(challenge.challenge_id, 0) }} solves</span>
+          <span class="challenge-header-right">
+            {% if challenge_container_counts.get(challenge.id, 0) > 0 %}
+            <span class="total-hackers">
+              {{ challenge_container_counts.get(challenge.id, 0) }} hacking,
+            </span>
+            {% endif %}
+            <span class="total-solves">
+              {{ total_solves.get(challenge.challenge_id, 0) }} solves
+            </span>
+          </span>
         {% else %}
           <div class="embed-responsive">
             <p>{{ challenge.description | markdown }}</p>
@@ -129,7 +138,7 @@
 
   <br>
 
-  <h2>Module Ranking</h2>
+  <h2>Ranking</h2>
   <p>This scoreboard reflects solves for challenges in this module after the module launched in this dojo.</p>
   {% from "macros/scoreboard.html" import scoreboard %}
   {{ scoreboard() }}
