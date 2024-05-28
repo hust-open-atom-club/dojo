@@ -14,6 +14,12 @@ function loadScoreboard(duration, page) {
             setTimeout(loadmsg, 1000);
         }
     }, 500);
+    $("#scoreboard-control-week").removeClass("scoreboard-page-selected");
+    $("#scoreboard-control-month").removeClass("scoreboard-page-selected");
+    $("#scoreboard-control-all").removeClass("scoreboard-page-selected");
+    if (duration == 7) $("#scoreboard-control-week").addClass("scoreboard-page-selected");
+    if (duration == 30) $("#scoreboard-control-month").addClass("scoreboard-page-selected");
+    if (duration == 0) $("#scoreboard-control-all").addClass("scoreboard-page-selected");
 
     CTFd.fetch(endpoint, {
         method: "GET",
@@ -26,12 +32,6 @@ function loadScoreboard(duration, page) {
         return response.json()
     }).then(result => {
         scoreboard.empty();
-        $("#scoreboard-control-week").removeClass("scoreboard-page-selected");
-        $("#scoreboard-control-month").removeClass("scoreboard-page-selected");
-        $("#scoreboard-control-all").removeClass("scoreboard-page-selected");
-        if (duration == 7) $("#scoreboard-control-week").addClass("scoreboard-page-selected");
-        if (duration == 30) $("#scoreboard-control-month").addClass("scoreboard-page-selected");
-        if (duration == 0) $("#scoreboard-control-all").addClass("scoreboard-page-selected");
 
         const standings = result.standings;
         if (result.me) {
@@ -42,21 +42,21 @@ function loadScoreboard(duration, page) {
         }
         standings.forEach(user => {
             const row = $(`
-            <tr style="font-size:1.5em">
-              <td scope="row"><b>#${user.rank}</b></td>
-              <td class="p-0">
-                <img src="${user.symbol}" class="scoreboard-symbol" style="width:2.6em">
+            <tr>
+              <td scope="row" class="col-md-1"><b>#${user.rank}</b></td>
+              <td class="col-md-1 p-0">
+                <img src="${user.symbol}" class="scoreboard-symbol">
               </td>
-              <td>
+              <td class="col-md-4">
                 <a href="${user.url}" class="scoreboard-name text-decoration-none">
                 </a>
               </td>
-              <td class="scoreboard-completions">
+              <td class="scoreboard-completions col-md-4">
               </td>
-              <td>
+              <td class="col-md-1">
                 <img src="${user.belt}" class="scoreboard-belt">
               </td>
-              <td><b>${user.solves}</b></td>
+              <td class="col-md-1"><b>${user.solves}</b></td>
             </tr>
             `);
             row.find(".scoreboard-name").text(user.name.slice(0, 50));
@@ -67,7 +67,7 @@ function loadScoreboard(duration, page) {
                 row.find(".scoreboard-completions").append($(`
                     <span title="${badge.text}">
                     <a href="${badge.url}">
-                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" style="width: 1.5em;">
+                    <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg" class="scoreboard-emoji"></img>
                     </a>${count}
                     </span><span> </span>
                 `));
