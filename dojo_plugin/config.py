@@ -16,8 +16,6 @@ logger.setLevel(logging.INFO)
 DOJOS_DIR = pathlib.Path("/var/dojos")
 DATA_DIR = pathlib.Path("/var/data")
 
-INDEX_HTML = pathlib.Path("/var/index.html").read_text()
-
 KOOK_TOKEN = os.getenv("KOOK_TOKEN")
 KOOK_GUILD_ID = os.getenv("KOOK_GUILD_ID")
 KOOK_CHANNEL_ID = os.getenv("KOOK_CHANNEL_ID")
@@ -137,5 +135,4 @@ def bootstrap():
 
         set_config("setup", True)
 
-    Pages.query.filter_by(route="index").update(dict(content=INDEX_HTML))
     db.session.commit()
