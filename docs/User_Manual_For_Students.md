@@ -228,7 +228,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 ![](static/Zn7HbY55DofT05x4maTci6Ycn7d.png)
 
-回到道馆，将 flag 粘贴至浅绿色框内，然后点击右侧 submit 提交，如果出现 correct 提示并且旗帜变成绿色说明 flag 正确，闯关成功。
+回到道馆，将 flag 粘贴至浅绿色框内，然后点击右侧 Submit 按钮提交，如果出现 correct 提示并且旗帜变成绿色说明 flag 正确，闯关成功。
 
 ## 2.4 SSH
 
@@ -236,7 +236,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 点击 start 按钮开启第八关，通过 SSH，用户可以安全地登录远程计算机，并执行命令、传输文件等操作。下面将演示在 win11 终端通过 ssh 成功获取 flag。
 
-打开终端，通过 cd 进入。ssh 文件夹，输入 ssh-keygen -f key（在 win11 终端中，使用空字符串作为参数可能会引起语法错误或不被接受，-N 去掉后输入密码时直接回车表示无密码），生成 key 和 key.pub 公私钥对，通过 cat key.pub 将公钥内容复制出来。
+打开终端，通过 cd 进入 `.ssh` 文件夹，输入 `ssh-keygen -f key`（在 win11 终端中，使用空字符串作为参数可能会引起语法错误或不被接受，-N 去掉后输入密码时直接回车表示无密码），生成 key 和 key.pub 公私钥对，通过 cat key.pub 将公钥内容复制出来。
 
 ![](static/HHM1bqcaSokSk6xiA01cxffOnOc.png)
 
@@ -248,7 +248,13 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 ![](static/ZoEPbAYvaowUPkxytfvcqTS5n4g.png)
 
-回到 Win11 终端，ssh -i ～/。ssh/key -p 22223 hacker@pwn.hust.college，即可连接到挑战关卡容器，切换到 challenge 目录，然后运行挑战程序，获取 flag。
+回到 Win11 终端，
+
+```
+ssh -i ～/.ssh/key -p 22223 hacker@pwn.cse.hust.edu.cn
+```
+
+即可连接到挑战关卡容器，切换到 challenge 目录，然后运行挑战程序，获取 flag。
 
 ![](static/Z73VbWoLSoaWTsxfop4cGdHOnpb.png)
 
