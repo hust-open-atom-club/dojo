@@ -474,6 +474,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         arping
+        bash-builtins
+        bat
         binutils
         binutils-aarch64-linux-gnu
         binwalk
@@ -487,52 +489,54 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ethtool
         exiftool
         expect
-        fish
         findutils
         firefox
+        fish
+        fonts-wqy-zenhei
+        fortune
         gcc-aarch64-linux-gnu
         gdb
         gdb-multiarch
+        gedit
         genisoimage
         gnupg-utils
         hexedit
+        icdiff
         iproute2
         iputils-ping
         ipython3
         keyutils
         kmod
+        less
         libc6-arm64-cross
         libc6-dev-arm64-cross
-        less
         ltrace
         nano
         neovim
-        net-tools
         netcat-openbsd
+        net-tools
         nmap
         openssh-server
+        p7zip-full
         parallel
         patchelf
         pcaputils
         pcre2-utils
         psutils
         python3-ipdb
-        qemu-user
         qemu-system-x86
+        qemu-user
         qemu-utils
         rsync
         screen
         silversearcher-ag
         strace
         tmux
+        valgrind
         whiptail
         wireshark
-        gedit
-        fortune
-        valgrind
-        zsh
         zip
-        fonts-wqy-zenhei
+        zsh
 EOF
 
 FROM builder-tools-apt-${INSTALL_TOOLS_APT} as builder-tools-apt
