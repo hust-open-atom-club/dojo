@@ -19,7 +19,9 @@
       <h2>
         {% for badge in badges[user.id] %}
         <span title="{{badge.text}}">
-          <a href="{{badge.url}}">{{badge.emoji}}</a>
+          <a href="{{badge.url}}">
+            <img src="/themes/dojo_theme/static/img/dojo/${badge.emoji}.svg"></img>
+          </a>
           </span><span>
         </span>
         {% endfor %}
