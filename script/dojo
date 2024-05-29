@@ -13,6 +13,11 @@ fi
 DOCKER_ARGS=${DOCKER_ARGS:--i}
 [ -t 0 ] && DOCKER_ARGS="-t $DOCKER_ARGS"
 
+DOJO_DIR=/opt/pwn.college
+if [ -f $DOJO_DIR/data/config.env ]; then
+    . $DOJO_DIR/data/config.env
+fi
+
 case "$ACTION" in
     # HELP: update: update dojo files (warning: does `git pull`), rebuild containers, and restart any changed services
     "update")
