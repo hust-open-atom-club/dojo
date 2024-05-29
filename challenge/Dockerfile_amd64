@@ -116,6 +116,24 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         rubygems
         squashfs-tools
         upx-ucl
+        valgrind
+EOF
+
+################################################################################
+
+FROM builder as builder-github-tools
+RUN <<EOF
+    git clone --depth 1 --recurse-submodules https://github.com/pwncollege/dojjail /opt/dojjail
+    pip install -e /opt/dojjail
+
+    git clone --depth 1 --recurse-submodules https://github.com/zolutal/kropr /opt/kropr
+    cd /opt/kropr
+    cargo install --path . --root /tmp
+    mv /tmp/bin/ropr /usr/bin/kropr
+    chmod +x /usr/bin/kropr
+
+    git clone --depth 1 --recurse-submodules https://github.com/zolutal/gdb-pt-dump /opt/pt-dump
+>>>>>>> 02b962b... Added tools to challenge container for programming course (#410):challenge/Dockerfile
 EOF
 
 ################################################################################
@@ -210,9 +228,12 @@ FROM essentials as builder-code-server
 RUN <<EOF
     curl -fsSL https://gitee.com/mirrors/code-server/raw/main/install.sh | /bin/sh /dev/stdin
     mkdir -p /opt/code-server/extensions
-    code-server --extensions-dir=/opt/code-server/extensions --install-extension ms-python.python
-    rm -rf /root/.cache/code-server
-    rm -rf /root/.local/share/code-server
+    wget -O /tmp/ms-vscode-cpptools.vsix 'https://github.com/microsoft/vscode-cpptools/releases/download/v1.20.5/cpptools-linux.vsix'    
+    code-server --extensions-dir=/opt/code-server/extensions \
+    	--install-extension ms-python.python \
+     	--install-extension /tmp/ms-vscode-cpptools.vsix
+    chmod +x /opt/code-server/extensions/ms-vscode.cpptools-*/bin/{cpptools*,libc.so}
+    rm -rf /root/.cache/code-server /root/.local/share/code-server /tmp/ms-vscode-cpptools.vsix
 EOF
 
 WORKDIR /usr/lib/code-server/lib/vscode/node_modules/@vscode/ripgrep/bin
