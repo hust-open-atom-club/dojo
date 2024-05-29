@@ -62,38 +62,34 @@ the `config.env` file. The default parameter value is `amd64`, and if deploying 
 
 For more arguments, please refer to `data/config.env` created in the dojo directory.
 
-<!-- Because Dojo does not support external access via IP, we need to use the host's nginx for port forwarding (which also conveniently allows for domain configuration).
-
-> [!NOTE]
-> In the current case, we use a fake IP: 10.10.10.10 as a reference. You can change this fake IP with your own IP.  
-> If you need to configure HTTPS and domain name, please remove the '#' comment symbol. The default SSL certificate and certificate key are respectively stored as `/etc/nginx/certs/pwn.hust.college.cert.pem` and `/etc/nginx/certs/pwn.hust.college.key.pem`.
-
-```sh
-echo 'server {
-    listen 80;
-    listen [::]:80;
-
-    #listen 443 ssl;
-    #listen [::]:443 ssl;
-    #ssl_certificate /etc/nginx/certs/pwn.hust.college.cert.pem;
-    #ssl_certificate_key /etc/nginx/certs/pwn.hust.college.key.pem;
-
-    #server_name pwn.hust.college;
-    location / {
-        proxy_http_version 1.1;
-        proxy_set_header Host 10.10.10.10:8880;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection upgrade;
-        proxy_set_header Accept-Encoding gzip;
-        proxy_set_header Origin "http://10.10.10.10:8880";
-        proxy_buffering off;
-
-        proxy_pass http://127.0.0.1:8880;
+For https certificates, you can copy to the pwncollege_certs mounted volume.
+```
+# docker inspect pwncollege_certs
+[
+    {
+        "CreatedAt": "2024-04-02T13:03:24Z",
+        "Driver": "local",
+        "Labels": {
+            "com.docker.compose.project": "pwncollege",
+            "com.docker.compose.version": "2.20.2",
+            "com.docker.compose.volume": "certs"
+        },
+        "Mountpoint": "/opt/pwn.college/data/docker/volumes/pwncollege_certs/_data",
+        "Name": "pwncollege_certs",
+        "Options": null,
+        "Scope": "local"
     }
-}' > dojo.conf
-cp ./dojo.conf /etc/nginx/sites-enabled/
-nginx -s reload
-``` -->
+]
+
+/opt/pwn.college/data/docker/volumes/pwncollege_certs/_data# ls -al
+-rw-r--r-- 1 root root 7769 May 21 10:16 pwn.cse.hust.edu.cn.crt
+-rw-r--r-- 1 root root 1704 May 21 10:16 pwn.cse.hust.edu.cn.key
+```
+The https certificate will be configured automatically by executing the following command.
+```
+dojo compose down
+dojo update
+```
 
 ## Updating
 
