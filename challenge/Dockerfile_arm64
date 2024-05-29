@@ -192,6 +192,9 @@ RUN <<EOF
 
     git clone --depth 1 https://github.com/jerdna-regeiz/splitmind /opt/splitmind
     git clone https://github.com/scwuaptx/Pwngdb.git /opt/Pwngdb
+    git clone --depth 1 https://github.com/nccgroup/libslub /opt/libslub
+    cd /opt/libslub
+    pip install -r requirements.txt
 EOF
 
 FROM builder-gdb-${INSTALL_GDB} as builder-gdb
@@ -203,9 +206,12 @@ FROM essentials as builder-code-server
 RUN <<EOF
     curl -fsSL https://gitee.com/mirrors/code-server/raw/main/install.sh | /bin/sh /dev/stdin
     mkdir -p /opt/code-server/extensions
-    code-server --extensions-dir=/opt/code-server/extensions --install-extension ms-python.python
-    rm -rf /root/.cache/code-server
-    rm -rf /root/.local/share/code-server
+    wget -O /tmp/ms-vscode-cpptools.vsix 'https://github.com/microsoft/vscode-cpptools/releases/download/v1.20.5/cpptools-linux.vsix'    
+    code-server --extensions-dir=/opt/code-server/extensions \
+    	--install-extension ms-python.python \
+     	--install-extension /tmp/ms-vscode-cpptools.vsix
+    chmod +x /opt/code-server/extensions/ms-vscode.cpptools-*/bin/{cpptools*,libc.so}
+    rm -rf /root/.cache/code-server /root/.local/share/code-server /tmp/ms-vscode-cpptools.vsix
 EOF
 
 WORKDIR /usr/lib/code-server/lib/vscode/node_modules/@vscode/ripgrep/bin
@@ -402,8 +408,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
         arping
+        bash-builtins
+        bat
         binutils
-        binutils-aarch64-linux-gnu
         binwalk
         bsdmainutils
         bsdutils
@@ -415,22 +422,22 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         ethtool
         exiftool
         expect
-        fish
         findutils
         firefox
-        gcc-aarch64-linux-gnu
+        fish
+        fonts-wqy-zenhei
+        fortune
         gdb
-        gdb-multiarch
+        gedit
         genisoimage
         gnupg-utils
         hexedit
+        icdiff
         iproute2
         iputils-ping
         ipython3
         keyutils
         kmod
-        libc6-arm64-cross
-        libc6-dev-arm64-cross
         less
         ltrace
         nano
@@ -439,27 +446,26 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         netcat-openbsd
         nmap
         openssh-server
+        p7zip-full
         parallel
         patchelf
         pcaputils
         pcre2-utils
         psutils
         python3-ipdb
+        qemu-system-aarch64
         qemu-user
-        qemu-system-x86
         qemu-utils
         rsync
         screen
         silversearcher-ag
         strace
         tmux
+        valgrind
         whiptail
         wireshark
-        gedit
-        fortune
-        zsh
         zip
-        fonts-wqy-zenhei
+        zsh
 EOF
 
 FROM builder-tools-apt-${INSTALL_TOOLS_APT} as builder-tools-apt
