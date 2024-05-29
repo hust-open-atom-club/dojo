@@ -20,7 +20,7 @@
         {% for badge in badges[user.id] %}
         <span title="{{badge.text}}">
           <a href="{{badge.url}}">
-            <img src="/themes/dojo_theme/static/img/dojo/{{badge.emoji}}.svg"></img>
+            <img src="{{ url_for("views.themes", path="img/dojo/"+badge.emoji+".svg") }}" class="scoreboard-belt">
           </a>
           </span><span>
         </span>
