@@ -16,9 +16,8 @@ dojo create
         title=dojo.name,
         text="{} Modules : ".format(dojo.modules | length) + "{} / {}".format(dojo.solves(user=user,
         ignore_visibility=True, ignore_admins=False).count() if user else 0, dojo.challenges | length),
-        icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(dojo.award.belt) if (dojo.award.belt and dojo.official)
-        else None,
-        emoji=dojo.award.emoji ) }}
+        icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(dojo.award.emoji) if (dojo.award.emoji and dojo.official)
+        else None) }}
         {% endfor %}
     </ul>
     <p>当您准备好后，填写下面的表单从您的仓库创建您的道馆！</p>
