@@ -17,9 +17,8 @@ port_names = {
     "challenge": 80,
     "vscode": 6080,
     "desktop": 6081,
-    "desktop-windows": 6082,
 }
-ondemand_services = { "vscode", "desktop", "desktop-windows" }
+ondemand_services = { "vscode", "desktop"}
 
 def container_password(container, *args):
     key = container.labels["dojo.auth_token"].encode()

@@ -11,7 +11,7 @@ from flask_restx import Namespace, Resource
 from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only
 
-from ...config import HOST_DATA_PATH, INTERNET_FOR_ALL, WINDOWS_VM_ENABLED, SECCOMP, USER_FIREWALL_ALLOWED
+from ...config import HOST_DATA_PATH, INTERNET_FOR_ALL, SECCOMP, USER_FIREWALL_ALLOWED
 from ...models import Dojos, DojoModules, DojoChallenges
 from ...utils import serialize_user_flag, simple_tar, random_home_path, module_challenges_visible, user_ipv4
 from ...utils.dojo import dojo_accessible, get_current_dojo_challenge
@@ -91,18 +91,7 @@ def start_challenge(user, dojo_challenge, practice):
                     "bind",
                     propagation="shared",
                 )
-            ]
-            + (
-                [
-                    docker.types.Mount(
-                        target="/run/media/windows",
-                        source="pwncollege_windows",
-                        read_only=True,
-                    )
-                ]
-                if WINDOWS_VM_ENABLED
-                else []
-            ),
+            ],
             devices=devices,
             network=None,
             extra_hosts={

@@ -87,7 +87,6 @@ DOJO_HOST = os.getenv("DOJO_HOST")
 HOST_DATA_PATH = os.getenv("HOST_DATA_PATH")
 BINARY_NINJA_API_KEY = os.getenv("BINARY_NINJA_API_KEY")
 INTERNET_FOR_ALL = bool(ast.literal_eval(os.getenv("INTERNET_FOR_ALL") or "False"))
-WINDOWS_VM_ENABLED = os.getenv("WINDOWS_VM") == "full"
 
 missing_errors = ["DOJO_HOST", "HOST_DATA_PATH"]
 missing_warnings = ["BINARY_NINJA_API_KEY"]
