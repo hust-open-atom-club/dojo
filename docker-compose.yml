@@ -71,7 +71,7 @@ services:
       - HOST_DATA_PATH=/opt/pwn.college/data
       - INTERNET_FOR_ALL=${INTERNET_FOR_ALL}
       - WINDOWS_VM=${WINDOWS_VM}
-      - VIRTUAL_HOST=${DOJO_HOST},localhost
+      - VIRTUAL_HOST=${DOJO_HOST}
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=${DOJO_HOST}
       - KOOK_TOKEN=${KOOK_TOKEN}
