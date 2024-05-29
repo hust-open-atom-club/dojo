@@ -103,7 +103,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 - `type`：**可选**。此字段可以取值 `welcome`、`elementary`、`intermediate`、`advanced`、`course`、`topic`、`example`、`hidden`。`welcome` 将该道馆放在**入门篇**部分，`elementary` 将该道馆放在**初级篇**部分，`intermediate` 将该道馆放在**中级篇**部分，`advanced` 将该道馆放在**高级篇**部分。`course` 将其放在**课程**部分，`topic` 将该道馆放在**主题**部分，`hidden` 意味着道馆不会被列出（但仍然可以访问）。如果省略 `type` 字段或包含除这八个之外的值，则道馆将出现在**更多**部分。
 - `password`：**可选**。用户加入道馆需要输入的密码。如果省略，则任何人都可以加入道馆。
 - `modules`：**必需**。模块对象的数组，`modules` 的参数，参考 **M****odule** 部分。
-- `award`：**可选**。子参数为 `belt`，`emoji`，内容为 svg/png 文件名，`belt` 的文件存放路径为：`/dojo_theme/static/img/belts/`；`emoji` 的文件存放路径为：`/dojo_theme/static/img/dojo/`。
+- `award`：**可选**。子参数为 `belt`，`emoji`，内容为 svg/png 文件名，`belt` 和 `emoji` 的文件存放路径均为：`/dojo_theme/static/img/dojo/`。
 
 使用样例：
 

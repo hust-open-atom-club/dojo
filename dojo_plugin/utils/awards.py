@@ -21,7 +21,7 @@ BELT_REQUIREMENTS = {
 
 def belt_asset(color):
     belt = color + ".png" if color in BELT_REQUIREMENTS else "white.png"
-    return url_for("views.themes", path=f"img/belts/{belt}")
+    return url_for("views.themes", path=f"img/dojo/{belt}")
 
 def get_user_emojis(user):
     emojis = [ ]
