@@ -88,7 +88,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 # 二、学生手册
 
-欢迎来到[ pwn.hust.college](https://pwn.hust.college/) ，一个基于神奇宝贝动画设计的趣味教育平台。为助您获取 flag，成功闯关，下面将介绍道馆的注册、登录、使用细则，以及 vscode 工作空间，图形桌面工作空间，SSH 这三种与挑战关卡互动的方式。
+欢迎来到 [pwn.hust.college](https://pwn.cse.hust.edu.cn/) ，一个基于神奇宝贝动画设计的趣味教育平台。为助您获取 flag，成功闯关，下面将介绍道馆的注册、登录、使用细则，以及 vscode 工作空间，图形桌面工作空间，SSH 这三种与挑战关卡互动的方式。
 
 ## 2.1 道馆
 
@@ -253,3 +253,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 ![](static/Z73VbWoLSoaWTsxfop4cGdHOnpb.png)
 
 最后回到道馆，将 flag 粘贴至浅绿色框内，然后点击右侧 submit 提交，如果出现 correct 提示并且旗帜变成绿色说明 flag 正确，闯关成功。
+
+## 2.5 KOOK
+
+同学们可以将 kook 个人账号连接到平台中，这样可以通过 pwn.hust.college 平台在 KOOK 频道中做信息广播。

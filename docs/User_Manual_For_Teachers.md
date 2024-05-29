@@ -90,7 +90,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 ## 2.1 道馆编写
 
-道馆是 pwn.hust.college 平台的核心概念，同学们（神奇宝贝训练家）可以通过道馆挑战学习软件安全课程的核心概念与实践各种知识点，并且获得道馆徽章。教师们可参考 [example-dojo](https://github.com/hust-open-atom-club/example-dojo))，自行编写自己的道馆及挑战关卡。
+道馆是 [pwn.hust.college](https://pwn.cse.hust.edu.cn/) 平台的核心概念，同学们（神奇宝贝训练家）可以通过道馆挑战学习软件安全课程的核心概念与实践各种知识点，并且获得道馆徽章。教师们可参考 [example-dojo](https://github.com/hust-open-atom-club/example-dojo)，自行编写自己的道馆及挑战关卡。
 
 ### 2.1.1 字段解释
 
