@@ -19,14 +19,15 @@
   <br><br>
 
   <h2 class="row">前置神奇宝贝道馆</h2>
+
   <ul class="card-list">
+    {% for dojo in prerequisite_dojo_sub %}
     {{ card(url_for("pwncollege_dojos.view_dojo", dojo=dojo.reference_id),
     title=dojo.name or dojo.id,
     text="{} Modules : ".format(dojo.modules | length) + "{} / {}".format(dojo.solves(user=user, ignore_visibility=True, ignore_admins=False).count() if user else 0, dojo.challenges | length),
     icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(dojo.award.emoji) if (dojo.award.emoji and dojo.official) else None) }}
-
-  </ul>
-
+  {% endfor %}
+</ul>
   <br><br>
 
   <h2 class="row">道馆模块</h2>
