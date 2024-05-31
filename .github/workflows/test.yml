@@ -1,19 +1,38 @@
-name: Test building and running dojo
+name: Integration Test
 on:
-  push:
   pull_request:
+  push:
+    branches:
+      - master
   schedule:
     - cron: '42 06 * * *'
 jobs:
-  smoketest:
-    runs-on: ubuntu-22.04
+  test:
+    name: Integration Test
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
+      - name: Host information
+        run: |
+          echo "::group::Host information"
+          echo "Hostname: $(hostname)"
+          echo "IP: $(hostname -I)"
+          echo "::endgroup::"
+          echo "::group::Filesystem"
+          df -h
+          echo "::endgroup::"
+          echo "::group::Memory"
+          free -h
+          echo "::endgroup::"
+          echo "::group::CPU"
+          lscpu
+          echo "::endgroup::"
+
+      - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v5
         with:
-          tags: dojo-test
+          tags: pwncollege/dojo:test
           load: true
           no-cache: ${{ github.event_name == 'schedule' }}
           # cache-from: type=gha
@@ -33,16 +52,17 @@ jobs:
       - name: Run dojo
         run: |
           docker run \
-            --privileged \
-            -d \
-            -v ./dojo-test-data:/opt/pwn.college/data:shared \
-            -p 2222:22 -p 80:80 -p 443:443 \
             --name dojo-test \
-            dojo-test
+            --privileged \
+            --detach \
+            --rm \
+            -p 2222:22 -p 80:80 -p 443:443 \
+            pwncollege/dojo:test
 
       - name: Wait for services to build and start
         run: |
           docker exec dojo-test dojo wait
+          docker exec dojo-test docker image ls
 
       - name: Wait for services to be ready
         timeout-minutes: 2

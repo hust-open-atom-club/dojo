@@ -2,14 +2,12 @@ services:
   challenge:
     build:
       context: ./challenge
-      target: challenge-final
       args:
         - DEFAULT_INSTALL_SELECTION=${DEFAULT_INSTALL_SELECTION}
         - INSTALL_AFL=${INSTALL_AFL:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_ANGR_MANAGEMENT=${INSTALL_ANGR_MANAGEMENT:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_BUSYBOX=${INSTALL_BUSYBOX:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_CAPSTONE=${INSTALL_CAPSTONE:-${DEFAULT_INSTALL_SELECTION}}
-        - INSTALL_DESKTOP=${INSTALL_DESKTOP:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_GDB=${INSTALL_GDB:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_GECKODRIVER=${INSTALL_GECKODRIVER:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_GHIDRA=${INSTALL_GHIDRA:-${DEFAULT_INSTALL_SELECTION}}
@@ -26,7 +24,6 @@ services:
         - INSTALL_VIRTIOFSD=${INSTALL_VIRTIOFSD:-${DEFAULT_INSTALL_SELECTION}}
         - INSTALL_WINDOWS=${INSTALL_WINDOWS:-${DEFAULT_INSTALL_SELECTION}}
         - UBUNTU_VERSION=${UBUNTU_VERSION}
-        - DOJO_CHALLENGE=${DOJO_CHALLENGE}
       privileged: true
     platform: linux/amd64
     entrypoint: /bin/true
@@ -49,7 +46,7 @@ services:
         if [ "$DOJO_ENV" != "development" ]; then
           ./docker-entrypoint.sh;
         else
-          FLASK_ENV=development WERKZEUG_DEBUG_PIN=off flask run --host 0.0.0.0 --port 8000;
+          FLASK_DEBUG=True WERKZEUG_DEBUG_PIN=off flask run --host 0.0.0.0 --port 8000;
         fi
     ulimits:
         nofile:
@@ -89,7 +86,6 @@ services:
       - ./data/challenges:/var/challenges:ro
       - ./data/dojos:/var/dojos
       - ./data/ssh_host_keys/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro
-      - ./index.html:/var/index.html:ro
       - ./user_firewall.allowed:/var/user_firewall.allowed:ro
       - /etc/docker/seccomp.json:/etc/docker/seccomp.json:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -166,26 +162,23 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
 
-  nginx:
-    container_name: nginx
-    image: nginxproxy/nginx-proxy
+  nginx-proxy:
+    container_name: nginx-proxy
+    image: nginxproxy/nginx-proxy:1.5
     restart: always
     ports:
       - "80:80"
       - "443:443"
     environment:
-      - DOCKER_HOST=unix:///tmp/${DOCKER_PSLR}/docker.sock
       - DEFAULT_HOST=${DOJO_HOST}
+      - TRUST_DOWNSTREAM_PROXY=false
       - LOG_JSON=true
     volumes:
       - conf:/etc/nginx/conf.d
       - html:/usr/share/nginx/html
-      - dhparam:/etc/nginx/dhparam
       - certs:/etc/nginx/certs:ro
       - ./nginx-proxy/etc/nginx/vhost.d:/etc/nginx/vhost.d
-      - ./nginx-proxy/etc/passwd:/etc/passwd:ro
-      - ./data/homes:/var/homes:shared
-      - /var/run/docker.sock:/tmp/${DOCKER_PSLR}/docker.sock:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       default:
       user_network:
@@ -193,12 +186,12 @@ services:
           - nginx
         ipv4_address: 10.0.0.3
 
-  nginx-certs:
-    container_name: nginx_certs
-    image: nginxproxy/acme-companion
+  acme-companion:
+    container_name: nginx-proxy-acme
+    image: nginxproxy/acme-companion:2.3
     restart: always
     volumes_from:
-      - nginx
+      - nginx-proxy
     volumes:
       - certs:/etc/nginx/certs:rw
       - acme:/etc/acme.sh
@@ -207,7 +200,6 @@ services:
 volumes:
   conf:
   html:
-  dhparam:
   certs:
   acme:
 

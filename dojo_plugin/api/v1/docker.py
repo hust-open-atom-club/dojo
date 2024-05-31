@@ -1,19 +1,20 @@
+import hashlib
 import os
-import sys
-import subprocess
 import pathlib
 import re
+import subprocess
+import sys
 import traceback
 
 import docker
-from flask import request
+from flask import request, current_app
 from flask_restx import Namespace, Resource
 from CTFd.utils.user import get_current_user, is_admin
 from CTFd.utils.decorators import authed_only
 
 from ...config import HOST_DATA_PATH, INTERNET_FOR_ALL, WINDOWS_VM_ENABLED, SECCOMP, USER_FIREWALL_ALLOWED
 from ...models import Dojos, DojoModules, DojoChallenges
-from ...utils import serialize_user_flag, simple_tar, random_home_path, module_challenges_visible, user_ipv4
+from ...utils import serialize_user_flag, resolved_tar, random_home_path, module_challenges_visible, user_ipv4
 from ...utils.dojo import dojo_accessible, get_current_dojo_challenge
 from ...utils.workspace import exec_run
 
@@ -108,7 +109,6 @@ def start_challenge(user, dojo_challenge, practice):
             init=True,
             cap_add=["SYS_PTRACE"],
             security_opt=[f"seccomp={SECCOMP}"],
-            storage_opt=dict(size="256G") if storage_driver == "zfs" else None,
             cpu_period=100000,
             cpu_quota=400000,
             pids_limit=1024,
@@ -156,9 +156,23 @@ def start_challenge(user, dojo_challenge, practice):
         )
 
     def insert_challenge(user, dojo_challenge):
-        for path in dojo_challenge.challenge_paths(user):
-            with simple_tar(path, f"/challenge/{path.name}") as tar:
-                container.put_archive("/", tar)
+        def is_option_path(path):
+            path = pathlib.Path(*path.parts[:len(dojo_challenge.path.parts) + 1])
+            return path.name.startswith("_") and path.is_dir()
+
+        root_dir = dojo_challenge.path.parent.parent
+        challenge_tar = resolved_tar(dojo_challenge.path,
+                                     root_dir=root_dir,
+                                     filter=lambda path: not is_option_path(path))
+        container.put_archive("/challenge", challenge_tar)
+
+        option_paths = sorted(path for path in dojo_challenge.path.iterdir() if is_option_path(path))
+        if option_paths:
+            secret = current_app.config["SECRET_KEY"]
+            option_hash = hashlib.sha256(f"{secret}_{user.id}_{dojo_challenge.challenge_id}".encode()).digest()
+            option = option_paths[int.from_bytes(option_hash[:8], "little") % len(option_paths)]
+            container.put_archive("/challenge", resolved_tar(option, root_dir=root_dir))
+
         exec_run("chown -R root:root /challenge", container=container)
         exec_run("chmod -R 4755 /challenge", container=container)
 

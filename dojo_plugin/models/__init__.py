@@ -78,9 +78,9 @@ class Dojos(db.Model):
     }
 
     users = db.relationship("DojoUsers", back_populates="dojo")
-    members = db.relationship("DojoMembers", back_populates="dojo")
-    admins = db.relationship("DojoAdmins", back_populates="dojo")
-    students = db.relationship("DojoStudents", back_populates="dojo")
+    members = db.relationship("DojoMembers", back_populates="dojo", overlaps="users")
+    admins = db.relationship("DojoAdmins", back_populates="dojo", overlaps="users")
+    students = db.relationship("DojoStudents", back_populates="dojo", overlaps="users")
     _modules = db.relationship("DojoModules",
                                order_by=lambda: DojoModules.module_index,
                                cascade="all, delete-orphan",
@@ -278,7 +278,7 @@ class DojoUsers(db.Model):
 
     type = db.Column(db.String(80), index=True)
 
-    dojo = db.relationship("Dojos", back_populates="users")
+    dojo = db.relationship("Dojos", back_populates="users", overlaps="admins,members,students")
     user = db.relationship("Users")
 
     def solves(self, **kwargs):
@@ -290,13 +290,13 @@ class DojoUsers(db.Model):
 class DojoMembers(DojoUsers):
     __mapper_args__ = {"polymorphic_identity": "member", "polymorphic_on": "type"}
 
-    dojo = db.relationship("Dojos", back_populates="members")
+    dojo = db.relationship("Dojos", back_populates="members", overlaps="users")
 
 
 class DojoAdmins(DojoUsers):
     __mapper_args__ = {"polymorphic_identity": "admin"}
 
-    dojo = db.relationship("Dojos", back_populates="admins")
+    dojo = db.relationship("Dojos", back_populates="admins", overlaps="users")
 
 
 class DojoStudents(DojoUsers):
@@ -304,7 +304,7 @@ class DojoStudents(DojoUsers):
 
     token = db.Column(db.String(256))
 
-    dojo = db.relationship("Dojos", back_populates="students")
+    dojo = db.relationship("Dojos", back_populates="students", overlaps="users")
 
     @property
     def official(self):
@@ -558,21 +558,6 @@ class DojoChallenges(db.Model):
             assert any(isinstance(dojo_admin.user, Admins) for dojo_admin in self.dojo.admins), "Custom images are only allowed for admin dojos"
             return self.data["image"]
         return "pwncollege-challenge"
-
-    def challenge_paths(self, user):
-        secret = current_app.config["SECRET_KEY"]
-
-        for path in self.path.iterdir():
-            if path.name.startswith("_"):
-                continue
-            yield path.resolve()
-
-        option_paths = sorted(path for path in self.path.iterdir() if path.name.startswith("_"))
-        if option_paths:
-            option_hash = hashlib.sha256(f"{secret}_{user.id}_{self.challenge_id}".encode()).digest()
-            option = option_paths[int.from_bytes(option_hash[:8], "little") % len(option_paths)]
-            for path in option.iterdir():
-                yield path.resolve()
 
     __repr__ = columns_repr(["module", "id", "challenge_id"])
 
