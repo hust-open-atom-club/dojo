@@ -140,7 +140,7 @@ FROM builder as builder-kernel-yes
 
 RUN <<EOF
     mkdir /opt/linux
-    wget -O - https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-6.6.32.tar.xz | tar xzC /opt/linux
+    wget -O - https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-6.6.32.tar.gz | tar xzC /opt/linux
     cd /opt/linux/linux-6.6.32
     make defconfig
 EOF
