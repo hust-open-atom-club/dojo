@@ -118,12 +118,12 @@ FROM builder as builder-kernel-yes
 
 RUN <<EOF
     mkdir /opt/linux
-    wget -O - https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.gz | tar xzC /opt/linux
-    cd /opt/linux/linux-5.4
+    wget -O - https://mirrors.hust.edu.cn/kernel.org/linux/kernel/v6.x/linux-6.6.32.tar.gz | tar xzC /opt/linux
+    cd /opt/linux/linux-6.6.32
     make defconfig
 EOF
 
-RUN awk '{$1=$1};1' >> /opt/linux/linux-5.4/.config <<EOF
+RUN awk '{$1=$1};1' >> /opt/linux/linux-6.6.32/.config <<EOF
     CONFIG_9P_FS=y
     CONFIG_9P_FS_POSIX_ACL=y
     CONFIG_9P_FS_SECURITY=y
@@ -158,10 +158,11 @@ RUN awk '{$1=$1};1' >> /opt/linux/linux-5.4/.config <<EOF
 EOF
 
 RUN <<EOF
-    cd /opt/linux/linux-5.4
-    make -j$(nproc) Image
-    ln -sf $PWD/arch/arm/boot/Image ../Image
+    cd /opt/linux/linux-6.6.32
+    make -j$(nproc) bzImage
+    ln -sf $PWD/arch/x86/boot/bzImage ../bzImage
     ln -sf $PWD/vmlinux ../vmlinux
+    ln -sf /opt/linux/linux-6.6.32 /opt/linux/linux
 EOF
 
 FROM builder-kernel-${INSTALL_KERNEL} as builder-kernel
