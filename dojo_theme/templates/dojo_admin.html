@@ -73,7 +73,7 @@
     <div>
       <form method="post" id="dojo-award-prune-form" autocomplete="off">
         <div class="form-group">
-          <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="Prune Legacy Emoji Awards">
+          <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="删除遗留道馆徽章">
         </div>
         <div id="dojo-award-prune-results" class="form-group">
         </div>
@@ -81,7 +81,7 @@
       {% if is_admin() %}
       <form method="post" id="dojo-promote-dojo-form" autocomplete="off">
         <div class="form-group">
-          <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="Make This Dojo Official">
+          <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="设置该道馆为官方道馆">
         </div>
         <div id="dojo-promote-dojo-results" class="form-group">
         </div>
@@ -102,7 +102,7 @@
             <li>{{ admin.user.name }}</li>
         {% endfor %}
     </ul>
-    <b style="font-family: 'Courier New', Courier, monospace">Members</b>
+    <b style="font-family: 'Courier New', Courier, monospace">成员</b>
     <form method="post" id="dojo-promote-admin-form" autocomplete="off">
       <div class="form-group">
         {% for member in dojo.members %}
