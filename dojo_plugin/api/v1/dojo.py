@@ -13,6 +13,7 @@ import yaml
 import os
 import re
 
+from ...utils.awards import update_awards
 from flask import request
 from flask_restx import Namespace, Resource
 from sqlalchemy.exc import IntegrityError
@@ -23,6 +24,7 @@ from CTFd.utils.decorators import authed_only, admins_only
 from CTFd.utils.user import get_current_user, is_admin, get_ip
 from CTFd.utils.modes import get_model
 from CTFd.utils.security.sanitize import sanitize_html
+from CTFd.models import db, Users, Challenges, Solves
 
 from ...models import Dojos, DojoMembers, DojoAdmins, DojoUsers, Emojis
 from ...utils.dojo import dojo_accessible, dojo_clone, dojo_from_dir, dojo_from_spec, dojo_route, dojo_admins_only
@@ -112,6 +114,20 @@ class PruneAwards(Resource):
                 db.session.delete(award)
         db.session.commit()
         return {"success": True, "pruned_awards": num_pruned}
+
+@dojo_namespace.route("/<dojo>/update-award")
+class UpdateAward(Resource):
+    @authed_only
+    @dojo_route
+    @dojo_admins_only
+    def get(self,dojo):
+        users = Users.query.all()
+        users_data = []
+        for user in users:
+            update_awards(user)
+            users_data.append(user)
+        return {"success": True}
+
 
 @dojo_namespace.route("/<dojo>/promote-dojo")
 class PromoteDojo(Resource):
