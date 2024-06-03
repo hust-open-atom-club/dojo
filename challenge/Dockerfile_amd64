@@ -184,6 +184,7 @@ RUN <<EOF
     make -j$(nproc) bzImage
     ln -sf $PWD/arch/x86/boot/bzImage ../bzImage
     ln -sf $PWD/vmlinux ../vmlinux
+    ln -sf /opt/linux/linux-6.6.32 /opt/linux/linux
 EOF
 
 FROM builder-kernel-${INSTALL_KERNEL} as builder-kernel
