@@ -110,7 +110,7 @@
         <label for="{{ member.user.id }}"><a href="{{ url_for('pwncollege_users.view_other', user_id=member.user.id) }}"><span id="name-for-{{member.user.id}}">{{ member.user.name }}</span></a></label>
         <br>
         {% endfor %}
-        <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="Promote to Admin">
+        <input class="btn btn-mini btn-primary" id="_submit" name="_submit" type="submit" value="晋升为管理员">
       </div>
       <div id="dojo-promote-admin-results" class="form-group">
       </div>
