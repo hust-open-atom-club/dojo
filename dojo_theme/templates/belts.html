@@ -18,30 +18,30 @@
   </p>
 
   {% for belt_color in ("blue", "purple", "green", "yellow", "orange", "white") %}
+    <!-- 增加img/dojo/belt_color图片 -->
+    <h2>
+      <img src="{{ url_for("views.themes", path="img/dojo/" + belt_color + ".png") }}" alt="{{ belt_color }} belt" style="width: 50px;">
     {% if belt_color == "blue" %}
-    <h2>大师级训练家 (Master Rank)</h2>
-    <p>
+      大师级训练家 (Master Rank)
     {% elif belt_color == "purple" %}
-    <h2>超级训练家 (Ultra Rank)</h2>
-    <p>
+      超级训练家 (Ultra Rank)
     <!-- 很少有人能在最艰难的挑战面前坚持不懈，在最黑暗的夜晚继续前进。
     下面的黑客们确实是最勇敢的，他们克服了无数看似不可能的挑战，证明了自己配得上在云中佩戴蓝带。 -->
     {% elif belt_color == "green" %}
-    <h2>资深级训练家 (Veteran Rank)</h2>
-    <p>
+    资深级训练家 (Veteran Rank)
     <!-- 一棵树苗向着太阳生长，一名黑客出现在阳光中。
     这些人表现出了一种独特的能力，能透过不确定性的阴霾看到更远处的清晰。
     他/她们已经准备好飞向天空。 -->
     {% elif belt_color == "yellow" %}
-    <h2>专家级训练家 (Expert Rank)</h2>
-    <p>
+    专家级训练家 (Expert Rank)
     <!-- 太阳升起照亮了天空。这些思想开放的学生正在承认一些鲜少有人怀疑存在的非凡的网络空间安全概念。阳光带来了成长的可能性和学习的希望。 -->
     {% elif belt_color == "orange" %}
-    <h2>卓越级训练家 (Great Rank)</h2>
-    <p>
+    卓越级训练家 (Great Rank)
     <!-- 黎明即将来临。
     下列同学不再是那些不了解网络安全的人了。相反，他们已然意识到，还有大量的网络安全空间安全概念尚未被探索，等待他们来发掘。 -->
     {% endif %}
+    </h2>
+    <p>
     </p>
 
     <ul style="list-style-image: url({{ url_for("views.themes", path="img/dojo/" + belt_color + ".png") }})">
