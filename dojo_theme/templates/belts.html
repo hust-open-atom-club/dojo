@@ -18,7 +18,6 @@
   </p>
 
   {% for belt_color in ("blue", "purple", "green", "yellow", "orange", "white") %}
-    <!-- 增加img/dojo/belt_color图片 -->
     <h2>
       <img src="{{ url_for("views.themes", path="img/dojo/" + belt_color + ".png") }}" alt="{{ belt_color }} belt" style="width: 50px;">
     {% if belt_color == "blue" %}
@@ -39,12 +38,14 @@
     卓越级训练家 (Great Rank)
     <!-- 黎明即将来临。
     下列同学不再是那些不了解网络安全的人了。相反，他们已然意识到，还有大量的网络安全空间安全概念尚未被探索，等待他们来发掘。 -->
+    {% elif belt_color == "white" %}
+    新手级 (Beginner Rank)
     {% endif %}
     </h2>
     <p>
     </p>
 
-    <ul style="list-style-image: url({{ url_for("views.themes", path="img/dojo/" + belt_color + ".png") }})">
+    <ul>
       {% for user_id in belt_data.ranks[belt_color] %}
       {% set user = belt_data.users[user_id] %}
       <li>
