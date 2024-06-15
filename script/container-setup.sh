@@ -17,7 +17,6 @@ define () {
 define DOJO_HOST localhost.pwn.hust.college
 define DOJO_ENV development
 define DOJO_CHALLENGE challenge-mini
-define WINDOWS_VM none
 define SECRET_KEY $(openssl rand -hex 16)
 define DOCKER_PSLR $(openssl rand -hex 16)
 define UBUNTU_VERSION 20.04
@@ -29,10 +28,16 @@ define INSTALL_BURPSUITE no
 define INSTALL_BUSYBOX no # needs compilation
 define INSTALL_CAPSTONE no
 define DEFAULT_INSTALL_SELECTION no # default to not installing tools
-define INSTALL_DESKTOP_BASE yes # matches the challenge-mini configuration
-define INSTALL_XFCE yes # matches the challenge-mini configuration
+define INSTALL_DESKTOP yes # matches the challenge-mini configuration
 define INSTALL_IDA_FREE no # explicitly disable -- only for free dojos
 define INSTALL_BINJA_FREE no # explicitly disable -- only for free dojos
+define KOOK_TOKEN
+define KOOK_GUILD_ID
+define KOOK_CHANNEL_ID
+define KOOK_CLIENT_ID
+define KOOK_CLIENT_SECRET
+define KOOK_APP_ID
+
 
 mv $DOJO_DIR/data/.config.env $DOJO_DIR/data/config.env
 . $DOJO_DIR/data/config.env
@@ -85,5 +90,5 @@ iptables -I DOCKER-USER -i user_network -j DROP
 for host in $(cat $DOJO_DIR/user_firewall.allowed); do
     iptables -I DOCKER-USER -i user_network -d $(host $host | awk '{print $NF; exit}') -j ACCEPT
 done
-iptables -I DOCKER-USER -i user_network -s 10.0.0.0/24 -m conntrack --ctstate NEW -j ACCEPT
-iptables -I DOCKER-USER -i user_network -d 10.0.0.0/8 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -I DOCKER-USER -i user_network -s 10.114.0.0/24 -m conntrack --ctstate NEW -j ACCEPT
+iptables -I DOCKER-USER -i user_network -d 10.114.0.0/16 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT

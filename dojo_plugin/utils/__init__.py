@@ -75,12 +75,12 @@ def serialize_user_flag(account_id, challenge_id, *, secret=None):
     return user_flag
 
 def user_ipv4(user):
-    # Subnet: 10.0.0.0/8
-    # Reserved: 10.0.0.0/24, 10.255.255.0/24
-    # Gateway: 10.0.0.1
-    # User IPs: 10.0.1.0 - 10.255.254.255
-    user_ip = (10 << 24) + (1 << 8) + user.id
-    assert user_ip < (10 << 24) + (255 << 16) + (255 << 8)
+    # Subnet: 10.114.0.0/16
+    # Reserved: 10.114.0.0/24, 10.114.255.0/24
+    # Gateway: 10.114.0.1
+    # User IPs: 10.114.1.0 - 10.114.254.255
+    user_ip = (10 << 24) + (114 << 16) + (1 << 8) + user.id
+    assert user_ip < (10 << 24) + (114 << 16) + (254 << 8) + 255
     return f"{user_ip >> 24 & 0xff}.{user_ip >> 16 & 0xff}.{user_ip >> 8 & 0xff}.{user_ip & 0xff}"
 
 def redirect_internal(redirect_uri, auth=None):

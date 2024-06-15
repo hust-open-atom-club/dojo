@@ -17,9 +17,8 @@ port_names = {
     "challenge": 80,
     "vscode": 6080,
     "desktop": 6081,
-    "desktop-windows": 6082,
 }
-
+ondemand_services = { "vscode", "desktop"}
 
 def container_password(container, *args):
     key = container.labels["dojo.auth_token"].encode()
@@ -42,7 +41,7 @@ def view_desktop():
         return render_template("iframe.html", active=False)
 
     exec_run(
-        "/opt/pwn.college/start-desktop.sh 2>&1 > /tmp/.dojo/desktop.log",
+        "/opt/pwn.college/services.d/desktop 2>&1 > /tmp/.dojo/service-desktop.log",
         user="hacker", pwncollege_uid=user.id, shell=True,
         assert_success=True
     )
@@ -107,6 +106,13 @@ def forward_workspace(service, service_path=""):
             port = int(port_names.get(port, port))
         except ValueError:
             abort(404)
+
+        if service in ondemand_services:
+            exec_run(
+                f"/opt/pwn.college/services.d/{service} 2>&1 > /tmp/.dojo/service-{service}.log",
+                user="hacker", pwncollege_uid=user.id, shell=True,
+                assert_success=True
+            )
 
     elif service.count("~") == 1:
         port, user_id = service.split("~", 1)

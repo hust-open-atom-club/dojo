@@ -16,15 +16,14 @@ RUN apt-get update && \
         host \
         htop
 
-RUN export DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce" && curl -fsSL https://get.docker.com | /bin/sh
+RUN export DOWNLOAD_URL="https://mirrors.hust.edu.cn/docker-ce" && curl -fsSL https://get.docker.com | /bin/sh
 RUN echo '{ "data-root": "/opt/pwn.college/data/docker" }' > /etc/docker/daemon.json
 
-# TODO: this can be removed with docker-v22 (buildx will be default)
 RUN docker buildx install
 
 RUN git clone --branch 3.6.0 https://github.com/CTFd/CTFd /opt/CTFd
 
-RUN wget -O /etc/docker/seccomp.json https://mirrors.hust.edu.cn/git/moby.git/plain/profiles/seccomp/default.json
+RUN wget -O /etc/docker/seccomp.json https://gitee.com/mirrors/moby/raw/master/profiles/seccomp/default.json
 
 RUN ln -s /opt/pwn.college/etc/systemd/system/pwn.college.service /etc/systemd/system/pwn.college.service
 RUN ln -s /opt/pwn.college/etc/systemd/system/pwn.college.logging.service /etc/systemd/system/pwn.college.logging.service

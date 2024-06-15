@@ -90,7 +90,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 
 ## 2.1 道馆编写
 
-道馆是 pwn.hust.college 平台的核心概念，同学们（神奇宝贝训练家）可以通过道馆挑战学习软件安全课程的核心概念与实践各种知识点，并且获得道馆徽章。教师们可参考 [example-dojo](https://github.com/HUSTSeclab/example-dojo))，自行编写自己的道馆及挑战关卡。
+道馆是 [pwn.hust.college](https://pwn.cse.hust.edu.cn/) 平台的核心概念，同学们（神奇宝贝训练家）可以通过道馆挑战学习软件安全课程的核心概念与实践各种知识点，并且获得道馆徽章。教师们可参考 [example-dojo](https://github.com/hust-open-atom-club/example-dojo)，自行编写自己的道馆及挑战关卡。
 
 ### 2.1.1 字段解释
 
@@ -103,7 +103,7 @@ pwn.hust.college 平台用于实践网络空间安全，旨在最小化学生和
 - `type`：**可选**。此字段可以取值 `welcome`、`elementary`、`intermediate`、`advanced`、`course`、`topic`、`example`、`hidden`。`welcome` 将该道馆放在**入门篇**部分，`elementary` 将该道馆放在**初级篇**部分，`intermediate` 将该道馆放在**中级篇**部分，`advanced` 将该道馆放在**高级篇**部分。`course` 将其放在**课程**部分，`topic` 将该道馆放在**主题**部分，`hidden` 意味着道馆不会被列出（但仍然可以访问）。如果省略 `type` 字段或包含除这八个之外的值，则道馆将出现在**更多**部分。
 - `password`：**可选**。用户加入道馆需要输入的密码。如果省略，则任何人都可以加入道馆。
 - `modules`：**必需**。模块对象的数组，`modules` 的参数，参考 **M****odule** 部分。
-- `award`：**可选**。子参数为 `belt`，`emoji`，内容为 svg/png 文件名，`belt` 的文件存放路径为：`/dojo_theme/static/img/belts/`；`emoji` 的文件存放路径为：`/dojo_theme/static/img/dojo/`。
+- `award`：**可选**。子参数为 `belt`，`emoji`，内容为 svg/png 文件名，`belt` 和 `emoji` 的文件存放路径均为：`/dojo_theme/static/img/dojo/`。
 
 使用样例：
 
@@ -199,7 +199,7 @@ resources:
 
 ![](static/Z4a7bHIdXotSYzx97NRcFDBCnIb.png)
 
-1. 根据道馆仓库所在的托管平台，选择 Github 或 Gitee，并输入相应的仓库路径，如 HUSTSeclab/example-道馆。若道馆仓库是开源的，即可点击 Create 按钮，创建道馆及其挑战关卡。反之，则需要在道馆仓库中添加如图所示的部署秘钥，详见 Github 或 Gitee 部署秘钥文档。
+1. 根据道馆仓库所在的托管平台，选择 Github 或 Gitee，并输入相应的仓库路径，如 hust-open-atom-club/example-dojo。若道馆仓库是开源的，即可点击 Create 按钮，创建道馆及其挑战关卡。反之，则需要在道馆仓库中添加如图所示的部署秘钥，详见 Github 或 Gitee 部署秘钥文档。
 
 ![](static/NESzbol3HoOzZ4xeUysc9uNTnbb.png)
 

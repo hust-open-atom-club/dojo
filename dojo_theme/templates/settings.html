@@ -12,6 +12,7 @@
       <div class="nav flex-column nav-pills" role="tablist">
         <a class="nav-link active" id="settings-profile-tab" data-toggle="pill" href="#profile" role="tab">简介</a>
         <a class="nav-link" id="settings-ssh-key-tab" data-toggle="pill" href="#ssh-key" role="tab">SSH 公钥</a>
+        <a class="nav-link" id="settings-kook-tab" data-toggle="pill" href="#kook" role="tab">KOOK</a>
       </div>
     </div>
     <div class="col-md-8">
@@ -23,7 +24,7 @@
           {% with form = Forms.self.SettingsForm(country=user.country) %}
           {% from "macros/forms.html" import render_extra_fields %}
           <form id="user-profile-form" method="post" accept-charset="utf-8" autocomplete="off" role="form"
-                class="form-horizontal">
+            class="form-horizontal">
             <div class="form-group">
               <b>{{ form.name.label }}</b>
               {{ form.name(class="form-control", value=user.name) }}
@@ -66,34 +67,85 @@
               </select>
             </div>
 
-	    {{ render_extra_fields(form.extra) }}
+            {{ render_extra_fields(form.extra) }}
 
             <div id="results" class="form-group">
             </div>
 
             <div class="form-group">
-              {{ form.submit(class="btn btn-md btn-primary btn-outlined float-right") }}
+              {{ form.submit(class="btn btn-md btn-primary float-right") }}
             </div>
           </form>
           {% endwith %}
         </div>
 
         <div class="tab-pane fade" id="ssh-key" role="tabpanel">
+
+          {% if ssh_keys %}
+            <b><label for="enter-name"> 现有 SSH 秘钥</label></b>
+            <br>
+
+            {% for key in ssh_keys %}
+            <form method="post" id="delete-ssh-key-{{ loop.index }}-form" autocomplete="off">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input class="form-control" id="ssh-key" name="ssh_key" type="text" value="{{ key }}" readonly>
+                        <div class="input-group-append ml-1" style="margin: -0.1rem">
+                            <button type="submit" class="btn btn-danger" id="delete-ssh-key-button-{{ loop.index }}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="delete-ssh-key-{{ loop.index }}-results" class="form-group">
+                </div>
+            </form>
+
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                form_fetch_and_show("delete-ssh-key-{{ loop.index }}", "/pwncollege_api/v1/ssh_key", "DELETE", "你的公钥已经被删除!");
+              });
+            </script>
+            {% endfor %}
+            <br>
+          {% endif %}
+
           <form method="post" id="ssh-key-form" autocomplete="off">
             <div class="form-group">
-              <b><label for="enter-name">SSH 公钥</label></b>
+              <b><label for="enter-name">添加新的 SSH 公钥</label></b>
               <small class="form-text text-muted"> 用于通过 `SSH` 远程访问挑战关卡 </small>
               <br>
-              <input class="form-control" id="ssh-key" name="ssh_key" type="text" value="{{ ssh_key or "" }}">
+              <input class="form-control" id="ssh-key" name="ssh_key" type="text" value="">
             </div>
 
             <div id="ssh-key-results" class="form-group">
             </div>
 
             <div class="form-group text-right">
-              <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit" value="Update">
+              <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit" value="Add">
             </div>
           </form>
+        </div>
+
+        <div class="tab-pane fade" id="kook" role="tabpanel">
+          {% if not kook_user %}
+          <a href="{{ url_for('kook.kook_connect') }}">
+            <button class="btn btn-primary btn-lg">连接到KOOK</button>
+          </a>
+
+          {% else %}
+          <h3>你的账户已经连接到KOOK。</h3>
+          <div style="margin-bottom: 24px;">用户名: {{ kook_user.username }}</div>
+
+          <a href="{{ url_for('kook.kook_connect') }}">
+            <button class="btn btn-primary btn-lg">更换账户</button>
+          </a>
+
+          <a href="{{ url_for('kook.kook_disconnect') }}">
+            <button class="btn btn-primary btn-lg">解除绑定</button>
+          </a>
+          {% endif %}
         </div>
 
         <div class="tab-pane fade" id="tokens" role="tabpanel">

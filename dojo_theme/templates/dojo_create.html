@@ -9,24 +9,23 @@ dojo create
 </div>
 <div class="container">
   
-    <p>pwn.hust.college 的道场是在一个 git 仓库中定义的。您可以使用下面列出的示例仓库，或者我们的<a href="https://github.com/HUSTSeclab/official-dojos">官方道馆仓库</a>，作为构建道馆的示例！</p>
+    <p>pwn.hust.college 的道场是在一个 git 仓库中定义的。您可以使用下面列出的示例仓库，或者我们的<a href="https://github.com/hust-open-atom-club/official-dojos">官方道馆仓库</a>，作为构建道馆的示例！</p>
     <ul class="card-list">
         {% for dojo in example_dojos %}
         {{ card(url_for("pwncollege_dojos.view_dojo", dojo=dojo.reference_id),
         title=dojo.name,
         text="{} Modules : ".format(dojo.modules | length) + "{} / {}".format(dojo.solves(user=user,
         ignore_visibility=True, ignore_admins=False).count() if user else 0, dojo.challenges | length),
-        icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(dojo.award.belt) if (dojo.award.belt and dojo.official)
-        else None,
-        emoji=dojo.award.emoji ) }}
+        icon="/themes/dojo_theme/static/img/dojo/{}.svg".format(dojo.award.emoji) if (dojo.award.emoji and dojo.official)
+        else None) }}
         {% endfor %}
     </ul>
     <p>当您准备好后，填写下面的表单从您的仓库创建您的道馆！</p>
     <form method="post" id="dojo-create-form" autocomplete="off">
         <div class="form-group">
             <b><label>Git 仓库</label></b>
-            <small class="form-text text-muted">https://github.com/<b>HUSTSeclab/example-dojo</b></small>
-            <small class="form-text text-muted">https://gitee.com/<b>HUSTSeclab/example-dojo</b></small>
+            <small class="form-text text-muted">https://github.com/<b>hust-open-atom-club/example-dojo</b></small>
+            <small class="form-text text-muted">https://gitee.com/<b>hust-open-atom-club/example-dojo</b></small>
             <small class="form-text text-muted">选择 Git 仓库类型：</small>
             <br>
             <div style="display: flex;
@@ -40,41 +39,41 @@ dojo create
                     </select>
                 </div>
                 <div class="col-sm-6 form-group ">
-                <input class="form-control btn btn-md btn-outline-secondary w-100" name="repository" type="text" placeholder="HUSTSeclab/example-dojo"
+                <input class="form-control btn btn-md btn-outline-secondary w-100" name="repository" type="text" placeholder="hust-open-atom-club/example-dojo"
                     value="">
                 </div>
             </div>
-                    <br>
-                    <b><label>部署秘钥</label></b>
+            <br>
+            <b><label>部署秘钥</label></b>
 
-                    <small class="form-text text-muted">
-                        Github 私库必需： <a href="https://docs.github.com/zh/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys" arget="_blank">部署秘钥文档</a>
-                    </small>
-                    <small class="form-text text-muted">
-                        Gitee 私库必需： <a href="https://help.gitee.com/repository/ssh/settings" arget="_blank">部署秘钥文档</a>
-                    </small>
-                    <br>
-                    <div class="input-group mb-3">
-                        <input class="form-control" name="public_key" type="text" value="{{ public_key }}" readonly>
-                        <div class="input-group-append copy-button">
-                            <button class="btn btn-outline-secondary" type="button">
-                                <i class="fas fa-clipboard"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <input class="form-control" name="private_key" type="hidden" value="{{ private_key }}">
+            <small class="form-text text-muted">
+                Github 私库必需： <a href="https://docs.github.com/zh/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys" arget="_blank">部署秘钥文档</a>
+            </small>
+            <small class="form-text text-muted">
+                Gitee 私库必需： <a href="https://help.gitee.com/repository/ssh/settings" arget="_blank">部署秘钥文档</a>
+            </small>
+            <br>
+            <div class="input-group mb-3">
+                <input class="form-control" name="public_key" type="text" value="{{ public_key }}" readonly>
+                <div class="input-group-append copy-button">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-clipboard"></i>
+                    </button>
                 </div>
+            </div>
 
-                <br>
+            <input class="form-control" name="private_key" type="hidden" value="{{ private_key }}">
+        </div>
 
-                <div id="dojo-create-results" class="form-group">
-                </div>
+        <br>
 
-                <div class="form-group text-right">
-                    <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit"
-                        value="Create">
-                </div>
+        <div id="dojo-create-results" class="form-group">
+        </div>
+
+        <div class="form-group text-right">
+            <input class="btn btn-md btn-primary btn-outlined" id="_submit" name="_submit" type="submit"
+                   value="Create">
+        </div>
     </form>
 </div>
 {% endblock %}

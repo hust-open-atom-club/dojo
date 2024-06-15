@@ -252,6 +252,11 @@ h4 {
     filter: drop-shadow(0px 0px 3px white);
 }
 
+.scoreboard-emoji {
+    height: 1.5em;
+    filter: drop-shadow(0px 0px 3px black);
+}
+
 .scoreboard-belt {
     height: 1.5em;
     filter: drop-shadow(0px 0px 3px black);
@@ -275,6 +280,9 @@ h4 {
     font-weight: bold;
 }
 
+.scoreboard tr {
+    display: flex;
+}
 
 #syllabus ul li {
   list-style-image:url('../img/bullet.png');

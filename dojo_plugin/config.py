@@ -18,6 +18,13 @@ DATA_DIR = pathlib.Path("/var/data")
 
 INDEX_HTML = pathlib.Path("/var/index.html").read_text()
 
+KOOK_TOKEN = os.getenv("KOOK_TOKEN")
+KOOK_GUILD_ID = os.getenv("KOOK_GUILD_ID")
+KOOK_CHANNEL_ID = os.getenv("KOOK_CHANNEL_ID")
+KOOK_CLIENT_ID = os.getenv("KOOK_CLIENT_ID")
+KOOK_CLIENT_SECRET = os.getenv("KOOK_CLIENT_SECRET")
+KOOK_APP_ID = os.getenv("KOOK_APP_ID")
+
 def create_seccomp():
     seccomp = json.load(pathlib.Path("/etc/docker/seccomp.json").open())
 
@@ -80,7 +87,6 @@ DOJO_HOST = os.getenv("DOJO_HOST")
 HOST_DATA_PATH = os.getenv("HOST_DATA_PATH")
 BINARY_NINJA_API_KEY = os.getenv("BINARY_NINJA_API_KEY")
 INTERNET_FOR_ALL = bool(ast.literal_eval(os.getenv("INTERNET_FOR_ALL") or "False"))
-WINDOWS_VM_ENABLED = os.getenv("WINDOWS_VM") == "full"
 
 missing_errors = ["DOJO_HOST", "HOST_DATA_PATH"]
 missing_warnings = ["BINARY_NINJA_API_KEY"]

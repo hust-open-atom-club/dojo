@@ -221,9 +221,9 @@ def build(path):
                     obj-m += debug.o
 
                     all:
-                    \tmake -C /opt/linux/linux-5.4 M={workdir} modules
+                    \tmake -C /opt/linux/linux M={workdir} modules
                     clean:
-                    \tmake -C /opt/linux/linux-5.4 M={workdir} clean
+                    \tmake -C /opt/linux/linux M={workdir} clean
                     """
                 )
             )
