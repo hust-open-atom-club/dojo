@@ -36,7 +36,7 @@ function renderSubmissionResponse(response, item) {
     if (result.status === "authentication_required") {
         window.location =
             CTFd.config.urlRoot +
-            "/cas-login?next=" +
+            "/login?next=" +
             CTFd.config.urlRoot +
             window.location.pathname +
             window.location.hash;
@@ -160,7 +160,7 @@ function startChallenge(event) {
             // User is not logged in or CTF is paused.
             window.location =
                 CTFd.config.urlRoot +
-                "/cas-login?next=" +
+                "/login?next=" +
                 CTFd.config.urlRoot +
                 window.location.pathname +
                 window.location.hash;
