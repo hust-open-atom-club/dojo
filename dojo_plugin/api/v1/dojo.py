@@ -60,7 +60,7 @@ def create_dojo(user,repository_type, repository, public_key, private_key):
 
     try:
         repository_re = r"[\w\-]+/[\w\-]+"
-        assert re.match(repository_re, repository), f"Invalid repository, expected format: <code>{repository_re}</code>, got <code>{repository_type}</code>"
+        assert re.match(repository_re, repository), f"Invalid repository, expected format: <code>{repository_re}</code>"
 
         assert not Dojos.query.filter_by(repository=repository).first(), DOJO_EXISTS
 
