@@ -11,7 +11,7 @@ ARG INSTALL_AFL=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_RAPPEL=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_RP=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_GECKODRIVER=${DEFAULT_INSTALL_SELECTION}
-ARG INSTALL_BURPSUITE=${DEFAULT_INSTALL_SELECTION}
+# ARG INSTALL_BURPSUITE=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_BUSYBOX=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_GLOW=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_DESKTOP=${DEFAULT_INSTALL_SELECTION}
@@ -140,7 +140,7 @@ FROM builder as builder-kernel-yes
 
 RUN <<EOF
     mkdir /opt/linux
-    wget -O - https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-6.6.32.tar.gz | tar xzC /opt/linux
+    wget -O - https://mirrors.hust.edu.cn/kernel.org/linux/kernel/v6.x/linux-6.6.32.tar.gz | tar xzC /opt/linux
     cd /opt/linux/linux-6.6.32
     make defconfig
 EOF
@@ -184,6 +184,7 @@ RUN <<EOF
     make -j$(nproc) bzImage
     ln -sf $PWD/arch/x86/boot/bzImage ../bzImage
     ln -sf $PWD/vmlinux ../vmlinux
+    ln -sf /opt/linux/linux-6.6.32 /opt/linux/linux
 EOF
 
 FROM builder-kernel-${INSTALL_KERNEL} as builder-kernel
@@ -321,14 +322,14 @@ RUN <<EOF
 EOF
 FROM builder-geckodriver-${INSTALL_GECKODRIVER} as builder-geckodriver
 
-FROM builder as builder-burpsuite-no
-FROM builder as builder-burpsuite-yes
-RUN <<EOF
-    wget -q -O /tmp/burpsuite.sh https://portswigger.net/burp/releases/download?product=community\&version=2023.11.1.4\&type=Linux
-    sh /tmp/burpsuite.sh -q
-    rm /tmp/burpsuite.sh
-EOF
-FROM builder-burpsuite-${INSTALL_BURPSUITE} as builder-burpsuite
+# FROM builder as builder-burpsuite-no
+# FROM builder as builder-burpsuite-yes
+# RUN <<EOF
+#     wget -q -O /tmp/burpsuite.sh https://portswigger.net/burp/releases/download?product=community\&version=2023.11.1.4\&type=Linux
+#     sh /tmp/burpsuite.sh -q
+#     rm /tmp/burpsuite.sh
+# EOF
+# FROM builder-burpsuite-${INSTALL_BURPSUITE} as builder-burpsuite
 
 FROM builder as builder-busybox-no
 FROM builder as builder-busybox-yes
@@ -632,7 +633,7 @@ COPY --link --from=builder-aflplusplus / /
 COPY --link --from=builder-rappel / /
 COPY --link --from=builder-rp / /
 COPY --link --from=builder-geckodriver / /
-COPY --link --from=builder-burpsuite / /
+# COPY --link --from=builder-burpsuite / /
 COPY --link --from=builder-busybox / /
 COPY --link --from=builder-glow / /
 COPY --link --from=builder-virtiofsd /opt/virtiofsd /opt/virtiofsd
@@ -663,7 +664,7 @@ COPY --link --from=builder-aflplusplus-yes / /
 COPY --link --from=builder-rappel-yes / /
 COPY --link --from=builder-rp-yes / /
 COPY --link --from=builder-geckodriver-yes / /
-COPY --link --from=builder-burpsuite-yes / /
+# COPY --link --from=builder-burpsuite-yes / /
 COPY --link --from=builder-busybox-yes / /
 COPY --link --from=builder-glow-yes / /
 COPY --link --from=builder-virtiofsd-yes /opt/virtiofsd /opt/virtiofsd
