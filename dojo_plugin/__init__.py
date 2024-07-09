@@ -24,7 +24,6 @@ from .pages.dojo import dojo
 from .pages.workspace import workspace
 from .pages.desktop import desktop
 from .pages.users import users
-from .pages.sso_login import sso
 from .pages.settings import settings_override
 from .pages.course import course
 from .pages.writeups import writeups
@@ -130,7 +129,6 @@ def load(app):
     app.register_blueprint(dojo)
     app.register_blueprint(workspace)
     app.register_blueprint(desktop)
-    app.register_blueprint(sso)
     app.register_blueprint(users)
     app.register_blueprint(course)
     app.register_blueprint(writeups)
