@@ -24,16 +24,16 @@
     <p>我们在平台上提供了众多课程，包含软件安全与软件安全实验。</p>
     {% elif type == "Elementary" %}
     <h2>初级篇</h2>
-    <p>深灰道馆，华蓝道馆构成了 pwn.hust.college 平台初级篇的主要课程内容，完成关卡后你可以获得<a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。建议按照顺序进行学习，祝你好运！</p>
+    <p>以下道馆构成了 pwn.hust.college 平台初级篇的主要课程内容，完成关卡后你可以获得<a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。建议按照顺序进行学习，祝你好运！</p>
     {% elif type == "Intermediate" %}
     <h2>中级篇</h2>
-    <p>枯叶道馆，金黄道馆构成了 pwn.hust.college 平台中级篇的主要课程内容，完成关卡后你可以获得<a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。建议按照顺序进行学习，祝你好运！</p>
+    <p>以下道馆构成了 pwn.hust.college 平台中级篇的主要课程内容，完成关卡后你可以获得<a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。建议按照顺序进行学习，祝你好运！</p>
     {% elif type == "Advanced" %}
     <h2>高级篇</h2>
-    <p> 神奇宝贝联盟大会 </p>
+    <p>以下道馆构成了 pwn.hust.college 平台高级篇的主要课程内容，完成关卡后你可以获得<a href="{{ url_for("pwncollege_belts.view_belts") }}">徽章</a>奖励。建议按照顺序进行学习，祝你好运！</p>
     {% elif type == "Archive" %}
     <h2>归档</h2>
-    <p>历史课程</p>
+    <p>历史道馆</p>
     {% endif %}
     <ul class="card-list">
       {% for dojo in dojos %}
