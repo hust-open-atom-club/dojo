@@ -23,7 +23,6 @@ docker run --privileged -d -v "dojo:/opt/pwn.college:shared" -p 22:22 -p 80:80 -
 ```
 
 This will run the initial setup, including building the challenge docker image. It would build docker image based on the host architecture.
-You can deploy dojo by cloning this repository and running [setup.sh](https://github.com/hust-open-atom-club/dojo/blob/hustsec_dev/setup.sh).
 
 ### Local Setup
 
