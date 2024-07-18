@@ -14,11 +14,6 @@
 <div class="container">
 	<div class="row">
 		<div class="col-md-6 offset-md-3">
-			{% include "components/errors.html" %}
-
-			<hr>
-			{% endif %}
-
 			{% with form = Forms.auth.LoginForm() %}
 			<form method="post" accept-charset="utf-8" autocomplete="off">
 				<div class="form-group">
@@ -32,7 +27,7 @@
 				<div class="row pt-3">
 					<div class="col-md-6">
 						<a class="float-left align-text-to-button" href="{{ url_for('auth.reset_password') }}">
-							忘记密码?
+							Forgot your password?
 						</a>
 					</div>
 					<div class="col-md-6">
