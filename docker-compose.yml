@@ -187,7 +187,7 @@ services:
 
   open-webui:
     container_name: open-webui
-    image: cees3/sensai:v2.31
+    image: cees3/sensai:v2.36
     environment:
       - OLLAMA_BASE_URLS=http://222.20.126.129:11434
     volumes:
