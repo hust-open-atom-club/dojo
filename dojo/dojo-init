@@ -92,3 +92,5 @@ iptables -I DOCKER-USER -i user_network -s 10.114.0.0/24 -m conntrack --ctstate 
 iptables -I DOCKER-USER -i user_network -d 10.114.0.0/16 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 iptables -I DOCKER-USER -i user_network -s 10.114.0.2 -j ACCEPT
 iptables -I DOCKER-USER -o user_network -d 10.114.0.2 -j ACCEPT
+iptables -I FORWARD 1 -s 10.114.0.3/32 -d 10.114.0.2/32 -p tcp --dport 8080 -j ACCEPT
+iptables -I FORWARD 1 -s 10.114.0.2/32 -d 10.114.0.3/32 -p tcp --sport 8080 -j ACCEPT
