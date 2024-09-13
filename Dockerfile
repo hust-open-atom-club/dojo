@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV LC_CTYPE=C.UTF-8
 
+RUN chmod 1777 /tmp
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y \
@@ -17,10 +18,10 @@ RUN apt-get update && \
         htop
 
 RUN export DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce" && curl -fsSL https://get.docker.com | /bin/sh
+RUN mkdir -p /etc/docker
 RUN echo '{ "data-root": "/opt/pwn.college/data/docker" }' > /etc/docker/daemon.json
 
 RUN docker buildx install
-
 RUN git clone --branch 3.6.0 https://github.com/CTFd/CTFd /opt/CTFd
 
 RUN wget -O /etc/docker/seccomp.json https://gitee.com/mirrors/moby/raw/master/profiles/seccomp/default.json
