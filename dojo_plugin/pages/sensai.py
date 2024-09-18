@@ -19,8 +19,8 @@ def view_sensai():
     return render_template("iframe.html", iframe_name="sensai", iframe_src="/sensai/", active=active)
 
 
-@sensai.route("/sensai/", methods=["GET", "POST"])
-@sensai.route("/sensai/<path:path>", methods=["GET", "POST"])
+@sensai.route("/sensai/", methods=["GET", "POST", "DELETE", "OPTIONS"])
+@sensai.route("/sensai/<path:path>", methods=["GET", "POST", "DELETE", "OPTIONS"])
 @sensai.route("/sensai/", websocket=True)
 @sensai.route("/sensai/<path:path>", websocket=True)
 @authed_only
