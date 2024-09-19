@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster as build
+FROM python:3.9-slim-buster AS build
 WORKDIR /opt/CTFd
 
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
@@ -22,7 +22,7 @@ RUN echo 'from werkzeug.utils import safe_join' >> /opt/venv/lib/python3.9/site-
 
 COPY . /opt/CTFd
 
-FROM python:3.9-slim-buster as release
+FROM python:3.9-slim-buster AS release
 WORKDIR /opt/CTFd
 
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list

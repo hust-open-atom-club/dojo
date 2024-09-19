@@ -24,7 +24,7 @@ ARG INSTALL_GDB=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_TOOLS_PIP=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_TOOLS_APT=${DEFAULT_INSTALL_SELECTION}
 
-FROM ubuntu:${UBUNTU_VERSION} as essentials
+FROM ubuntu:${UBUNTU_VERSION} AS essentials
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
 
@@ -58,7 +58,7 @@ RUN rm -f /usr/lib/python3.*/EXTERNALLY-MANAGED
 
 ################################################################################
 
-FROM essentials as builder-essentials
+FROM essentials AS builder-essentials
 
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -70,7 +70,7 @@ EOF
 
 ################################################################################
 
-FROM builder-essentials as builder
+FROM builder-essentials AS builder
 
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -112,9 +112,9 @@ EOF
 
 ################################################################################
 
-FROM builder as builder-kernel-no
+FROM builder AS builder-kernel-no
 RUN mkdir /opt/linux
-FROM builder as builder-kernel-yes
+FROM builder AS builder-kernel-yes
 
 RUN <<EOF
     mkdir /opt/linux
@@ -165,12 +165,12 @@ RUN <<EOF
     ln -sf /opt/linux/linux-6.6.32 /opt/linux/linux
 EOF
 
-FROM builder-kernel-${INSTALL_KERNEL} as builder-kernel
+FROM builder-kernel-${INSTALL_KERNEL} AS builder-kernel
 
 ################################################################################
 
-FROM builder as builder-gdb-no
-FROM builder as builder-gdb-yes
+FROM builder AS builder-gdb-no
+FROM builder AS builder-gdb-yes
 
 RUN <<EOF
     mkdir /opt/gdb
@@ -198,11 +198,11 @@ RUN <<EOF
     pip install -r requirements.txt
 EOF
 
-FROM builder-gdb-${INSTALL_GDB} as builder-gdb
+FROM builder-gdb-${INSTALL_GDB} AS builder-gdb
 
 ################################################################################
 
-FROM essentials as builder-code-server
+FROM essentials AS builder-code-server
 
 RUN <<EOF
     curl -fsSL https://gitee.com/mirrors/code-server/raw/main/install.sh | /bin/sh /dev/stdin
@@ -235,8 +235,8 @@ RUN chmod +x rg
 
 ################################################################################
 
-FROM builder as builder-tcpdump-no
-FROM builder as builder-tcpdump-yes
+FROM builder AS builder-tcpdump-no
+FROM builder AS builder-tcpdump-yes
 RUN <<EOF
     git clone --depth 1 https://github.com/the-tcpdump-group/tcpdump /opt/tcpdump
     cd /opt/tcpdump
@@ -244,65 +244,65 @@ RUN <<EOF
     ./configure
     make install
 EOF
-FROM builder-tcpdump-${INSTALL_TCPDUMP} as builder-tcpdump
+FROM builder-tcpdump-${INSTALL_TCPDUMP} AS builder-tcpdump
 
-FROM builder as builder-capstone-no
-FROM builder as builder-capstone-yes
+FROM builder AS builder-capstone-no
+FROM builder AS builder-capstone-yes
 RUN <<EOF
     git clone --depth 1 https://github.com/capstone-engine/capstone /opt/capstone
     cd /opt/capstone
     make
     make install
 EOF
-FROM builder-capstone-${INSTALL_CAPSTONE} as builder-capstone
+FROM builder-capstone-${INSTALL_CAPSTONE} AS builder-capstone
 
 
-FROM builder as builder-aflplusplus-no
-FROM builder as builder-aflplusplus-yes
+FROM builder AS builder-aflplusplus-no
+FROM builder AS builder-aflplusplus-yes
 RUN <<EOF
     git clone --depth 1 https://github.com/aflplusplus/aflplusplus /opt/aflplusplus
     cd /opt/aflplusplus
     make distrib
     make install
 EOF
-FROM builder-aflplusplus-${INSTALL_AFL} as builder-aflplusplus
+FROM builder-aflplusplus-${INSTALL_AFL} AS builder-aflplusplus
 
-FROM builder as builder-rappel-no
-FROM builder as builder-rappel-yes
+FROM builder AS builder-rappel-no
+FROM builder AS builder-rappel-yes
 RUN <<EOF
     git clone --depth 1 https://github.com/yrp604/rappel /opt/rappel
     cd /opt/rappel
     make
     cp bin/rappel /usr/bin/rappel
 EOF
-FROM builder-rappel-${INSTALL_RAPPEL} as builder-rappel
+FROM builder-rappel-${INSTALL_RAPPEL} AS builder-rappel
 
-FROM builder as builder-rp-no
-FROM builder as builder-rp-yes
+FROM builder AS builder-rp-no
+FROM builder AS builder-rp-yes
 RUN <<EOF
     wget https://github.com/0vercl0k/rp/releases/download/v2.0.2/rp-lin-x64 -O /usr/bin/rp++
     chmod +x /usr/bin/rp++
 EOF
-FROM builder-rp-${INSTALL_RP} as builder-rp
+FROM builder-rp-${INSTALL_RP} AS builder-rp
 
-FROM builder as builder-geckodriver-no
-FROM builder as builder-geckodriver-yes
+FROM builder AS builder-geckodriver-no
+FROM builder AS builder-geckodriver-yes
 RUN <<EOF
     wget -q -O - https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz | tar xvz -C /usr/local/bin
 EOF
-FROM builder-geckodriver-${INSTALL_GECKODRIVER} as builder-geckodriver
+FROM builder-geckodriver-${INSTALL_GECKODRIVER} AS builder-geckodriver
 
-# FROM builder as builder-burpsuite-no
-# FROM builder as builder-burpsuite-yes
+# FROM builder AS builder-burpsuite-no
+# FROM builder AS builder-burpsuite-yes
 # RUN <<EOF
 #     wget -q -O /tmp/burpsuite.sh https://portswigger.net/burp/releases/download?product=community\&version=2023.11.1.4\&type=Linux
 #     sh /tmp/burpsuite.sh -q
 #     rm /tmp/burpsuite.sh
 # EOF
-# FROM builder-burpsuite-${INSTALL_BURPSUITE} as builder-burpsuite
+# FROM builder-burpsuite-${INSTALL_BURPSUITE} AS builder-burpsuite
 
-FROM builder as builder-busybox-no
-FROM builder as builder-busybox-yes
+FROM builder AS builder-busybox-no
+FROM builder AS builder-busybox-yes
 RUN <<EOF
     VERSION="busybox-1.33.2"
     mkdir /opt/busybox && cd "$_"
@@ -314,10 +314,10 @@ RUN <<EOF
     popd
     ln -s "${VERSION}/_install" /opt/busybox/fs
 EOF
-FROM builder-busybox-${INSTALL_BUSYBOX} as builder-busybox
+FROM builder-busybox-${INSTALL_BUSYBOX} AS builder-busybox
 
-FROM builder as builder-glow-no
-FROM builder as builder-glow-yes
+FROM builder AS builder-glow-no
+FROM builder AS builder-glow-yes
 RUN <<EOF
     VERSION="1.5.1"
     ARCH=$(dpkg --print-architecture)
@@ -328,11 +328,11 @@ RUN <<EOF
     rm "${DEB_NAME}"
     popd
 EOF
-FROM builder-glow-${INSTALL_GLOW} as builder-glow
+FROM builder-glow-${INSTALL_GLOW} AS builder-glow
 
-FROM builder as builder-virtiofsd-no
+FROM builder AS builder-virtiofsd-no
 RUN mkdir /opt/virtiofsd
-FROM builder as builder-virtiofsd-yes
+FROM builder AS builder-virtiofsd-yes
 RUN <<EOF
     mkdir /opt/virtiofsd && cd "$_"
     wget -q -O ./build.zip "https://gitlab.com/virtio-fs/virtiofsd/-/jobs/artifacts/main/download?job=publish"
@@ -340,12 +340,12 @@ RUN <<EOF
     rm -f ./build.zip
     chmod +x ./virtiofsd
 EOF
-FROM builder-virtiofsd-${INSTALL_VIRTIOFSD} as builder-virtiofsd
+FROM builder-virtiofsd-${INSTALL_VIRTIOFSD} AS builder-virtiofsd
 
 ################################################################################
 
-FROM essentials as builder-desktop-no
-FROM essentials as builder-desktop-yes
+FROM essentials AS builder-desktop-no
+FROM essentials AS builder-desktop-yes
 
 ARG UBUNTU_VERSION=20.04
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
@@ -374,15 +374,15 @@ COPY desktop/pwncollege_background.jpg /usr/share/backgrounds/
 
 RUN rm /etc/xdg/autostart/*
 
-FROM builder-desktop-${INSTALL_DESKTOP} as builder-desktop
+FROM builder-desktop-${INSTALL_DESKTOP} AS builder-desktop
 
 ################################################################################
 
 
 ################################################################################
 
-FROM essentials as builder-desktop-ghidra-no
-FROM essentials as builder-desktop-ghidra-yes
+FROM essentials AS builder-desktop-ghidra-no
+FROM essentials AS builder-desktop-ghidra-yes
 
 COPY desktop/Ghidra.desktop /usr/share/applications/
 RUN <<EOF
@@ -392,15 +392,15 @@ RUN <<EOF
     rm /tmp/ghidra.zip
 EOF
 
-FROM builder-desktop-ghidra-${INSTALL_GHIDRA} as builder-desktop-ghidra
+FROM builder-desktop-ghidra-${INSTALL_GHIDRA} AS builder-desktop-ghidra
 
 ################################################################################
 
 
 ################################################################################
 
-FROM essentials as builder-tools-apt-no
-FROM essentials as builder-tools-apt-yes
+FROM essentials AS builder-tools-apt-no
+FROM essentials AS builder-tools-apt-yes
 
 RUN sed -i.bak 's|https\?://archive.ubuntu.com|http://mirrors.hust.edu.cn|g' /etc/apt/sources.list
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -468,12 +468,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         zsh
 EOF
 
-FROM builder-tools-apt-${INSTALL_TOOLS_APT} as builder-tools-apt
+FROM builder-tools-apt-${INSTALL_TOOLS_APT} AS builder-tools-apt
 
 ################################################################################
 
-FROM builder as builder-tools-pip-no
-FROM builder as builder-tools-pip-yes
+FROM builder AS builder-tools-pip-no
+FROM builder AS builder-tools-pip-yes
 
 RUN xargs pip install --force-reinstall <<EOF
     angr
@@ -491,11 +491,11 @@ EOF
 
 RUN ln -sf /usr/bin/ipython3 /usr/bin/ipython
 
-FROM builder-tools-pip-${INSTALL_TOOLS_PIP} as builder-tools-pip
+FROM builder-tools-pip-${INSTALL_TOOLS_PIP} AS builder-tools-pip
 
 ################################################################################
 
-FROM builder-essentials as builder-pwn.college
+FROM builder-essentials AS builder-pwn.college
 
 RUN mkdir /opt/pwn.college
 COPY docker-initialize.sh /opt/pwn.college/docker-initialize.sh
@@ -516,7 +516,7 @@ RUN gcc /opt/pwn.college/setuid_interpreter.c -DSUID_PYTHON -o /opt/pwn.college/
 
 ################################################################################
 
-FROM ubuntu:${UBUNTU_VERSION} as challenge-nano
+FROM ubuntu:${UBUNTU_VERSION} AS challenge-nano
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
 
@@ -540,17 +540,17 @@ EOF
 
 ################################################################################
 
-FROM challenge-nano as challenge-micro
+FROM challenge-nano AS challenge-micro
 COPY --link --from=builder-code-server / /
 
 ################################################################################
 
-FROM challenge-micro as challenge-mini
+FROM challenge-micro AS challenge-mini
 COPY --link --from=builder-desktop-yes / /
 
 ################################################################################
 
-FROM challenge-mini as challenge-granular
+FROM challenge-mini AS challenge-granular
 
 # TODO: probably extra slow to `COPY / /`
 COPY --link --from=builder-essentials / /
@@ -576,7 +576,7 @@ COPY --link --from=builder-tools-apt / /
 
 ################################################################################
 
-FROM challenge-mini as challenge-full
+FROM challenge-mini AS challenge-full
 
 # here, everything is installed except for IDA, which still uses the INSTALL_IDA_FREE parameter
 
@@ -605,12 +605,12 @@ COPY --link --from=builder-tools-apt-yes / /
 ################################################################################
 
 # legacy
-FROM challenge-mini as challenge-minimal
-FROM challenge-full as challenge
+FROM challenge-mini AS challenge-minimal
+FROM challenge-full AS challenge
 
 ################################################################################
 
-FROM ${DOJO_CHALLENGE} as challenge-final
+FROM ${DOJO_CHALLENGE} AS challenge-final
 
 RUN <<EOF
     if [ -f /etc/ssh/ssh_config ]
