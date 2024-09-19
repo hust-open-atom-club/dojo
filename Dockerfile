@@ -18,7 +18,6 @@ RUN apt-get update && \
         htop
 
 RUN export DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce" && curl -fsSL https://get.docker.com | /bin/sh
-RUN mkdir -p /etc/docker
 RUN echo '{ "data-root": "/opt/pwn.college/data/docker" }' > /etc/docker/daemon.json
 
 RUN docker buildx install

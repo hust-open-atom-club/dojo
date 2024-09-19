@@ -206,7 +206,7 @@ RUN <<EOF
 EOF
 
 RUN <<EOF
-    git clone --depth 1 --recurse-submodules https://github.com/pwndbg/pwndbg /opt/pwndbg
+    git clone --branch 2024.02.14 --depth 1 --recurse-submodules https://github.com/pwndbg/pwndbg /opt/pwndbg
     cd /opt/pwndbg
     ./setup.sh
 
