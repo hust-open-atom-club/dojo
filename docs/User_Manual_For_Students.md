@@ -263,3 +263,9 @@ ssh -i ～/.ssh/key -p 22223 hacker@pwn.cse.hust.edu.cn
 ## 2.5 KOOK
 
 同学们可以将 kook 个人账号连接到平台中，这样可以通过 pwn.hust.college 平台在 KOOK 频道中做信息广播。
+
+## 2.6 帮助
+开启挑战后点击上方的帮助，可开启一个大语言模型交互界面，在输入框中输入与开启的挑战相关的信息并发送，可以获取到相关的帮助信息。
+
+![](static/076adcafbcf8ffb309778b89175001f0.png)
+![](static/3cfa3d5a7557641a13e71152458d974e.png)
