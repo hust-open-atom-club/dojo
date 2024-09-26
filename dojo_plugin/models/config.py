@@ -10,5 +10,7 @@ DOJO_PREREQUISITES = {
     "cinnabar": ["pewter", "saffron", "cerulean", "vermilion"],
     "viridian": ["pewter", "saffron", "cerulean", "vermilion"],
     "leagueconference": ["celadon", "fuchsia", "cinnabar", "viridian"],
-    "leagueconference": ["viridian"],
+    "system-security": ["welcome"],
+    "system-security-lab-2024": ["welcome"],
+    "software-security-lab-2024": ["welcome"],
 }
