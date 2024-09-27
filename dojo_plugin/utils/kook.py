@@ -1,7 +1,8 @@
+from enum import Enum
 from logging import getLogger
 from typing import TypedDict, Union
 
-import requests, asyncio
+import requests, asyncio, os
 from CTFd.cache import cache
 from flask import url_for
 from khl import Bot, Channel, GuildUser
@@ -11,22 +12,44 @@ from ..models import KookUsers
 
 KOOK_BASE_URL = "https://www.kookapp.cn/api"
 
+class KookChannels(Enum):
+    AWARD = os.getenv("KOOK_CHANNEL_ID_AWARD")
+    WELCOME = os.getenv("KOOK_CHANNEL_ID_WELCOME")
+    NOTIFICATION = os.getenv("KOOK_CHANNEL_ID_NOTIFICATION")
 
-async def _send_message(message, channel_id, logger=getLogger(__name__)) -> None:
+
+async def _send_group_message(message, channel_id, logger=getLogger(__name__)) -> None:
     if KOOK_TOKEN is None:
         logger.error("KOOK_TOKEN is not set")
         return
+    if channel_id is None:
+        logger.error("channel_id is not set")
+        return
+    logger.debug(f"send message to channel {channel_id}")
     bot = Bot(token=KOOK_TOKEN)
     ch = await bot.client.fetch_public_channel(channel_id)
     if ch is None:
         logger.error(f"channel {channel_id} not found")
         return
-    logger.debug(f"send message to channel {channel_id}")
     await ch.send(message)
 
-def send_message(message, channel_id, logger=getLogger(__name__)) -> None:
-    asyncio.run(_send_message(message, channel_id, logger=logger))
+def send_group_message(message, channel_id = KookChannels.NOTIFICATION, logger=getLogger(__name__)) -> None:
+    asyncio.run(_send_group_message(message, channel_id.value, logger=logger))
 
+async def _send_user_message(message, user_id, logger=getLogger(__name__)) -> None:
+    if KOOK_TOKEN is None:
+        logger.error("KOOK_TOKEN is not set")
+        return
+    bot = Bot(token=KOOK_TOKEN)
+    user = await bot.client.fetch_user(user_id)
+    if user is None:
+        logger.error(f"user {user_id} not found")
+        return
+    logger.debug(f"send message to user {user_id}")
+    await user.send(message)
+
+def send_user_message(message, user_id, logger=getLogger(__name__)) -> None:
+    asyncio.run(_send_user_message(message, user_id, logger=logger))
 
 async def _get_kook_user(user_id, logger=getLogger(__name__)) -> Union[GuildUser, None]:
     if not KOOK_TOKEN:

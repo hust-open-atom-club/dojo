@@ -5,7 +5,7 @@ from CTFd.cache import cache
 from CTFd.models import db, Users
 from flask import url_for
 
-from .kook import get_kook_user, send_message
+from .kook import KookChannels, get_kook_user, send_group_message
 
 from ..models import Dojos, Belts, Emojis
 
@@ -111,9 +111,9 @@ def update_awards(user):
             if belt not in current_belts:
                 continue
             belt_role = belt.title() + " Belt"
-            user_mention = f"<@{kook_user.id}>"
-            message = f"{user_mention} earned their {belt_role}! :tada:"
-            send_message(message, "belting-ceremony")
+            user_mention = f"(met){kook_user.id}(met)"
+            message = f"{user_mention} 恭喜 {user.name} 获得 {belt_role} ！:tada:"
+            send_group_message(message, KookChannels.AWARD)
 
     current_emojis = get_user_emojis(user)
     for emoji,dojo_name,dojo_id in current_emojis:

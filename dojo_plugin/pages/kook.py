@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..config import KOOK_APP_ID, KOOK_CLIENT_ID
 from ..models import KookUsers
-from ..utils.kook import get_kook_user_from_auth_code, get_kook_user
+from ..utils.kook import KookChannels, get_kook_user_from_auth_code, get_kook_user, send_group_message, send_user_message
 
 kook = Blueprint("kook", __name__)
 kook_oauth_serializer = URLSafeTimedSerializer(
@@ -58,7 +58,6 @@ def kook_redirect():
 
     try:
         redirect_user_id = kook_oauth_serializer.loads(state, max_age=60)
-        print(get_current_user())
         user_id = get_current_user().id
         assert user_id == redirect_user_id, (user_id, redirect_user_id)
         kook_user = get_kook_user_from_auth_code(code)
@@ -79,6 +78,8 @@ def kook_redirect():
         db.session.rollback()
         return {"success": False, "error": "kook user already in use"}, 400
 
+    send_group_message("(met){}(met) 欢迎加入到 pwn.hust.college 的大家庭！".format(kook_id), KookChannels.WELCOME)
+    send_user_message("你的账号已经和用户 {} 绑定。".format(get_current_user().name), kook_id)
     return redirect("/settings#kook")
 
 @kook.route("/kook/disconnect")
@@ -86,7 +87,9 @@ def kook_redirect():
 def kook_disconnect():
     user_id = get_current_user().id
     kook_user = KookUsers.query.filter_by(user_id=user_id).first()
+    kook_user_id = kook_user.kook_id
     if kook_user:
         db.session.delete(kook_user)
         db.session.commit()
+    send_user_message("当前 KOOK 账号已经和 pwn.hust.college 解绑，如果不是你的操作，请关注账号安全。", kook_user_id)
     return redirect("/settings#kook")
