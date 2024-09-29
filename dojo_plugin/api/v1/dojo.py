@@ -1,13 +1,11 @@
 import datetime
 import sys
 import traceback
-import sqlalchemy
 import subprocess
 import tempfile
 import logging
 import pathlib
 import shutil
-import docker
 import pathlib
 import yaml
 import os
@@ -161,7 +159,7 @@ class GetDojoModules(Resource):
                  module_index=module.module_index,
                  name=module.name,
                  description=module.description)
-            for module in dojo.modules if module.visible()
+            for module in dojo.modules
         ]
         return {"success": True, "modules": modules}
 

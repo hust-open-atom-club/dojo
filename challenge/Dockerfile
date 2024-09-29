@@ -21,13 +21,12 @@ ARG INSTALL_ANGR_MANAGEMENT=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_GDB=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_TOOLS_PIP=${DEFAULT_INSTALL_SELECTION}
 ARG INSTALL_TOOLS_APT=${DEFAULT_INSTALL_SELECTION}
-ARG INSTALL_WINDOWS=${DEFAULT_INSTALL_SELECTION}
 
 FROM ubuntu:${UBUNTU_VERSION} as essentials
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_CTYPE=C.UTF-8
 
 RUN <<EOF
@@ -48,6 +47,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         build-essential
         ca-certificates
         curl
+        python-is-python3
         sudo
         wget
         unzip
@@ -63,28 +63,19 @@ RUN mkdir /opt/pwn.college
 COPY docker-initialize.sh /opt/pwn.college/docker-initialize.sh
 COPY docker-entrypoint.d /opt/pwn.college/docker-entrypoint.d
 COPY docker-entrypoint.sh /opt/pwn.college/docker-entrypoint.sh
-COPY services.d /opt/pwn.college/services.d
-COPY setuid_interpreter.c /opt/pwn.college/setuid_interpreter.c
 COPY bash.bashrc /opt/pwn.college/bash.bashrc
 COPY vm /opt/pwn.college/vm
-COPY windows /opt/pwn.college/windows
 COPY .tmux.conf /opt/pwn.college/.tmux.conf
 COPY .gdbinit /opt/pwn.college/.gdbinit
 COPY .radare2rc /opt/pwn.college/.radare2rc
 COPY .pwn.conf /opt/pwn.college/.pwn.conf
 
 RUN <<EOF
-    gcc /opt/pwn.college/setuid_interpreter.c -DSUID_PYTHON -o /opt/pwn.college/python
-    gcc /opt/pwn.college/setuid_interpreter.c -DSUID_BASH -o /opt/pwn.college/bash
-    gcc /opt/pwn.college/setuid_interpreter.c -DSUID_SH -o /opt/pwn.college/sh
+    ln -sf /run/dojo/bin/python-suid /opt/pwn.college/python
+    ln -sf /run/dojo/bin/bash-suid /opt/pwn.college/bash
+    ln -sf /run/dojo/bin/sh-suid /opt/pwn.college/sh
 
-    ln -sf /bin/bash /opt/pwn.college/ssh-entrypoint
-    
-    ln -sf /opt/pwn.college/python /usr/local/bin/python-setuid
-    ln -sf /opt/pwn.college/bash /usr/local/bin/bash-setuid
-    ln -sf /opt/pwn.college/sh /usr/local/bin/sh-setuid
     ln -sf /opt/pwn.college/vm/vm /usr/local/bin/vm
-    ln -sf /opt/pwn.college/windows/windows /usr/local/bin/windows
 
     ln -sf /home/hacker/.tmux.conf /root/.tmux.conf
     ln -sf /home/hacker/.gdbinit /root/.gdbinit
@@ -94,69 +85,6 @@ RUN <<EOF
     mkdir /challenge
     install -m 400 <(echo 'pwn.college{uninitialized}') /flag
 EOF
-
-################################################################################
-
-FROM essentials as builder-code-server
-
-RUN <<EOF
-    curl -fsSL https://code-server.dev/install.sh | /bin/sh /dev/stdin
-    mkdir -p /opt/code-server/extensions
-    wget -O /tmp/ms-vscode-cpptools.vsix 'https://github.com/microsoft/vscode-cpptools/releases/download/v1.20.5/cpptools-linux.vsix'
-    code-server --extensions-dir=/opt/code-server/extensions \
-        --install-extension ms-python.python \
-        --install-extension /tmp/ms-vscode-cpptools.vsix
-    chmod +x /opt/code-server/extensions/ms-vscode.cpptools-*/{bin/cpptools*,bin/libc.so,debugAdapters/bin/OpenDebugAD7,LLVM/bin/clang-*}
-    rm -rf /root/.cache/code-server /root/.local/share/code-server /tmp/ms-vscode-cpptools.vsix
-EOF
-
-WORKDIR /usr/lib/code-server/lib/vscode/node_modules/@vscode/ripgrep/bin
-
-RUN mv rg rg.orig
-
-COPY <<EOF ./rg
-#!/usr/bin/python
-
-import sys
-import os
-
-sys.argv[0] += ".orig"
-if "--follow" in sys.argv:
-    sys.argv.remove("--follow")
-os.execv(sys.argv[0], sys.argv)
-EOF
-
-RUN chmod +x rg
-
-################################################################################
-
-FROM essentials as builder-desktop
-ARG UBUNTU_VERSION=20.04
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    [ "${UBUNTU_VERSION}" == "20.04" ] && TGR=common || TGR=tools; \
-    apt-get update && xargs apt-get install -yqq <<EOF && \
-    apt-get -y remove --purge at-spi2-core tumbler gvfs-* && \
-    apt-get -y autoremove && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-        novnc
-        tigervnc-standalone-server
-        tigervnc-$TGR
-        websockify
-        xterm
-        dbus-x11
-        mousepad
-        xclip
-        xfce4
-        xfce4-terminal
-EOF
-
-# TODO: can we generate desktop data with cli ???
-COPY desktop/xfce4 /usr/share/desktop-base/profiles/xdg-config/xfce4
-COPY desktop/pwncollege_background.jpg /usr/share/backgrounds/
-
-RUN rm /etc/xdg/autostart/*
 
 ################################################################################
 
@@ -237,12 +165,15 @@ RUN awk '{$1=$1};1' >> /opt/linux/linux-5.4/.config <<EOF
     CONFIG_GDB_SCRIPTS=y
     CONFIG_HW_RANDOM_VIRTIO=y
     CONFIG_HYPERVISOR_GUEST=y
+    CONFIG_IKCONFIG=y
+    CONFIG_IKCONFIG_PROC=y
     CONFIG_NET_9P=y
     CONFIG_NET_9P_DEBUG=n
     CONFIG_NET_9P_VIRTIO=y
     CONFIG_PARAVIRT=y
     CONFIG_PCI=y
     CONFIG_PCI_HOST_GENERIC=y
+    CONFIG_USER_NS=y
     CONFIG_VIRTIO_BALLOON=y
     CONFIG_VIRTIO_BLK=y
     CONFIG_VIRTIO_BLK_SCSI=y
@@ -268,18 +199,7 @@ FROM scratch as builder-gdb-no
 FROM builder as builder-gdb-yes
 
 RUN <<EOF
-    mkdir /opt/gdb
-    wget -O - https://ftp.gnu.org/gnu/gdb/gdb-11.1.tar.gz | tar xzC /opt/gdb
-    cd /opt/gdb/gdb-11.1
-    mkdir build
-    cd build
-    ../configure --prefix=/usr --with-python=/usr/bin/python3
-    make -j$(nproc)
-    make install
-EOF
-
-RUN <<EOF
-    git clone --depth 1 --recurse-submodules https://github.com/pwndbg/pwndbg /opt/pwndbg
+    git clone --depth 1 --recurse-submodules --branch 2024.02.14 https://github.com/pwndbg/pwndbg /opt/pwndbg
     cd /opt/pwndbg
     ./setup.sh
 
@@ -298,6 +218,7 @@ RUN <<EOF
     cargo install --path . --root /tmp
     mv /tmp/bin/ropr /usr/bin/kropr
     chmod +x /usr/bin/kropr
+    ln -sf /home/hacker/.gdbinit /root/.gdbinit
 EOF
 
 FROM builder-gdb-${INSTALL_GDB} as builder-gdb
@@ -366,7 +287,7 @@ FROM builder-rp-${INSTALL_RP} as builder-rp
 FROM scratch as builder-geckodriver-no
 FROM builder as builder-geckodriver-yes
 RUN <<EOF
-    wget -q -O - https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz | tar xvz -C /usr/local/bin
+    wget -q -O - https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux64.tar.gz | tar xvz -C /usr/local/bin
 EOF
 FROM builder-geckodriver-${INSTALL_GECKODRIVER} as builder-geckodriver
 
@@ -510,6 +431,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         firefox
         fish
         fortune
+        fortunes
         gcc-aarch64-linux-gnu
         gdb
         gdb-multiarch
@@ -520,8 +442,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         hexedit
         icdiff
         iproute2
+        iptables
         iputils-ping
         ipython3
+        john
         jq
         keyutils
         kmod
@@ -546,6 +470,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         php-mysql
         psutils
         python3-ipdb
+        python3-magic
+        sagemath
         qemu-system-x86
         qemu-user
         qemu-utils
@@ -559,6 +485,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         tmux
         valgrind
         vim
+        wamerican
         whiptail
         wireshark
         zip
@@ -575,6 +502,7 @@ FROM builder as builder-tools-pip-yes
 RUN xargs pip install --force-reinstall <<EOF
     angr
     asteval
+    dojjail>=0.1.2
     flask
     git+https://github.com/Gallopsled/pwntools#egg=pwntools
     git+https://github.com/secdev/scapy#egg=scapy
@@ -592,110 +520,6 @@ FROM builder-tools-pip-${INSTALL_TOOLS_PIP} as builder-tools-pip
 
 ################################################################################
 
-FROM scratch as builder-windows-no
-
-# TODO: We probably shouldn't base off builder-tools-apt
-FROM builder-tools-apt as builder-windows-install
-ARG INSTALL_IDA_FREE=${DEFAULT_INSTALL_SELECTION}
-
-WORKDIR /opt/windows
-COPY windows/Autounattend.xml windows/setup.ps1 windows/config_startup.ps1 windows/sshd_config ./
-COPY windows/shutdown.py .
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && xargs apt-get install --no-install-recommends -yqq <<EOF && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-        apt-transport-https
-        ca-certificates
-        curl
-        dosfstools
-        mtools
-        openssh-client
-        python3
-        qemu-kvm
-        qemu-utils
-        xorriso
-EOF
-
-RUN <<EOF
-    sed -i "s/INSTALL_IDA_FREE/${INSTALL_IDA_FREE}/g" ./setup.ps1
-    mkdir -p ./build
-    mkfs.fat -F 12 -C ./build/floppy.img 1440
-    mcopy -si ./build/floppy.img ./Autounattend.xml ./setup.ps1 ./config_startup.ps1 ./sshd_config ::
-    rm -rf ./Autounattend.xml ./setup.ps1 ./config_startup.ps1 ./sshd_config
-
-    echo "Building virtio drivers disk"
-    curl -Lo virtio-win-raw.iso \
-      'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso'
-    WORKDIR="$(mktemp -d --suffix=.img-extract)"
-    EXTRACT_DIR="$WORKDIR/virtio-win"
-    mkdir -p "$EXTRACT_DIR"
-    xorriso -report_about SORRY -osirrox on -indev ./virtio-win-raw.iso -extract / "$EXTRACT_DIR"
-    rm ./virtio-win-raw.iso
-    xorriso \
-      -as genisoimage -rock -joliet -volid VIRTIO \
-      -output ./build/virtio-win-processed.iso \
-      "$WORKDIR"
-    rm -rf "$WORKDIR" virtio-win-raw.iso
-
-    echo "Downloading Windows Server ISO"
-    curl -Lo ./build/server-2022.iso \
-      'https://software-static.download.prss.microsoft.com/sg/download/888969d5-f34g-4e03-ac9d-1f9786c66749/SERVER_EVAL_x64FRE_en-us.iso'
-EOF
-
-RUN --security=insecure <<EOF
-    echo "Creating VM image"
-    rm -rf ./build/clean.qcow2 ./build/image-built
-    qemu-img create -f qcow2 ./build/clean.qcow2 51200M
-    echo "Installing and configuring windows (this will take 20+ min)"
-    qemu-system-x86_64 \
-      -name dojo \
-      -boot once=d \
-      -machine type=pc,accel=kvm \
-      -m 4096M \
-      -smp "$(nproc)" \
-      -display vnc=:12 \
-      -nographic \
-      -device virtio-net,netdev=user.0 \
-      -netdev user,id=user.0,hostfwd=tcp::5985-:5985,hostfwd=tcp::2222-:22 \
-      -serial null \
-      -drive "file=./build/floppy.img,format=raw,index=0,if=floppy" \
-      -drive "file=./build/server-2022.iso,media=cdrom" \
-      -drive "file=./build/virtio-win-processed.iso,media=cdrom" \
-      -drive "file=./build/clean.qcow2,if=virtio,cache=writeback,discard=ignore,format=qcow2"
-    rm -rf ./build/monitor.sock
-EOF
-
-FROM builder-windows-install as builder-windows-yes
-
-COPY windows/challenge-proxy.c windows/post_install.sh windows/post_install.ps1 windows/startup.ps1 ./
-
-RUN --security=insecure <<EOF
-    echo "Performing initial bootup"
-    qemu-system-x86_64 \
-      -name dojo \
-      -boot once=d \
-      -machine type=pc,accel=kvm \
-      -m 4096M \
-      -smp "$(nproc)" \
-      -display vnc=:12 \
-      -nographic \
-      -device virtio-net,netdev=user.0 \
-      -netdev user,id=user.0,hostfwd=tcp::5985-:5985,hostfwd=tcp::2222-:22 \
-      -serial null \
-      -drive "file=./build/floppy.img,format=raw,index=0,if=floppy" \
-      -drive "file=./build/server-2022.iso,media=cdrom" \
-      -drive "file=./build/virtio-win-processed.iso,media=cdrom" \
-      -drive "file=./build/clean.qcow2,if=virtio,cache=writeback,discard=ignore,format=qcow2" &
-    ./post_install.sh
-    rm -f ./build/monitor.sock
-EOF
-
-FROM builder-windows-${INSTALL_WINDOWS} as builder-windows
-
-################################################################################
-
 FROM ubuntu:${UBUNTU_VERSION} as challenge
 
 SHELL ["/bin/bash", "-ceov", "pipefail"]
@@ -704,8 +528,6 @@ ENV LC_CTYPE=C.UTF-8
 
 COPY --link --from=essentials / /
 COPY --link --from=builder-pwn.college / /
-COPY --link --from=builder-code-server / /
-COPY --link --from=builder-desktop / /
 
 COPY --link --from=builder-kernel /opt/linux /opt/linux
 COPY --link --from=builder-tcpdump / /
@@ -723,10 +545,9 @@ COPY --link --from=builder-desktop-ida-free / /
 COPY --link --from=builder-desktop-binja-free / /
 COPY --link --from=builder-desktop-ghidra / /
 COPY --link --from=builder-desktop-angr-management / /
-COPY --link --from=builder-gdb / /
 COPY --link --from=builder-tools-pip / /
 COPY --link --from=builder-tools-apt / /
-COPY --link --from=builder-windows / /
+COPY --link --from=builder-gdb / /
 
 RUN <<EOF
     if [ -f /etc/ssh/ssh_config ]
@@ -748,14 +569,11 @@ RUN <<EOF
     passwd -d hacker
 
     echo -e '\n[ "$UID" -eq 1000 ] && . /opt/pwn.college/bash.bashrc' >> /etc/bash.bashrc
+    ln -s /etc/bash.bashrc /etc/bashrc
 
     find / -xdev -type f -perm -4000 -exec chmod u-s {} \;
 
-    chmod u+s /opt/pwn.college/python \
-              /opt/pwn.college/bash \
-              /opt/pwn.college/sh \
-              /opt/pwn.college/vm/vm \
-              /opt/pwn.college/windows/windows
+    chmod u+s /opt/pwn.college/vm/vm
 
     date > /opt/pwn.college/build
 EOF

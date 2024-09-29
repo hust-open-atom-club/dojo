@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 cd /opt/pwn.college
 
@@ -13,11 +13,8 @@ fi
 DOCKER_ARGS=${DOCKER_ARGS:--i}
 [ -t 0 ] && DOCKER_ARGS="-t $DOCKER_ARGS"
 
-CONTAINER_WITH_MYSQL=db
-
-DOJO_DIR=/opt/pwn.college
-if [ -f $DOJO_DIR/data/config.env ]; then
-    . $DOJO_DIR/data/config.env
+if [ "$ACTION" != "init" ] && [ -f /data/config.env ]; then
+    . /data/config.env
 fi
 
 case "$ACTION" in
@@ -30,7 +27,7 @@ case "$ACTION" in
     # HELP: update: update dojo files (warning: does `git pull`), rebuild containers, and restart any changed services
     "update")
         git pull
-        dojo up
+        dojo up "$@"
         ;;
 
     # HELP: sync: sync changed dojo files
@@ -42,10 +39,10 @@ case "$ACTION" in
 
     # HELP: enter [ -s ] USER_ID: enter a user's running container. -s for entering as root
     "enter")
-        USER_SWITCH=""
+        USER_SWITCH="--user=1000"
         if [ "$1" == "-s" ]
         then
-            USER_SWITCH="--user=root"
+            USER_SWITCH="--user=0"
             shift
         fi
         DOJO_UID="$1"
@@ -60,7 +57,14 @@ case "$ACTION" in
 
     # HELP: compose ARGS: run a docker compose command with the config.env file loaded
     "compose")
-        docker compose --env-file=/opt/pwn.college/data/config.env "$@"
+        profile="main"
+        [ "$WORKSPACE_NODE" -gt 0 ] && profile="workspace"
+        docker compose --env-file=/data/config.env --profile "$profile" "$@"
+        ;;
+
+    # HELP: node: run a dojo node command
+    "node")
+        dojo-node "$@"
         ;;
 
     # HELP: flask: drop into a flask shell in the ctfd container
@@ -70,13 +74,13 @@ case "$ACTION" in
 
     # HELP: db: launch a mysql client session, connected to the ctfd db
     "db")
-        docker exec $DOCKER_ARGS ${CONTAINER_WITH_MYSQL} mysql -h ${DB_HOST} -p${DB_PASS} -D${DB_NAME} -u${DB_USER} "$@"
+        docker exec $DOCKER_ARGS db mysql -h ${DB_HOST} -p${DB_PASS} -D${DB_NAME} -u${DB_USER} "$@"
         ;;
 
-    # HELP: backup: does a dojo db backup into the `data/backups` directory.
+    # HELP: backup: does a dojo db backup into the `/data/backups` directory.
     "backup")
-        mkdir -p data/backups
-        docker exec ${CONTAINER_WITH_MYSQL} mysqldump -h ${DB_HOST} -p${DB_PASS} -u${DB_USER} --single-transaction --routines --triggers ${DB_NAME} | gzip > "data/backups/db-$(date -Iseconds).sql.gz"
+        mkdir -p /data/backups
+        docker exec db mysqldump -h ${DB_HOST} -p${DB_PASS} -u${DB_USER} --single-transaction --routines --triggers ${DB_NAME} | gzip > "/data/backups/db-$(date -Iseconds).sql.gz"
         ;;
 
     # HELP: cloud-backup: upload the last day's worth of cloud backups to S3, but encrypt it at rest
@@ -85,7 +89,7 @@ case "$ACTION" in
         [ -f $BACKUP_AES_KEY_FILE ] || (echo "To use cloud backup, BACKUP_AES_KEY_FILE must be set to a file, but is $BACKUP_AES_KEY_FILE instead"; exit -1)
         [ -z ${S3_BACKUP_BUCKET+x} ] && (echo "To use cloud backup, S3_BACKUP_BUCKET must be set to the S3 bucket to use"; exit -1)
         set -e
-        for f in $(find data/backups -mtime -1 -type f)
+        for f in $(find /data/backups -mtime -1 -type f)
         do
             BACKUP_FILENAME="$(basename $f).enc"
             OUT_FILE="/tmp/$BACKUP_FILENAME"
@@ -98,11 +102,11 @@ case "$ACTION" in
         done
         ;;
 
-    # HELP: restore PATH: restores a dojo db backup. Path arg is relative to the `data/backups` directory
+    # HELP: restore PATH: restores a dojo db backup. Path arg is relative to the `/data/backups` directory
     "restore")
-        BACKUP_PATH="data/backups/$1"
+        BACKUP_PATH="/data/backups/$1"
         if [ -f "$BACKUP_PATH" ]; then
-            gunzip < "$BACKUP_PATH" | docker exec -i ${CONTAINER_WITH_MYSQL} mysql -h ${DB_HOST} -p${DB_PASS} -u${DB_USER} -D${DB_NAME}
+            gunzip < "$BACKUP_PATH" | docker exec -i db mysql -h ${DB_HOST} -p${DB_PASS} -u${DB_USER} -D${DB_NAME}
         else
             echo "Error: missing file to restore from" >&2
         fi
@@ -110,7 +114,7 @@ case "$ACTION" in
 
     # HELP: logs: display dojo logs
     "logs")
-        journalctl -u pwn.college -f
+        journalctl -u pwn.college -f --no-tail
         ;;
 
     # HELP: wait: wait for the dojo to finish starting
@@ -140,16 +144,16 @@ case "$ACTION" in
     # HELP: help: displays this help
     "help")
         echo "Usage: $0 COMMAND [ ARG ]"
-	echo
-	echo "COMMANDS:"
-	echo
-	cat "$0" | grep "[H]ELP" | sed -e "s/.*H[E]LP: /\t/"
+        echo
+        echo "COMMANDS:"
+        echo
+        cat "$0" | grep "[H]ELP" | sed -e "s/.*H[E]LP: /\t/"
         ;;
 
     *)
         echo "Unknown command."
-	echo ""
-	"$0" help
+        echo ""
+        "$0" help
         exit 1
         ;;
 esac

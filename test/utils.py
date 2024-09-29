@@ -1,4 +1,5 @@
 import subprocess
+import time
 import requests
 import pathlib
 import shutil
@@ -24,7 +25,12 @@ def login(name, password, *, success=True, register=False, email=None):
     data = { "name": name, "password": password, "nonce": nonce }
     if register:
         data["email"] = email or f"{name}@example.com"
-    response = session.post(f"{PROTO}://{HOST}/{endpoint}", data=data, allow_redirects=False)
+    while True:
+        response = session.post(f"{PROTO}://{HOST}/{endpoint}", data=data, allow_redirects=False)
+        if response.status_code == 429:
+            time.sleep(1)
+            continue
+        break
     if not success:
         assert response.status_code == 200, f"Expected {endpoint} failure (status code 200), but got {response.status_code}"
         return session
@@ -32,9 +38,11 @@ def login(name, password, *, success=True, register=False, email=None):
     session.headers["CSRF-Token"] = parse_csrf_token(session.get(f"{PROTO}://{HOST}/").text)
     return session
 
+
 def make_dojo_official(dojo_rid, admin_session):
     response = admin_session.post(f"{PROTO}://{HOST}/pwncollege_api/v1/dojo/{dojo_rid}/promote-dojo", json={})
     assert response.status_code == 200, f"Expected status code 200, but got {response.status_code} - {response.json()}"
+
 
 def create_dojo(repository, *, session):
     test_public_key = f"public/{repository}"
@@ -45,11 +53,13 @@ def create_dojo(repository, *, session):
     dojo_reference_id = response.json()["dojo"]
     return dojo_reference_id
 
+
 def create_dojo_yml(spec, *, session):
     response = session.post(f"{PROTO}://{HOST}/pwncollege_api/v1/dojo/create", json={"spec": spec})
     assert response.status_code == 200, f"Expected status code 200, but got {response.status_code} - {response.json()}"
     dojo_reference_id = response.json()["dojo"]
     return dojo_reference_id
+
 
 def dojo_run(*args, **kwargs):
     kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -57,7 +67,6 @@ def dojo_run(*args, **kwargs):
         [shutil.which("docker"), "exec", "-i", CONTAINER_NAME, "dojo", *args],
         check=kwargs.pop("check", True), **kwargs
     )
-
 
 def workspace_run(cmd, *, user, root=False, **kwargs):
     args = [ "enter" ]

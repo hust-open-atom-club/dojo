@@ -14,6 +14,11 @@ from utils import TEST_DOJOS_LOCATION, PROTO, HOST, login, dojo_run, workspace_r
 def get_flag(user):
     return workspace_run("cat /flag", user=user, root=True).stdout
 
+def get_dojo_modules(dojo):
+    response = requests.get(f"{PROTO}://{HOST}/pwncollege_api/v1/dojo/{dojo}/modules")
+    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+    return response.json()["modules"]
+
 def get_challenge_id(session, dojo, module, challenge):
     response = session.get(f"{PROTO}://{HOST}/pwncollege_api/v1/dojo/{dojo}/{module}/challenges")
     assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
@@ -28,8 +33,10 @@ def get_challenge_id(session, dojo, module, challenge):
     return challenge_id
 
 
-def start_challenge(dojo, module, challenge, practice=False, *, session):
+def start_challenge(dojo, module, challenge, practice=False, *, session, as_user=None):
     start_challenge_json = dict(dojo=dojo, module=module, challenge=challenge, practice=practice)
+    if as_user:
+        start_challenge_json["as_user"] = as_user
     response = session.post(f"{PROTO}://{HOST}/pwncollege_api/v1/docker", json=start_challenge_json)
     assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
     assert response.json()["success"], f"Failed to start challenge: {response.json()['error']}"
@@ -76,6 +83,19 @@ def test_create_dojo(example_dojo, admin_session):
     assert admin_session.get(f"{PROTO}://{HOST}/{example_dojo}/").status_code == 200
     assert admin_session.get(f"{PROTO}://{HOST}/example/").status_code == 200
 
+@pytest.mark.dependency()
+def test_get_dojo_modules(example_dojo):
+    modules = get_dojo_modules(example_dojo)
+    assert len(modules) == 2, f"Expected 2 module in 'example' dojo but got {len(modules)}"
+    hello_module = modules[0]
+    assert hello_module['id'] == "hello", f"Expected module id to be 'hello' but got {hello_module['id']}"
+    assert hello_module['module_index'] == 0, f"Expected module index to be '0' but got {hello_module['module_index']}"
+    assert hello_module['name'] == "Hello", f"Expected module name to be 'Hello' but got {hello_module['name']}"
+
+    world_module = modules[1]
+    assert world_module['id'] == "world", f"Expected module id to be 'world' but got {world_module['id']}"
+    assert world_module['module_index'] == 1, f"Expected module index to be '1' but got {world_module['module_index']}"
+    assert world_module['name'] == "World", f"Expected module name to be 'World' but got {world_module['name']}"
 
 @pytest.mark.dependency(depends=["test_create_dojo"])
 def test_delete_dojo(admin_session):
@@ -235,30 +255,47 @@ def test_workspace_challenge():
     assert match, f"Expected flag, but got: {result.stdout}"
 
 
-@pytest.mark.dependency(depends=["test_start_challenge"])
-def test_workspace_home_mount():
+def check_mount(path, *, user, fstype, check_nosuid=True):
     try:
-        result = workspace_run("findmnt -J /home/hacker", user="admin")
+        result = workspace_run(f"findmnt -J {path}", user=user)
     except subprocess.CalledProcessError as e:
-        assert False, f"Home not mounted: {(e.stdout, e.stderr)}"
-    assert result, f"Home not mounted: {(e.stdout, e.stderr)}"
+        assert False, f"'{path}' not mounted: {(e.stdout, e.stderr)}"
+    assert result, f"'{path}' not mounted: {(e.stdout, e.stderr)}"
 
     mount_info = json.loads(result.stdout)
     assert len(mount_info.get("filesystems", [])) == 1, f"Expected exactly one filesystem, but got: {mount_info}"
 
     filesystem = mount_info["filesystems"][0]
-    assert filesystem["target"] == "/home/hacker", f"Expected home to be mounted at /home/hacker, but got: {filesystem}"
-    assert "nosuid" in filesystem["options"], f"Expected home to be mounted nosuid, but got: {filesystem}"
+    assert filesystem["target"] == path, f"Expected '{path}' to be mounted at '{path}', but got: {filesystem}"
+    assert filesystem["fstype"] == fstype, f"Expected '{path}' to be mounted as '{fstype}', but got: {filesystem}"
+    if check_nosuid:
+        assert "nosuid" in filesystem["options"], f"Expected '{path}' to be mounted nosuid, but got: {filesystem}"
+
+
+@pytest.mark.dependency(depends=["test_start_challenge"])
+def test_workspace_home_mount():
+    check_mount("/home/hacker", user="admin", fstype="nfs")
 
 
 @pytest.mark.dependency(depends=["test_start_challenge"])
 def test_workspace_no_sudo():
     try:
-        s = workspace_run("sudo -v", user="admin")
+        s = workspace_run("sudo whoami", user="admin")
     except subprocess.CalledProcessError:
         pass
     else:
         assert False, f"Expected sudo to fail, but got no error: {(s.stdout, s.stderr)}"
+
+
+@pytest.mark.dependency(depends=["test_start_challenge"])
+def test_workspace_practice_challenge(random_user):
+    user, session = random_user
+    start_challenge("example", "hello", "apple", practice=True, session=session)
+    try:
+        result = workspace_run("sudo whoami", user=user)
+        assert result.stdout.strip() == "root", f"Expected 'root', but got: ({result.stdout}, {result.stderr})"
+    except subprocess.CalledProcessError as e:
+        assert False, f"Expected sudo to succeed, but got: {(e.stdout, e.stderr)}"
 
 
 @pytest.mark.dependency(depends=["test_start_challenge"])
@@ -274,14 +311,48 @@ def test_workspace_home_persistent(random_user):
 
 
 @pytest.mark.dependency(depends=["test_start_challenge"])
-def test_workspace_practice_challenge(random_user):
+def test_active_module_endpoint(random_user):
     user, session = random_user
-    start_challenge("example", "hello", "apple", practice=True, session=session)
-    try:
-        workspace_run("sudo -v", user=user)
-    except subprocess.CalledProcessError as e:
-        assert False, f"Expected sudo to succeed, but got: {(e.stdout, e.stderr)}"
+    start_challenge("example", "hello", "banana", session=session)
+    response = session.get(f"{PROTO}://{HOST}/active-module")
+    challenges = {
+        "apple": {
+            "challenge_id": 1,
+            "challenge_name": "Apple",
+            "challenge_reference_id": "apple",
+            "dojo_name": "Example Dojo",
+            "dojo_reference_id": "example",
+            "module_id": "hello",
+            "module_name": "Hello",
+            "description": "<p>This is apple.</p>",
+        },
+        "banana": {
+            "challenge_id": 2,
+            "challenge_name": "Banana",
+            "challenge_reference_id": "banana",
+            "dojo_name": "Example Dojo",
+            "dojo_reference_id": "example",
+            "module_id": "hello",
+            "module_name": "Hello",
+            "description": "<p>This is banana.</p>",
+        },
+        "empty": {}
+    }
+    apple_description = challenges["apple"].pop("description")
+    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+    assert response.json()["c_current"] == challenges["banana"], f"Expected challenge 'Banana'\n{challenges['banana']}\n, but got {response.json()['c_current']}"
+    assert response.json()["c_next"] == challenges["empty"], f"Expected empty {challenges['empty']} challenge, but got {response.json()['c_next']}"
+    assert response.json()["c_previous"] == challenges["apple"], f"Expected challenge 'Apple'\n{challenges['apple']}\n, but got {response.json()['c_previous']}"
+    challenges["apple"]["description"] = apple_description
 
+    start_challenge("example", "hello", "apple", session=session)
+    response = session.get(f"{PROTO}://{HOST}/active-module")
+    banana_description = challenges["banana"].pop("description")
+    assert response.status_code == 200, f"Expected status code 200, but got {response.status_code}"
+    assert response.json()["c_current"] == challenges["apple"], f"Expected challenge 'Apple'\n{challenges['apple']}\n, but got {response.json()['c_current']}"
+    assert response.json()["c_next"] == challenges["banana"], f"Expected challenge 'Banana'\n{challenges['banana']}\n, but got {response.json()['c_next']}"
+    assert response.json()["c_previous"] == challenges["empty"], f"Expected empty {challenges['empty']} challenge, but got {response.json()['c_previous']}"
+    challenges["banana"]["description"] = banana_description
 
 def get_all_standings(session, dojo, module=None):
     """
@@ -349,3 +420,35 @@ def test_scoreboard(random_user):
             found_me = True
             break
     assert found_me, f"Unable to find new user {user} in new standings after solving a challenge"
+
+
+@pytest.mark.skip(reason="Disabling test temporarily until overlay issue is resolved")
+@pytest.mark.dependency(depends=["test_workspace_home_persistent"])
+def test_workspace_as_user(admin_user, random_user):
+    admin_user, admin_session = admin_user
+    random_user, random_session = random_user
+    random_user_id = get_user_id(random_user)
+
+    start_challenge("example", "hello", "apple", session=random_session)
+    workspace_run("touch /home/hacker/test", user=random_user)
+
+    start_challenge("example", "hello", "apple", session=admin_session, as_user=random_user_id)
+    check_mount("/home/hacker", user=admin_user, fstype="overlay")
+    check_mount("/home/me", user=admin_user, fstype="nfs")
+
+    try:
+        workspace_run("[ -f '/home/hacker/test' ]", user=admin_user)
+    except subprocess.CalledProcessError as e:
+        assert False, f"Expected existing file to exist, but got: {(e.stdout, e.stderr)}"
+
+    workspace_run("touch /home/hacker/test2", user=random_user)
+    try:
+        workspace_run("[ -f '/home/hacker/test2' ]", user=admin_user)
+    except subprocess.CalledProcessError as e:
+        assert False, f"Expected new file to exist, but got: {(e.stdout, e.stderr)}"
+
+    workspace_run("touch /home/hacker/test3", user=admin_user)
+    try:
+        workspace_run("[ ! -e '/home/hacker/test3' ]", user=random_user)
+    except subprocess.CalledProcessError as e:
+        assert False, f"Expected overlay file to not exist, but got: {(e.stdout, e.stderr)}"

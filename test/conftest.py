@@ -12,6 +12,10 @@ def admin_session():
     session = login("admin", "admin")
     yield session
 
+@pytest.fixture(scope="session")
+def admin_user():
+    session = login("admin", "admin")
+    yield "admin", session
 
 @pytest.fixture
 def random_user():

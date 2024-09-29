@@ -143,6 +143,41 @@ h4 {
 
 .card-body {
   text-align: center;
+  position: relative;
+}
+
+.card-body .progress-bar {
+  background-color: #63c0f5;
+  opacity: 30%;
+  height: 8%;
+  width: 0;
+  margin: 0;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transition: all 0.2s ease;
+  container: progress-bar / inline-size;
+}
+
+.card-body .progress-bar .progress-bar-text {
+  opacity: 0%;
+  font-size: 0.75em;
+  transition: all 0.2s ease;
+}
+
+@container progress-bar (width < 2em) {
+  .progress-bar-text {
+    margin-left: calc(100% + 0.5em);
+  }
+}
+
+.card-small:hover .card-body .progress-bar .progress-bar-text {
+  opacity: 100%;
+}
+
+
+.card-small:hover .card-body .progress-bar {
+  opacity: 100%;
 }
 
 .card-list {
@@ -178,9 +213,10 @@ h4 {
 .card-text {
     position: absolute;
     left: 50%;
+    bottom: 0%;
+    top: 75%;
     transform: translate(-50%, -50%);
     width: 100%;
-    top: 85%;
     color: rgb(234, 234, 234);
     font-size: 0.75em;
 }
@@ -207,7 +243,7 @@ h4 {
 
 .accordion-item-body {
     padding: 1.25rem;
-    background-color: rgba(255,255,255,0.05);
+    background-color: rgba(255,255,255,0.03);
 }
 
 .accordion-item-name {
@@ -322,13 +358,16 @@ pre {
     padding: 0px 0px 0px 0px;
 }
 
+code{
+    color: #61afef;
+}
 
 .hljs {
     display: block;
     overflow-x: auto;
     padding: .5em;
     color: #abb2bf; /* Adjusted text color for better visibility */
-    background: #1e1e1e; /* Dark background color */    
+    background: #1e1e1e; /* Dark background color */
 }
 
 .hljs-comment, .hljs-quote {

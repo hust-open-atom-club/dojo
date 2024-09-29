@@ -181,6 +181,10 @@ class Dojos(db.Model):
             deferred=True)
 
     @property
+    def solves_code(self):
+        return hashlib.md5(self.private_key.encode() + b"SOLVES").hexdigest()
+
+    @property
     def path(self):
         if hasattr(self, "_path"):
             return self._path
@@ -266,7 +270,7 @@ class Dojos(db.Model):
         dojo_admin = DojoAdmins.query.filter_by(dojo=self, user=user).first()
         return dojo_admin is not None or is_admin()
 
-    __repr__ = columns_repr(["name", "id"])
+    __repr__ = columns_repr(["name", "reference_id"])
 
 
 class DojoUsers(db.Model):
@@ -339,9 +343,15 @@ class DojoModules(db.Model):
                                  cascade="all, delete-orphan",
                                  back_populates="module")
 
+    visibility = db.relationship("DojoModuleVisibilities",
+                                 uselist=False,
+                                 cascade="all, delete-orphan",
+                                 back_populates="module")
+
+
     def __init__(self, *args, **kwargs):
         default = kwargs.pop("default", None)
-        default_visibility = kwargs.pop("default_visibility", None)
+        visibility = kwargs["visibility"] if "visibility" in kwargs else None
 
         data = kwargs.pop("data", {})
         for field in self.data_fields:
@@ -357,14 +367,14 @@ class DojoModules(db.Model):
             kwargs.pop("challenges", None) or
             ([DojoChallenges(
                 default=challenge,
-                visibility=(DojoChallengeVisibilities(**default_visibility) if default_visibility else None),
+                visibility=(DojoChallengeVisibilities(start=visibility.start) if visibility else None),
             ) for challenge in default.challenges] if default else [])
         )
         kwargs["resources"] = (
             kwargs.pop("resources", None) or
             ([DojoResources(
                 default=resource,
-                visibility=(DojoResourceVisibilities(**default_visibility) if default_visibility else None),
+                visibility=(DojoResourceVisibilities(start=visibility.start) if visibility else None),
             ) for resource in default.resources] if default else [])
         )
 
@@ -415,6 +425,23 @@ class DojoModules(db.Model):
     def solves(self, **kwargs):
         return DojoChallenges.solves(module=self, **kwargs)
 
+
+    @hybrid_method
+    def visible(self, when=None):
+        when = when or datetime.datetime.utcnow()
+        return not self.visibility or all((
+            not self.visibility.start or when >= self.visibility.start,
+            not self.visibility.stop or when <= self.visibility.stop,
+        ))
+
+    @visible.expression
+    def visible(cls, when=None):
+        when = when or datetime.datetime.utcnow()
+        return or_(cls.visibility == None, and_(
+            cls.visibility.has(or_(DojoChallengeVisibilities.start == None, when >= DojoChallengeVisibilities.start)),
+            cls.visibility.has(or_(DojoChallengeVisibilities.stop == None, when <= DojoChallengeVisibilities.stop)),
+        ))
+
     __repr__ = columns_repr(["dojo", "id"])
 
 
@@ -432,7 +459,7 @@ class DojoChallenges(db.Model):
     module_index = db.Column(db.Integer, primary_key=True)
     challenge_index = db.Column(db.Integer, primary_key=True)
 
-    challenge_id = db.Column(db.Integer, db.ForeignKey("challenges.id", ondelete="CASCADE"))
+    challenge_id = db.Column(db.Integer, db.ForeignKey("challenges.id", ondelete="CASCADE"), index=True)
     id = db.Column(db.String(32), index=True)
     name = db.Column(db.String(128))
     description = db.Column(db.Text)
@@ -559,6 +586,19 @@ class DojoChallenges(db.Model):
             return self.data["image"]
         return "pwncollege-challenge"
 
+    @property
+    def reference_id(self):
+        return f"{self.dojo.reference_id}/{self.module.id}/{self.id}"
+
+    def resolve(self):
+        # TODO: We should probably refactor to correctly store a reference to the DojoChallenge
+        if not self.path_override:
+            return self
+        return (DojoChallenges.query
+                .filter(DojoChallenges.challenge_id == self.challenge_id,
+                        DojoChallenges.data["path_override"] == None)
+                .first())
+
     __repr__ = columns_repr(["module", "id", "challenge_id"])
 
 
@@ -677,13 +717,31 @@ class DojoResourceVisibilities(db.Model):
 
     __repr__ = columns_repr(["resource", "start", "stop"])
 
+class DojoModuleVisibilities(db.Model):
+    __tablename__ = "dojo_module_visibilities"
+    __table_args__ = (
+        db.ForeignKeyConstraint(["dojo_id", "module_index"],
+                                ["dojo_modules.dojo_id", "dojo_modules.module_index"],
+                                ondelete="CASCADE"),
+    )
+
+    dojo_id = db.Column(db.Integer, primary_key=True)
+    module_index = db.Column(db.Integer, primary_key=True)
+
+    start = db.Column(db.DateTime, index=True)
+    stop = db.Column(db.DateTime, index=True)
+
+    module = db.relationship("DojoModules", back_populates="visibility")
+
+    __repr__ = columns_repr(["module", "start", "stop"])
+
 
 class SSHKeys(db.Model):
     __tablename__ = "ssh_keys"
     user_id = db.Column(
         db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    value = db.Column(db.String(512), primary_key=True, unique=True)
+    value = db.Column(db.String(750), primary_key=True, unique=True)
 
     user = db.relationship("Users")
 
@@ -701,11 +759,33 @@ class DiscordUsers(db.Model):
 
     __repr__ = columns_repr(["user", "discord_id"])
 
+
 class Belts(Awards):
     __mapper_args__ = {"polymorphic_identity": "belt"}
 
+
 class Emojis(Awards):
     __mapper_args__ = {"polymorphic_identity": "emoji"}
+
+
+class WorkspaceTokens(db.Model):
+    __tablename__ = "workspace_tokens"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    expiration = db.Column(
+        db.DateTime,
+        default=lambda: datetime.datetime.utcnow() + datetime.timedelta(days=30),
+    )
+    value = db.Column(db.String(128), unique=True)
+
+    user = db.relationship("Users", foreign_keys="WorkspaceTokens.user_id", lazy="select")
+
+    def __init__(self, *args, **kwargs):
+        super(WorkspaceTokens, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.id!r}>"
 
 
 for deferral in deferred_definitions:

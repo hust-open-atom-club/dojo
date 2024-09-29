@@ -1,11 +1,12 @@
 import sys
 import os
 import datetime
+
 from email.message import EmailMessage
 from email.utils import formatdate
 from urllib.parse import urlparse, urlunparse
 
-from flask import Response, request, redirect
+from flask import Response, request, redirect, current_app
 from flask.json import JSONEncoder
 from itsdangerous.exc import BadSignature
 from marshmallow_sqlalchemy import field_for
@@ -22,12 +23,12 @@ from .utils.awards import update_awards
 from .pages.dojos import dojos, dojos_override
 from .pages.dojo import dojo
 from .pages.workspace import workspace
-from .pages.desktop import desktop
 from .pages.sensai import sensai
 from .pages.users import users
 from .pages.settings import settings_override
 from .pages.discord import discord
 from .pages.course import course
+from .pages.canvas import sync_canvas_user, canvas
 from .pages.writeups import writeups
 from .pages.belts import belts
 from .pages.index import static_html_override
@@ -43,6 +44,8 @@ class DojoChallenge(BaseChallenge):
     def solve(cls, user, team, challenge, request):
         super().solve(user, team, challenge, request)
         update_awards(user)
+        sync_canvas_user(user.id, challenge.id)
+
 
 class DojoFlag(BaseFlag):
     name = "dojo"
@@ -128,11 +131,11 @@ def load(app):
     app.register_blueprint(dojos)
     app.register_blueprint(dojo)
     app.register_blueprint(workspace)
-    app.register_blueprint(desktop)
     app.register_blueprint(sensai)
     app.register_blueprint(discord)
     app.register_blueprint(users)
     app.register_blueprint(course)
+    app.register_blueprint(canvas)
     app.register_blueprint(writeups)
     app.register_blueprint(belts)
     app.register_blueprint(api, url_prefix="/pwncollege_api/v1")

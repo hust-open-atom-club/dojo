@@ -13,7 +13,7 @@ function usage {
 	exit
 }
 
-VOLUME_ARGS=("-v" "$PWD:/opt/pwn.college:shared")
+VOLUME_ARGS=("-v" "$PWD:/opt/pwn.college" "-v" "$PWD/data:/data:shared")
 ENV_ARGS=( )
 DB_RESTORE=""
 CONTAINER_NAME=dojo-test
@@ -26,7 +26,7 @@ do
 		T) TEST=no ;;
 		D)
 			DATA_DIR=$(mktemp -d)
-			VOLUME_ARGS+=("-v" "$DATA_DIR:/opt/pwn.college/data:shared")
+			VOLUME_ARGS[3]="$DATA_DIR:/data:shared"
 			;;
 		e) ENV_ARGS+=("-e" "$OPTARG") ;;
 		h) usage ;;
@@ -39,8 +39,8 @@ done
 shift $((OPTIND-1))
 
 [ "${#VOLUME_ARGS[@]}" -eq 2 ] && VOLUME_ARGS+=(
-	"-v" "/opt/pwn.college/data/dojos"
-	"-v" "/opt/pwn.college/data/mysql"
+	"-v" "/data/dojos"
+	"-v" "/data/mysql"
 )
 
 export CONTAINER_NAME
@@ -50,9 +50,9 @@ while docker ps -a | grep "$CONTAINER_NAME"; do sleep 1; done
 
 # freaking bad unmount
 sleep 1
-mount | grep $PWD | while read -a ENTRY
+mount | grep $PWD | sed -e "s/.* on //" | sed -e "s/ .*//" | tac | while read ENTRY
 do
-	sudo umount "${ENTRY[2]}"
+	sudo umount "$ENTRY"
 done
 
 docker run --rm --privileged -d "${VOLUME_ARGS[@]}" "${ENV_ARGS[@]}" -p 2222:22 -p 80:80 -p 443:443 --name "$CONTAINER_NAME" dojo || exit 1
@@ -64,7 +64,17 @@ docker exec "$CONTAINER_NAME" ip route add "${GW[2]}" via 172.17.0.1
 docker exec "$CONTAINER_NAME" ip route add "${NS[1]}" via 172.17.0.1 || echo "Failed to add nameserver route"
 
 docker exec "$CONTAINER_NAME" dojo wait
-[ -n "$DB_RESTORE" ] && until docker exec "$CONTAINER_NAME" dojo restore $DB_RESTORE; do sleep 1; done
+if [ -n "$DB_RESTORE" ]
+then
+	BASENAME=$(basename $DB_RESTORE)
+	docker exec "$CONTAINER_NAME" mkdir -p /data/backups/
+	[ -f "$DB_RESTORE" ] && docker cp "$DB_RESTORE" "$CONTAINER_NAME":/data/backups/"$BASENAME"
+	docker exec "$CONTAINER_NAME" dojo restore "$BASENAME"
+fi
 
-until curl -s localhost.pwn.college | grep -q pwn; do sleep 1; done
+until curl -Ls localhost.pwn.college | grep -q pwn; do sleep 1; done
+# fix up the data permissions and git
+sudo chown "$USER:$USER" "$PWD/data"
+git checkout "$PWD/data/.gitkeep" || true
+
 [ "$TEST" == "yes" ] && MOZ_HEADLESS=1 pytest -v test/test_running.py test/test_welcome.py
