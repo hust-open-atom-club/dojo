@@ -43,7 +43,7 @@ class DojoChallenge(BaseChallenge):
     @classmethod
     def solve(cls, user, team, challenge, request):
         super().solve(user, team, challenge, request)
-        update_awards(user)
+        update_awards(user, challenge)
 
 
 class DojoFlag(BaseFlag):

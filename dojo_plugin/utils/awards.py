@@ -7,7 +7,7 @@ from flask import url_for
 
 from .kook import KookChannels, get_kook_user, send_group_message
 
-from ..models import Dojos, Belts, Emojis
+from ..models import Dojos, Belts, Emojis, DojoChallenges
 
 
 BELT_ORDER = [ "orange", "yellow", "green", "purple", "blue", "brown", "red", "black" ]
@@ -93,7 +93,7 @@ def get_viewable_emojis(user):
         })
     return result
 
-def update_awards(user):
+def update_awards(user, challenge):
     current_belts = [belt.name for belt in Belts.query.filter_by(user=user)]
     for belt, dojo_id in BELT_REQUIREMENTS.items():
         if belt in current_belts:
@@ -106,14 +106,12 @@ def update_awards(user):
         current_belts.append(belt)
 
     kook_user = get_kook_user(user.id)
-    if kook_user:
-        for belt in BELT_REQUIREMENTS:
-            if belt not in current_belts:
-                continue
-            belt_role = belt.title() + " Belt"
-            user_mention = f"(met){kook_user.id}(met)"
-            message = f"{user_mention} 恭喜 {user.name} 获得 {belt_role} ！:tada:"
-            send_group_message(message, KookChannels.AWARD)
+    dojo_challenge = DojoChallenges.query.filter_by(challenge_id=challenge.id).first()
+    if kook_user and dojo_challenge:
+        award = dojo_challenge.module.name
+        user_mention = f"(met){kook_user.id}(met)"
+        message = f"{user_mention} 恭喜 {user.name} 完成 《{award}》 ！:tada:"
+        send_group_message(message, KookChannels.AWARD)
 
     current_emojis = get_user_emojis(user)
     for emoji,dojo_name,dojo_id in current_emojis:
