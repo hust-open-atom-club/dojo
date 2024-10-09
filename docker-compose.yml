@@ -32,6 +32,279 @@ services:
     networks:
       - user_network
 
+      //添加
+      services:
+  challenge:
+    build:
+      context: ./challenge
+      args:
+        - DEFAULT_INSTALL_SELECTION=${DEFAULT_INSTALL_SELECTION}
+        - INSTALL_AFL=${INSTALL_AFL:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_ANGR_MANAGEMENT=${INSTALL_ANGR_MANAGEMENT:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_BUSYBOX=${INSTALL_BUSYBOX:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_CAPSTONE=${INSTALL_CAPSTONE:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_GDB=${INSTALL_GDB:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_GECKODRIVER=${INSTALL_GECKODRIVER:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_GHIDRA=${INSTALL_GHIDRA:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_GLOW=${INSTALL_GLOW:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_IDA_FREE=${INSTALL_IDA_FREE:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_BINJA_FREE=${INSTALL_BINJA_FREE:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_KERNEL=${INSTALL_KERNEL:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_RADARE2=${INSTALL_RADARE2:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_RAPPEL=${INSTALL_RAPPEL:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_RP=${INSTALL_RP:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_TCPDUMP=${INSTALL_TCPDUMP:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_TOOLS_APT=${INSTALL_TOOLS_APT:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_TOOLS_PIP=${INSTALL_TOOLS_PIP:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_VIRTIOFSD=${INSTALL_VIRTIOFSD:-${DEFAULT_INSTALL_SELECTION}}
+        - INSTALL_WINDOWS=${INSTALL_WINDOWS:-${DEFAULT_INSTALL_SELECTION}}
+        - UBUNTU_VERSION=${UBUNTU_VERSION}
+      privileged: true
+    platform: linux/amd64
+    entrypoint: /bin/true
+    networks:
+      - workspace_net
+
+  workspace-builder:
+    container_name: workspace-builder
+    build:
+      context: ./workspace
+      args:
+        - DOJO_WORKSPACE=${DOJO_WORKSPACE}
+    environment:
+      - DOJO_WORKSPACE=${DOJO_WORKSPACE}
+    volumes:
+      - /data/workspace:/out
+
+  workspacefs:
+    container_name: workspacefs
+    privileged: true
+    build:
+      context: ./workspacefs
+    volumes:
+      - /data/workspacefs:/run/workspace:shared
+      - /data/workspace/nix:/nix
+    depends_on:
+      workspace-builder:
+        condition: service_completed_successfully
+
+  dojofs:
+    container_name: dojofs
+    privileged: true
+    pid: host
+    build:
+      context: ./dojofs
+    volumes:
+      - /run/dojofs:/run/dojofs:shared
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  ctfd:
+    container_name: ctfd
+    profiles:
+      - main
+    hostname: ctfd
+    build: /opt/CTFd
+    platform: linux/amd64
+    user: root
+    restart: always
+    privileged: true
+    entrypoint: ""
+    command:
+      - /bin/sh
+      - -c
+      - |
+        if [ "$DOJO_ENV" != "development" ]; then
+          ./docker-entrypoint.sh;
+        else
+          FLASK_DEBUG=True WERKZEUG_DEBUG_PIN=off flask run --host 0.0.0.0 --port 8000;
+        fi
+    ulimits:
+        nofile:
+            soft: 32768
+            hard: 1048576
+    environment:
+      - UPLOAD_FOLDER=/var/uploads
+      - DATABASE_URL=mysql+pymysql://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}
+      - REDIS_URL=redis://cache:6379
+      - WORKERS=8
+      - LOG_FOLDER=/var/log/CTFd
+      - ACCESS_LOG=-
+      - ERROR_LOG=-
+      - REVERSE_PROXY=true
+      - SERVER_SENT_EVENTS=false
+      - SECRET_KEY=${SECRET_KEY}
+      - DOJO_HOST=${DOJO_HOST}
+      - HOST_DATA_PATH=/data
+      - MAIL_SERVER=${MAIL_SERVER}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_ADDRESS=${MAIL_ADDRESS}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+      - INTERNET_FOR_ALL=${INTERNET_FOR_ALL}
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - VIRTUAL_PORT=8000
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+      - MAC_HOSTNAME=${MAC_HOSTNAME}
+      - MAC_USERNAME=${MAC_USERNAME}
+      - MAC_KEY_FILE=${MAC_KEY_FILE}
+      - MAC_GUEST_CONTROL_FILE=${MAC_GUEST_CONTROL_FILE}
+    volumes:
+      - /data/CTFd/logs:/var/log/CTFd
+      - /data/CTFd/uploads:/var/uploads
+      - /data/mac:/var/data/mac
+      - /data/homes:/var/homes:shared
+      - /data/dojos:/var/dojos
+      - /data/workspace_nodes.json:/var/workspace_nodes.json:ro
+      - /data/ssh_host_keys/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro
+      - ./user_firewall.allowed:/var/user_firewall.allowed:ro
+      - /etc/docker/seccomp.json:/etc/docker/seccomp.json:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/pwn.college/dojo_plugin:/opt/CTFd/CTFd/plugins/dojo_plugin:ro
+      - /opt/pwn.college/dojo_theme:/opt/CTFd/CTFd/themes/dojo_theme:ro
+    healthcheck:
+      test:
+        - "CMD"
+        - "python"
+        - "-c"
+        - |
+          import requests
+          response = requests.get('http://localhost:8000')
+          response.raise_for_status()
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      challenge:
+        condition: service_completed_successfully
+      workspace-builder:
+        condition: service_completed_successfully
+      workspacefs:
+        condition: service_started
+      dojofs:
+        condition: service_started
+      db:
+        condition: service_healthy
+        restart: true
+      cache:
+        condition: service_started
+
+  db:
+    container_name: db
+    profiles:
+      - main
+    build:
+      context: ./db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_DATABASE=${DB_NAME}
+      - DB_EXTERNAL=${DB_EXTERNAL}
+    volumes:
+      - /data/mysql:/var/lib/mysql
+    command: [/start.sh]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASS}", "-u${DB_USER}", "-h${DB_HOST}"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  cache:
+    container_name: cache
+    profiles:
+      - main
+    image: redis:4
+    restart: always
+    volumes:
+      - /data/redis:/data
+
+  sshd:
+    container_name: sshd
+    profiles:
+      - main
+    build:
+      context: ./sshd
+    volumes:
+      - /data/workspace_nodes.json:/var/workspace_nodes.json:ro
+      - /data/ssh_host_keys:/etc/ssh:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /data/mac:/var/data/mac:ro
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - REDIS_URL=redis://cache:6379
+      - MAC_HOSTNAME=${MAC_HOSTNAME}
+      - MAC_USERNAME=${MAC_USERNAME}
+      - MAC_KEY_FILE=${MAC_KEY_FILE}
+      - MAC_GUEST_CONTROL_FILE=${MAC_GUEST_CONTROL_FILE}
+    ports:
+      - "22:22"
+
+  nginx-proxy:
+    container_name: nginx-proxy
+    profiles:
+      - main
+    image: nginxproxy/nginx-proxy:1.5
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DEFAULT_HOST=${DOJO_HOST}
+      - TRUST_DOWNSTREAM_PROXY=false
+      - LOG_JSON=true
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+      - ./nginx-proxy/etc/nginx/vhost.d:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      default:
+      workspace_net:
+        aliases:
+          - nginx
+        ipv4_address: 10.0.0.3
+
+  acme-companion:
+    container_name: nginx-proxy-acme
+    profiles:
+      - main
+    image: nginxproxy/acme-companion:2.3
+    restart: always
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  conf:
+  html:
+  certs:
+  acme:
+
+networks:
+  default:
+    driver: bridge
+  workspace_net:
+    name: workspace_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/8
+    driver_opts:
+      com.docker.network.bridge.name: "workspace_net"
+      com.docker.network.bridge.enable_icc: "false"
+
   ctfd:
     container_name: ctfd
     hostname: ctfd
