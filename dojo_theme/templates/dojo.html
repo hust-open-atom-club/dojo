@@ -52,7 +52,7 @@
   <br>
   {% endif %}
 
-
+  {% if dojo.modules %}
   <h2 class="row">道馆状态</h2>
   <br>
   <div class="row">
@@ -96,6 +96,8 @@
   <br>
   {% from "macros/scoreboard.html" import scoreboard %}
   {{ scoreboard() }}
+
+  {% endif %}
 </div>
 {% endblock %}
 
